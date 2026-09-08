@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Hourglass } from 'lucide-react';
 import { getChurch, getCell, listenJoinRequest, cancelJoinRequest, clearPendingRequest, setActiveCell } from '../../lib/church';
 
-export default function PendingApproval({ user, pendingRequest }) {
+export default function PendingApproval({ user, pendingRequest, onBackHome }) {
   const { churchId, cellId } = pendingRequest;
   const [names, setNames] = useState(null);
   const [status, setStatus] = useState('pending');
@@ -75,6 +75,15 @@ export default function PendingApproval({ user, pendingRequest }) {
             신청 취소
           </button>
         </>
+      )}
+      {onBackHome && (
+        <button
+          onClick={onBackHome}
+          style={{ color: '#4A3B3F' }}
+          className="text-xs underline underline-offset-2 opacity-70"
+        >
+          내 기도나무로 돌아가기
+        </button>
       )}
     </div>
   );

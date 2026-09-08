@@ -17,7 +17,7 @@ import TreeScene from './components/TreeScene';
 import ListModal from './components/ListModal';
 import EntrySheet from './components/EntrySheet';
 
-export default function App({ user, onSignOut, churchId, cellId, onOpenAdmin, onOpenMembers }) {
+export default function App({ user, onSignOut, churchId, cellId, onOpenAdmin, onOpenMembers, onBackHome }) {
   const [cellNameLoaded, setCellNameLoaded] = useState(false);
   const [entriesLoaded, setEntriesLoaded] = useState(false);
   const [error, setError] = useState('');
@@ -332,6 +332,11 @@ export default function App({ user, onSignOut, churchId, cellId, onOpenAdmin, on
     >
       <div className="max-w-sm mx-auto min-h-screen relative flex flex-col">
         <div className="flex items-center justify-end gap-1.5 px-4 pt-3 text-xs shrink-0" style={{ color: 'var(--ink-soft)' }}>
+          {onBackHome && (
+            <button onClick={onBackHome} className="flex items-center gap-1 underline underline-offset-2 mr-1">
+              🌳 내 기도나무
+            </button>
+          )}
           <button onClick={onOpenMembers} className="flex items-center gap-1 underline underline-offset-2">
             <Users size={12} /> 셀원
           </button>

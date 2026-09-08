@@ -20,7 +20,7 @@ function growthScale(score) {
 const MIN_USER_ZOOM = 0.6;
 const MAX_USER_ZOOM = 4;
 
-export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onAdd, onOpenList }) {
+export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onAdd, onOpenList, showActions = true }) {
   // 잎 개수 제한 없음 — score(누적 기도 일수)만큼 절차적으로 생성.
   // 채우기와 테두리를 따로 그리면(색상별로 채우기 먼저, 테두리는 나중에 한번에) 뒤에 있어야 할
   // 잎의 테두리까지 앞에 있는 잎 위로 뚫고 나와서 죄다 겹쳐 보이는 문제가 있었음 — 잎 하나마다
@@ -221,14 +221,16 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
         </div>
       </div>
 
-      <div style={{ position: 'absolute', left: '14px', bottom: '18px' }} className="flex flex-col items-center gap-2.5">
-        <SceneIcon icon={Plus} label="추가" bg="var(--ink)" fg="#FFF8F0" onClick={onAdd} />
-        <SceneIcon icon={Sprout} label="기도씨앗" count={seedCount} bg="#FFFDF9" fg={STATUS.seed.color} onClick={() => onOpenList('seed')} />
-        <SceneIcon icon={Sparkles} label="믿음열매" count={fruitCount} bg="#FFFDF9" fg={STATUS.fruit.color} onClick={() => onOpenList('fruit')} />
-        <div style={{ marginTop: '6px' }}>
-          <HeartBadge count={todayActiveCount} />
+      {showActions && (
+        <div style={{ position: 'absolute', left: '14px', bottom: '18px' }} className="flex flex-col items-center gap-2.5">
+          <SceneIcon icon={Plus} label="추가" bg="var(--ink)" fg="#FFF8F0" onClick={onAdd} />
+          <SceneIcon icon={Sprout} label="기도씨앗" count={seedCount} bg="#FFFDF9" fg={STATUS.seed.color} onClick={() => onOpenList('seed')} />
+          <SceneIcon icon={Sparkles} label="믿음열매" count={fruitCount} bg="#FFFDF9" fg={STATUS.fruit.color} onClick={() => onOpenList('fruit')} />
+          <div style={{ marginTop: '6px' }}>
+            <HeartBadge count={todayActiveCount} />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

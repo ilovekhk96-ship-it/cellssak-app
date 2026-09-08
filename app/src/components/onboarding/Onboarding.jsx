@@ -14,7 +14,7 @@ import {
 
 const PAGE_BG = 'linear-gradient(to bottom, #CFEFFB 0%, #E3F7EC 52%, #C3E9B9 52%, #A8DE9D 100%)';
 
-export default function Onboarding({ user }) {
+export default function Onboarding({ user, onBackHome }) {
   const [step, setStep] = useState('church'); // 'church' | 'cell'
   const [churches, setChurches] = useState([]);
   const [cells, setCells] = useState([]);
@@ -124,6 +124,15 @@ export default function Onboarding({ user }) {
   return (
     <div style={{ background: PAGE_BG }} className="w-full min-h-screen">
       <div className="max-w-sm mx-auto min-h-screen flex flex-col px-5 pt-8 pb-6">
+        {onBackHome && (
+          <button
+            onClick={onBackHome}
+            style={{ color: '#4A3B3F' }}
+            className="flex items-center gap-1 text-xs mb-2 w-fit opacity-70"
+          >
+            <ChevronLeft size={14} /> 내 기도나무
+          </button>
+        )}
         <h1
           style={{ fontFamily: "'Cafe24Dongdong', 'Gowun Dodum', sans-serif", color: '#4A3B3F' }}
           className="text-3xl mb-1"

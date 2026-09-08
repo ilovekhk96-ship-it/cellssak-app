@@ -6,6 +6,8 @@ import { useMyRole } from './hooks/useMyRole';
 import { markLeaderNotified } from './lib/church';
 import { isSuperAdmin } from './lib/superAdmin';
 import Login from './components/Login';
+import ProfileSetup from './components/onboarding/ProfileSetup';
+import PersonalHome from './components/PersonalHome';
 import Onboarding from './components/onboarding/Onboarding';
 import PendingApproval from './components/onboarding/PendingApproval';
 import AdminApprovals from './components/admin/AdminApprovals';
@@ -29,6 +31,7 @@ export default function AppRoot() {
   const activeCell = userDoc?.activeCell || null;
   const role = useMyRole(activeCell?.churchId, activeCell?.cellId, authUser?.uid);
   const [view, setView] = useState('main'); // 'main' | 'admin' | 'members' | 'superadmin'
+  const [showCellFlow, setShowCellFlow] = useState(false); // false면 내 기도나무(기본 화면), true면 모임(셀) 관련 화면
 
   // 리더 양도를 "받은" 경우에만 안내: role이 leader인데 이 셀에 대해 아직 안내를 확인 안 한 경우.
   // 직접 셀을 만들거나 되살린 경우는 markLeaderNotified가 그 자리에서 같이 호출돼서 안 뜸.
@@ -71,15 +74,25 @@ export default function AppRoot() {
     );
   } else if (memberLoading || !userDoc) {
     content = <Loading />;
+  } else if (!userDoc.nickname) {
+    content = <ProfileSetup user={user} />;
   } else if (view === 'superadmin' && isSuperAdmin(authUser.uid)) {
     content = <SuperAdmin onBack={() => setView('main')} />;
+  } else if (!showCellFlow) {
+    content = (
+      <PersonalHome
+        user={user}
+        activeCell={activeCell}
+        pendingRequest={userDoc.pendingRequest}
+        onOpenCellFlow={() => setShowCellFlow(true)}
+      />
+    );
   } else if (activeCell) {
     const { churchId, cellId } = activeCell;
-    let cellContent;
     if (view === 'admin' && role === 'leader') {
-      cellContent = <AdminApprovals churchId={churchId} cellId={cellId} onBack={() => setView('main')} />;
+      content = <AdminApprovals churchId={churchId} cellId={cellId} onBack={() => setView('main')} />;
     } else if (view === 'members') {
-      cellContent = (
+      content = (
         <MemberList
           churchId={churchId}
           cellId={cellId}
@@ -89,7 +102,7 @@ export default function AppRoot() {
         />
       );
     } else {
-      cellContent = (
+      content = (
         <App
           user={user}
           onSignOut={signOut}
@@ -97,39 +110,16 @@ export default function AppRoot() {
           cellId={cellId}
           onOpenAdmin={role === 'leader' ? () => setView('admin') : null}
           onOpenMembers={() => setView('members')}
+          onBackHome={() => setShowCellFlow(false)}
         />
       );
     }
-    content = (
-      <>
-        {cellContent}
-        {showLeaderNotice && (
-          <div className="fixed inset-0 flex items-center justify-center z-30 px-6">
-            <div style={{ background: '#00000040' }} className="absolute inset-0" onClick={dismissLeaderNotice} />
-            <div
-              style={{ background: '#FFFDF9', color: '#4A3B3F' }}
-              className="relative rounded-3xl px-6 py-8 flex flex-col items-center gap-3 shadow-xl text-center max-w-xs"
-            >
-              <span style={{ fontSize: '2.5rem' }}>👑</span>
-              <p style={{ fontFamily: "'Cafe24Dongdong', 'Gowun Dodum', sans-serif", fontSize: '1.2rem' }}>
-                셀의 리더가 되었어요!
-              </p>
-              <button
-                onClick={dismissLeaderNotice}
-                style={{ background: '#6FA66B', color: '#FFF8F0' }}
-                className="mt-2 px-6 py-2 rounded-full text-sm font-medium"
-              >
-                확인
-              </button>
-            </div>
-          </div>
-        )}
-      </>
-    );
   } else if (userDoc.pendingRequest) {
-    content = <PendingApproval user={user} pendingRequest={userDoc.pendingRequest} />;
+    content = (
+      <PendingApproval user={user} pendingRequest={userDoc.pendingRequest} onBackHome={() => setShowCellFlow(false)} />
+    );
   } else {
-    content = <Onboarding user={user} />;
+    content = <Onboarding user={user} onBackHome={() => setShowCellFlow(false)} />;
   }
 
   const showAdminEntry = authUser && isSuperAdmin(authUser.uid) && view !== 'superadmin';
@@ -137,6 +127,27 @@ export default function AppRoot() {
   return (
     <>
       {content}
+      {showLeaderNotice && (
+        <div className="fixed inset-0 flex items-center justify-center z-30 px-6">
+          <div style={{ background: '#00000040' }} className="absolute inset-0" onClick={dismissLeaderNotice} />
+          <div
+            style={{ background: '#FFFDF9', color: '#4A3B3F' }}
+            className="relative rounded-3xl px-6 py-8 flex flex-col items-center gap-3 shadow-xl text-center max-w-xs"
+          >
+            <span style={{ fontSize: '2.5rem' }}>👑</span>
+            <p style={{ fontFamily: "'Cafe24Dongdong', 'Gowun Dodum', sans-serif", fontSize: '1.2rem' }}>
+              셀의 리더가 되었어요!
+            </p>
+            <button
+              onClick={dismissLeaderNotice}
+              style={{ background: '#6FA66B', color: '#FFF8F0' }}
+              className="mt-2 px-6 py-2 rounded-full text-sm font-medium"
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
       {showAdminEntry && (
         <button
           onClick={() => setView('superadmin')}
