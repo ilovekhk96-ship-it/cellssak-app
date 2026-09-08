@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Cafe24Dongdong';
+  src: url('/fonts/Cafe24Dongdong.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@keyframes swayLeaves {
+  0% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+  100% { transform: rotate(-2deg); }
+}
+@keyframes swayTwigs {
+  0% { transform: rotate(-1.2deg); }
+  50% { transform: rotate(1.2deg); }
+  100% { transform: rotate(-1.2deg); }
+}
+@keyframes swayGrass {
+  0% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+  100% { transform: rotate(-3deg); }
+}
+@keyframes driftCloud {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(16px); }
+}
+@keyframes bubblePop {
+  0% { opacity: 0; transform: translateY(6px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.sway-leaves { animation: swayLeaves 4.5s ease-in-out infinite; transform-origin: 120px 170px; }
+.sway-twigs { animation: swayTwigs 3.6s ease-in-out infinite; transform-origin: 120px 170px; }
+.sway-grass { animation: swayGrass 3.2s ease-in-out infinite; transform-origin: bottom center; }
+.drift-cloud { animation: driftCloud 9s ease-in-out infinite alternate; }
+.thought-bubble { animation: bubblePop 0.4s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sway-leaves, .sway-twigs, .sway-grass, .drift-cloud { animation: none !important; }
+}

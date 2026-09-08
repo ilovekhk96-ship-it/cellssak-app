@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // 슈퍼 관리자 — 앱 안에서 아무도 스스로 부여받을 수 없도록 UID를 규칙에 직접 고정
+    function isSuperAdmin() {
+      return isSignedIn() && request.auth.uid == 'q0FPoLQkG4ciFKareHsubnEvz712';
+    }
+
+    function isMember(churchId, cellId) {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/churches/$(churchId)/cells/$(cellId)/members/$(request.auth.uid));
+    }
+
+    function isLeader(churchId, cellId) {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/churches/$(churchId)/cells/$(cellId)/members/$(request.auth.uid)).data.role == 'leader';
+    }
+
+    function isLeaderlessCell(churchId, cellId) {
+      return get(/databases/$(database)/documents/churches/$(churchId)/cells/$(cellId)).data.get('memberCount', 0) <= 0;
+    }
+
+    // 셀 나가기: 현재 멤버 본인이 memberCount 필드만 건드리는 것 (다른 필드는 손댈 수 없음)
+    function isSelfLeaveUpdate(churchId, cellId) {
+      return isMember(churchId, cellId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberCount']);
+    }
+
+    // 닉네임 변경: 본인이 자기 멤버 문서의 displayName/photoURL만 건드리는 것 (role 등은 못 바꿈)
+    function isSelfProfileUpdate() {
+      return isSignedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoURL']);
+    }
+
+    // 기도했어요/좋아요/열매전환 — 내용(대상자 이름 등)이 아니라 참여 관련 필드만 바뀌는 업데이트는 셀원 누구나 가능
+    function isEntryEngagementUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['prayerCount', 'lastPrayedDate', 'likeCount', 'status']);
+    }
+
+    function isEntryOwner() {
+      return isSignedIn() && resource.data.get('authorUid', '') == request.auth.uid;
+    }
+
+    // 본인 프로필/온보딩 상태 — 본인만 읽고 쓸 수 있음
+    match /users/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      // 본인은 자유롭게, 관리자는 셀 삭제 시 소속 멤버들의 activeCell을 정리하기 위해 쓸 수 있음
+      allow write: if isSignedIn() && (request.auth.uid == uid || isSuperAdmin());
+    }
+
+    match /churches/{churchId} {
+      // 교회 선택 화면에서 목록을 봐야 하므로 로그인한 사람 누구나 읽기 가능
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSuperAdmin();
+      allow delete: if isSuperAdmin();
+
+      match /cells/{cellId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+        // 평소엔 리더만 셀 정보를 바꿀 수 있고, 멤버가 0명인 셀은 누구든 스스로를 리더로 등록하며 되살릴 수 있음, 관리자는 언제든
+        allow update: if isLeader(churchId, cellId) ||
+          (isSignedIn() && isLeaderlessCell(churchId, cellId) && request.resource.data.leaderUid == request.auth.uid) ||
+          isSelfLeaveUpdate(churchId, cellId) ||
+          isSuperAdmin();
+        allow delete: if isSuperAdmin();
+
+        match /members/{uid} {
+          // 셀원 목록은 같은 셀 멤버라면 누구나 볼 수 있음, 관리자는 어디든 볼 수 있음
+          allow read: if isMember(churchId, cellId) || isSuperAdmin();
+          // 셀을 새로 만든 사람이 스스로 리더로 등록되거나, 리더가 승인하며 멤버를 등록
+          allow create: if isSignedIn() && (request.auth.uid == uid || isLeader(churchId, cellId));
+          // 리더 승인/거절, 리더 양도(자신 role -> member, 상대 role -> leader)는 리더만 가능하고,
+          // 본인은 자기 이름(닉네임)/사진만 스스로 수정 가능, 관리자는 역할까지 자유롭게 수정 가능
+          allow update: if isLeader(churchId, cellId) ||
+            (request.auth.uid == uid && isSelfProfileUpdate()) ||
+            isSuperAdmin();
+          // 삭제(=탈퇴)는 리더가 다른 사람을 내보내거나, 본인이 스스로 나갈 때, 관리자는 셀 정리 시
+          allow delete: if isLeader(churchId, cellId) || (isSignedIn() && request.auth.uid == uid) || isSuperAdmin();
+        }
+
+        match /joinRequests/{uid} {
+          allow read: if isSignedIn() && (request.auth.uid == uid || isLeader(churchId, cellId) || isSuperAdmin());
+          allow create: if isSignedIn() && request.auth.uid == uid;
+          // 본인은 재신청(이전 승인/거절 기록을 덮어쓰는 것도 포함)할 수 있고, 리더는 승인/거절 처리를 함
+          allow update: if isSignedIn() && (request.auth.uid == uid || isLeader(churchId, cellId));
+          allow delete: if isSignedIn() && (request.auth.uid == uid || isLeader(churchId, cellId) || isSuperAdmin());
+        }
+
+        match /entries/{entryId} {
+          allow read: if isMember(churchId, cellId) || isSuperAdmin();
+          allow create: if isMember(churchId, cellId);
+          // 기도했어요/좋아요/열매전환은 셀원 누구나, 이름·관계·기도제목 내용 수정과 삭제는 작성자 본인이나 리더만
+          allow update: if isSuperAdmin() || isLeader(churchId, cellId) || isEntryOwner() ||
+            (isMember(churchId, cellId) && isEntryEngagementUpdate());
+          allow delete: if isSuperAdmin() || isLeader(churchId, cellId) || isEntryOwner();
+        }
+
+        match /dailyPrayers/{date} {
+          allow read, write: if isMember(churchId, cellId) || isSuperAdmin();
+        }
+      }
+    }
+  }
+}

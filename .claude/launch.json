@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cellssak-dev",
+      "runtimeExecutable": "C:\\Windows\\System32\\cmd.exe",
+      "runtimeArgs": [
+        "/c",
+        "app\\dev.cmd"
+      ],
+      "port": 5173
+    }
+  ]
+}
