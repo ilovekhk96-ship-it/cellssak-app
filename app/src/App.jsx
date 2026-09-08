@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Settings, Users, Pencil, Check, Crown, Camera } from 'lucide-react';
+import { Pencil, Check, Crown } from 'lucide-react';
 import { STATUS, VERSES, FULL_INDEX, getIndexLabel, todayStr } from './data/constants';
-import { listenCell, renameCell, setNickname, setProfilePhoto, clearActiveCell } from './lib/church';
-import { uploadProfilePhoto } from './lib/photoUpload';
+import { listenCell, renameCell, clearActiveCell } from './lib/church';
 import {
   listenEntries,
   listenDailyPrayers,
@@ -16,6 +15,9 @@ import {
 import TreeScene from './components/TreeScene';
 import ListModal from './components/ListModal';
 import EntrySheet from './components/EntrySheet';
+import ProfileMenu from './components/nav/ProfileMenu';
+import CellMenu from './components/nav/CellMenu';
+import TreeMoveButton from './components/nav/TreeMoveButton';
 
 export default function App({ user, onSignOut, churchId, cellId, onOpenAdmin, onOpenMembers, onBackHome }) {
   const [cellNameLoaded, setCellNameLoaded] = useState(false);
@@ -26,10 +28,6 @@ export default function App({ user, onSignOut, churchId, cellId, onOpenAdmin, on
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const [savingName, setSavingName] = useState(false);
-  const [editingMyName, setEditingMyName] = useState(false);
-  const [myNameDraft, setMyNameDraft] = useState('');
-  const [savingMyName, setSavingMyName] = useState(false);
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [entries, setEntries] = useState([]);
   const [dailyPrayers, setDailyPrayers] = useState({}); // { 'YYYY-MM-DD'(KST): string[] (그 날 기도했어요를 누른 사람 이름, 중복 제거) }
   const [openList, setOpenList] = useState(null); // null | 'seed' | 'fruit'
@@ -87,48 +85,6 @@ export default function App({ user, onSignOut, churchId, cellId, onOpenAdmin, on
     }
   };
 
-  const startEditMyName = () => {
-    setMyNameDraft(user.displayName);
-    setEditingMyName(true);
-  };
-
-  const cancelEditMyName = () => {
-    setEditingMyName(false);
-    setMyNameDraft(user.displayName);
-  };
-
-  const saveEditMyName = async () => {
-    const name = myNameDraft.trim();
-    if (!name) return;
-    if (name === user.displayName) {
-      setEditingMyName(false);
-      return;
-    }
-    setSavingMyName(true);
-    try {
-      await setNickname(user.uid, name, { churchId, cellId });
-      setEditingMyName(false);
-    } catch (e) {
-      setError('이름 변경에 실패했어요. 잠시 후 다시 시도해주세요.');
-    } finally {
-      setSavingMyName(false);
-    }
-  };
-
-  const handlePhotoChange = async (e) => {
-    const file = e.target.files?.[0];
-    e.target.value = ''; // 같은 파일을 다시 골라도 onChange가 또 발생하게
-    if (!file) return;
-    setUploadingPhoto(true);
-    try {
-      const photoURL = await uploadProfilePhoto(user.uid, file);
-      await setProfilePhoto(user.uid, photoURL, { churchId, cellId });
-    } catch (e) {
-      setError('프로필 사진 변경에 실패했어요. 잠시 후 다시 시도해주세요.');
-    } finally {
-      setUploadingPhoto(false);
-    }
-  };
 
   useEffect(() => {
     setEntriesLoaded(false);
@@ -331,68 +287,22 @@ export default function App({ user, onSignOut, churchId, cellId, onOpenAdmin, on
       className="w-full min-h-screen"
     >
       <div className="max-w-sm mx-auto min-h-screen relative flex flex-col">
-        <div className="flex items-center justify-end gap-1.5 px-4 pt-3 text-xs shrink-0" style={{ color: 'var(--ink-soft)' }}>
-          {onBackHome && (
-            <button onClick={onBackHome} className="flex items-center gap-1 underline underline-offset-2 mr-1">
-              🌳 내 기도나무
-            </button>
-          )}
-          <button onClick={onOpenMembers} className="flex items-center gap-1 underline underline-offset-2">
-            <Users size={12} /> 셀원
-          </button>
-          {onOpenAdmin && (
-            <button onClick={onOpenAdmin} className="flex items-center gap-1 underline underline-offset-2 mr-1">
-              <Settings size={12} /> 가입 승인
-            </button>
-          )}
-          <label className="relative shrink-0" style={{ width: '20px', height: '20px' }}>
-            {user.photoURL && (
-              <img src={user.photoURL} alt="" referrerPolicy="no-referrer" className="w-5 h-5 rounded-full block" />
-            )}
-            <span
-              style={{ background: '#4A3B3F', color: '#FFF8F0', width: '11px', height: '11px' }}
-              className="absolute -bottom-0.5 -right-0.5 rounded-full flex items-center justify-center"
-            >
-              <Camera size={7} />
-            </span>
-            <input type="file" accept="image/*" onChange={handlePhotoChange} disabled={uploadingPhoto} className="hidden" />
-          </label>
-          {editingMyName ? (
-            <span className="flex items-center gap-1">
-              <input
-                value={myNameDraft}
-                onChange={(e) => setMyNameDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') saveEditMyName();
-                  if (e.key === 'Escape') cancelEditMyName();
-                }}
-                autoFocus
-                style={{ color: 'var(--ink-soft)', borderBottom: '1px solid var(--line)' }}
-                className="bg-transparent outline-none text-xs w-20"
-              />
-              <button
-                onClick={saveEditMyName}
-                disabled={savingMyName || !myNameDraft.trim()}
-                style={{ color: '#6FA66B' }}
-                className="disabled:opacity-50"
-                aria-label="이름 저장"
+        <div className="flex items-center justify-start gap-2 px-4 pt-3 shrink-0">
+          <div className="relative shrink-0">
+            <ProfileMenu user={user} activeCell={{ churchId, cellId }} onSignOut={onSignOut} />
+            {isLeader && (
+              <span
+                style={{ background: '#E8A93C', color: '#FFF8F0', width: '14px', height: '14px' }}
+                className="absolute -top-1 -right-1 rounded-full flex items-center justify-center shadow-sm"
               >
-                <Check size={12} />
-              </button>
-            </span>
-          ) : (
-            <span className="flex items-center gap-1">
-              {user.displayName}
-              {isLeader && <Crown size={11} style={{ color: '#E8A93C' }} />}
-              <button onClick={startEditMyName} aria-label="이름 수정">
-                <Pencil size={10} />
-              </button>
-            </span>
-          )}
-          <button onClick={onSignOut} className="underline underline-offset-2">
-            로그아웃
-          </button>
+                <Crown size={8} />
+              </span>
+            )}
+          </div>
+          <CellMenu onOpenMembers={onOpenMembers} onOpenAdmin={onOpenAdmin} />
         </div>
+
+        {onBackHome && <TreeMoveButton onClick={onBackHome} />}
 
         {loading ? (
           <p style={{ color: 'var(--ink-soft)' }} className="text-sm py-16 text-center">

@@ -83,8 +83,8 @@ export default function AppRoot() {
       <PersonalHome
         user={user}
         activeCell={activeCell}
-        pendingRequest={userDoc.pendingRequest}
         onOpenCellFlow={() => setShowCellFlow(true)}
+        onSignOut={signOut}
       />
     );
   } else if (activeCell) {
