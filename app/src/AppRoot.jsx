@@ -10,8 +10,6 @@ import ProfileSetup from './components/onboarding/ProfileSetup';
 import PersonalHome from './components/PersonalHome';
 import Onboarding from './components/onboarding/Onboarding';
 import PendingApproval from './components/onboarding/PendingApproval';
-import AdminApprovals from './components/admin/AdminApprovals';
-import MemberList from './components/members/MemberList';
 import SuperAdmin from './components/superadmin/SuperAdmin';
 import App from './App';
 
@@ -30,7 +28,7 @@ export default function AppRoot() {
   const { loading: memberLoading, userDoc, error: memberError } = useMembership(authUser);
   const activeCell = userDoc?.activeCell || null;
   const role = useMyRole(activeCell?.churchId, activeCell?.cellId, authUser?.uid);
-  const [view, setView] = useState('main'); // 'main' | 'admin' | 'members' | 'superadmin'
+  const [view, setView] = useState('main'); // 'main' | 'superadmin'
   const [showCellFlow, setShowCellFlow] = useState(false); // false면 내 기도나무(기본 화면), true면 모임(셀) 관련 화면
 
   // 리더 양도를 "받은" 경우에만 안내: role이 leader인데 이 셀에 대해 아직 안내를 확인 안 한 경우.
@@ -90,31 +88,16 @@ export default function AppRoot() {
     );
   } else if (activeCell) {
     const { churchId, cellId } = activeCell;
-    if (view === 'admin' && role === 'leader') {
-      content = <AdminApprovals churchId={churchId} cellId={cellId} onBack={() => setView('main')} />;
-    } else if (view === 'members') {
-      content = (
-        <MemberList
-          churchId={churchId}
-          cellId={cellId}
-          myUid={user.uid}
-          myRole={role}
-          onBack={() => setView('main')}
-        />
-      );
-    } else {
-      content = (
-        <App
-          user={user}
-          onSignOut={signOut}
-          churchId={churchId}
-          cellId={cellId}
-          onOpenAdmin={role === 'leader' ? () => setView('admin') : null}
-          onOpenMembers={() => setView('members')}
-          onBackHome={() => setShowCellFlow(false)}
-        />
-      );
-    }
+    content = (
+      <App
+        user={user}
+        onSignOut={signOut}
+        churchId={churchId}
+        cellId={cellId}
+        isLeader={role === 'leader'}
+        onBackHome={() => setShowCellFlow(false)}
+      />
+    );
   } else if (userDoc.pendingRequest) {
     content = (
       <PendingApproval user={user} pendingRequest={userDoc.pendingRequest} onBackHome={() => setShowCellFlow(false)} />

@@ -16,11 +16,11 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 flex items-end justify-center z-30" style={{ maxWidth: '384px', margin: '0 auto' }}>
-          <div style={{ background: '#00000033' }} className="absolute inset-0" onClick={() => setOpen(false)} />
+        <div className="fixed inset-0 flex items-center justify-center z-30 px-6" style={{ maxWidth: '384px', margin: '0 auto' }}>
+          <div style={{ background: '#00000040' }} className="absolute inset-0" onClick={() => setOpen(false)} />
           <div
             style={{ background: 'var(--paper, #FFF8F0)', color: 'var(--ink, #4A3B3F)' }}
-            className="relative w-full rounded-t-3xl px-5 pt-5 pb-8 flex flex-col gap-2"
+            className="relative w-full rounded-3xl shadow-xl px-5 py-6 flex flex-col gap-2"
           >
             <p style={{ fontFamily: "'Cafe24Dongdong', 'Gowun Dodum', sans-serif" }} className="text-lg mb-1">
               알림

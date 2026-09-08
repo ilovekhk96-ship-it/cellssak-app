@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, Crown, LogOut } from 'lucide-react';
+import { Crown, LogOut } from 'lucide-react';
 import { listenMembers, transferLeadership, leaveCell } from '../../lib/church';
 
-export default function MemberList({ churchId, cellId, myUid, myRole, onBack }) {
+export default function MemberList({ churchId, cellId, myUid, myRole }) {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busyUid, setBusyUid] = useState(null);
@@ -54,83 +54,65 @@ export default function MemberList({ churchId, cellId, myUid, myRole, onBack }) 
   };
 
   return (
-    <div
-      style={{ background: 'linear-gradient(to bottom, #CFEFFB 0%, #E3F7EC 52%, #C3E9B9 52%, #A8DE9D 100%)' }}
-      className="w-full min-h-screen"
-    >
-      <div className="max-w-sm mx-auto min-h-screen flex flex-col px-5 pt-8 pb-6">
-        <button onClick={onBack} style={{ color: '#4A3B3F' }} className="flex items-center gap-1 text-sm mb-4 w-fit">
-          <ChevronLeft size={16} /> 셀로 돌아가기
-        </button>
-
-        <h1 style={{ fontFamily: "'Cafe24Dongdong', 'Gowun Dodum', sans-serif", color: '#4A3B3F' }} className="text-2xl mb-1">
-          셀원
-        </h1>
-        <p style={{ color: '#4A3B3F' }} className="text-sm mb-5 opacity-80">
-          총 {members.length}명
+    <div className="flex flex-col gap-3">
+      {loading ? (
+        <p style={{ color: '#9C8286' }} className="text-sm text-center py-10">
+          불러오는 중...
         </p>
-
-        <div style={{ background: '#FFFDF9' }} className="rounded-3xl shadow-sm flex-1 overflow-y-auto px-4 py-4">
-          {loading ? (
-            <p style={{ color: '#9C8286' }} className="text-sm text-center py-10">
-              불러오는 중...
-            </p>
-          ) : (
-            <div className="flex flex-col gap-2.5">
-              {members.map((member) => (
-                <div
-                  key={member.id}
-                  style={{ background: '#F5F0E8' }}
-                  className="flex items-center gap-2.5 rounded-2xl px-3.5 py-3"
-                >
-                  {member.photoURL && (
-                    <img src={member.photoURL} alt="" referrerPolicy="no-referrer" className="w-8 h-8 rounded-full shrink-0" />
-                  )}
-                  <span style={{ color: '#4A3B3F' }} className="flex items-center gap-1 text-sm font-medium flex-1 min-w-0 truncate">
-                    {member.displayName}
-                    {member.role === 'leader' && <Crown size={14} style={{ color: '#E8A93C' }} />}
-                  </span>
-                  {myRole === 'leader' && member.id !== myUid && (
-                    <button
-                      onClick={() => handleTransfer(member.id)}
-                      disabled={busyUid === member.id}
-                      style={{
-                        background: confirmUid === member.id ? '#F2678A' : '#E8DADB',
-                        color: confirmUid === member.id ? '#FFF8F0' : '#4A3B3F',
-                      }}
-                      className="text-xs px-2.5 py-1.5 rounded-full font-medium disabled:opacity-50 shrink-0"
-                    >
-                      {confirmUid === member.id ? '확정' : '리더 넘기기'}
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col items-center gap-1 pt-4">
-          {canLeave ? (
-            <button
-              onClick={handleLeave}
-              disabled={leaving}
-              style={{ color: confirmLeave ? '#C4456B' : '#4A3B3F' }}
-              className="flex items-center gap-1.5 text-sm disabled:opacity-50"
+      ) : (
+        <div className="flex flex-col gap-2.5">
+          {members.map((member) => (
+            <div
+              key={member.id}
+              style={{ background: '#FFFDF9' }}
+              className="flex items-center gap-2.5 rounded-2xl px-3.5 py-3"
             >
-              <LogOut size={14} />
-              {confirmLeave ? '한 번 더 누르면 나가져요' : '이 셀 나가기'}
-            </button>
-          ) : (
-            <p style={{ color: '#4A3B3F' }} className="text-xs text-center opacity-70">
-              리더는 다른 셀원에게 리더를 넘긴 후에 나갈 수 있어요
-            </p>
-          )}
-          {leaveError && (
-            <p style={{ color: '#C4456B' }} className="text-xs text-center mt-1">
-              {leaveError}
-            </p>
-          )}
+              {member.photoURL && (
+                <img src={member.photoURL} alt="" referrerPolicy="no-referrer" className="w-8 h-8 rounded-full shrink-0" />
+              )}
+              <span style={{ color: '#4A3B3F' }} className="flex items-center gap-1 text-sm font-medium flex-1 min-w-0 truncate">
+                {member.displayName}
+                {member.role === 'leader' && <Crown size={14} style={{ color: '#E8A93C' }} />}
+              </span>
+              {myRole === 'leader' && member.id !== myUid && (
+                <button
+                  onClick={() => handleTransfer(member.id)}
+                  disabled={busyUid === member.id}
+                  style={{
+                    background: confirmUid === member.id ? '#F2678A' : '#E8DADB',
+                    color: confirmUid === member.id ? '#FFF8F0' : '#4A3B3F',
+                  }}
+                  className="text-xs px-2.5 py-1.5 rounded-full font-medium disabled:opacity-50 shrink-0"
+                >
+                  {confirmUid === member.id ? '확정' : '리더 넘기기'}
+                </button>
+              )}
+            </div>
+          ))}
         </div>
+      )}
+
+      <div className="flex flex-col items-center gap-1 pt-2">
+        {canLeave ? (
+          <button
+            onClick={handleLeave}
+            disabled={leaving}
+            style={{ color: confirmLeave ? '#C4456B' : '#4A3B3F' }}
+            className="flex items-center gap-1.5 text-sm disabled:opacity-50"
+          >
+            <LogOut size={14} />
+            {confirmLeave ? '한 번 더 누르면 나가져요' : '이 셀 나가기'}
+          </button>
+        ) : (
+          <p style={{ color: '#4A3B3F' }} className="text-xs text-center opacity-70">
+            리더는 다른 셀원에게 리더를 넘긴 후에 나갈 수 있어요
+          </p>
+        )}
+        {leaveError && (
+          <p style={{ color: '#C4456B' }} className="text-xs text-center mt-1">
+            {leaveError}
+          </p>
+        )}
       </div>
     </div>
   );

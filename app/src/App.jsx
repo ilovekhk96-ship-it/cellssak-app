@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Pencil, Check, Crown } from 'lucide-react';
+import { Crown } from 'lucide-react';
 import { STATUS, VERSES, FULL_INDEX, getIndexLabel, todayStr } from './data/constants';
-import { listenCell, renameCell, clearActiveCell } from './lib/church';
+import { listenCell, clearActiveCell } from './lib/church';
 import {
   listenEntries,
   listenDailyPrayers,
@@ -19,15 +19,12 @@ import ProfileMenu from './components/nav/ProfileMenu';
 import CellMenu from './components/nav/CellMenu';
 import TreeMoveButton from './components/nav/TreeMoveButton';
 
-export default function App({ user, onSignOut, churchId, cellId, onOpenAdmin, onOpenMembers, onBackHome }) {
+export default function App({ user, onSignOut, churchId, cellId, isLeader, onBackHome }) {
   const [cellNameLoaded, setCellNameLoaded] = useState(false);
   const [entriesLoaded, setEntriesLoaded] = useState(false);
   const [error, setError] = useState('');
   const [toast, setToast] = useState('');
   const [cellName, setCellName] = useState('');
-  const [editingName, setEditingName] = useState(false);
-  const [nameDraft, setNameDraft] = useState('');
-  const [savingName, setSavingName] = useState(false);
   const [entries, setEntries] = useState([]);
   const [dailyPrayers, setDailyPrayers] = useState({}); // { 'YYYY-MM-DD'(KST): string[] (그 날 기도했어요를 누른 사람 이름, 중복 제거) }
   const [openList, setOpenList] = useState(null); // null | 'seed' | 'fruit'
@@ -54,37 +51,6 @@ export default function App({ user, onSignOut, churchId, cellId, onOpenAdmin, on
     });
     return unsubscribe;
   }, [churchId, cellId, user.uid]);
-
-  const isLeader = Boolean(onOpenAdmin);
-
-  const startEditName = () => {
-    setNameDraft(cellName);
-    setEditingName(true);
-  };
-
-  const cancelEditName = () => {
-    setEditingName(false);
-    setNameDraft(cellName);
-  };
-
-  const saveEditName = async () => {
-    const name = nameDraft.trim();
-    if (!name) return;
-    if (name === cellName) {
-      setEditingName(false);
-      return;
-    }
-    setSavingName(true);
-    try {
-      await renameCell(churchId, cellId, name);
-      setEditingName(false);
-    } catch (e) {
-      setError('셀 이름 변경에 실패했어요. 잠시 후 다시 시도해주세요.');
-    } finally {
-      setSavingName(false);
-    }
-  };
-
 
   useEffect(() => {
     setEntriesLoaded(false);
@@ -287,79 +253,42 @@ export default function App({ user, onSignOut, churchId, cellId, onOpenAdmin, on
       className="w-full min-h-screen"
     >
       <div className="max-w-sm mx-auto min-h-screen relative flex flex-col">
-        <div className="flex items-center justify-end gap-2 px-4 pt-3 shrink-0">
-          <div className="relative shrink-0">
-            <ProfileMenu user={user} activeCell={{ churchId, cellId }} onSignOut={onSignOut} />
-            {isLeader && (
-              <span
-                style={{ background: '#E8A93C', color: '#FFF8F0', width: '14px', height: '14px' }}
-                className="absolute -top-1 -right-1 rounded-full flex items-center justify-center shadow-sm"
-              >
-                <Crown size={8} />
-              </span>
-            )}
+        <div className="flex items-center justify-between gap-2 px-4 pt-3 shrink-0">
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem' }} className="truncate">
+            {cellName}
+          </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="relative shrink-0">
+              <ProfileMenu user={user} activeCell={{ churchId, cellId }} onSignOut={onSignOut} />
+              {isLeader && (
+                <span
+                  style={{ background: '#E8A93C', color: '#FFF8F0', width: '14px', height: '14px' }}
+                  className="absolute -top-1 -right-1 rounded-full flex items-center justify-center shadow-sm"
+                >
+                  <Crown size={8} />
+                </span>
+              )}
+            </div>
+            <CellMenu churchId={churchId} cellId={cellId} cellName={cellName} myUid={user.uid} isLeader={isLeader} />
           </div>
-          <CellMenu onOpenMembers={onOpenMembers} onOpenAdmin={onOpenAdmin} />
         </div>
 
-        {onBackHome && <TreeMoveButton onClick={onBackHome} label="나의 나무로 이동" />}
+        {onBackHome && <TreeMoveButton onClick={onBackHome} label="나의 나무" />}
 
         {loading ? (
           <p style={{ color: 'var(--ink-soft)' }} className="text-sm py-16 text-center">
             셀싹을 펼치는 중...
           </p>
         ) : (
-          <>
-            <div className="flex items-end justify-between gap-3 px-4 pt-6 pb-2 shrink-0">
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem' }} className="font-bold leading-none">
-                셀싹
-              </h1>
-              {isLeader && editingName ? (
-                <div className="flex items-center gap-1.5 pb-1">
-                  <input
-                    value={nameDraft}
-                    onChange={(e) => setNameDraft(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') saveEditName();
-                      if (e.key === 'Escape') cancelEditName();
-                    }}
-                    placeholder="셀 이름"
-                    autoFocus
-                    style={{ color: 'var(--ink-soft)', borderBottom: '1px solid var(--line)' }}
-                    className="bg-transparent outline-none text-sm text-right w-24"
-                  />
-                  <button
-                    onClick={saveEditName}
-                    disabled={savingName || !nameDraft.trim()}
-                    style={{ color: '#6FA66B' }}
-                    className="disabled:opacity-50"
-                    aria-label="저장"
-                  >
-                    <Check size={16} />
-                  </button>
-                </div>
-              ) : (
-                <span style={{ color: 'var(--ink-soft)' }} className="flex items-center gap-1 text-sm pb-1">
-                  {cellName}
-                  {isLeader && (
-                    <button onClick={startEditName} aria-label="셀 이름 수정">
-                      <Pencil size={12} />
-                    </button>
-                  )}
-                </span>
-              )}
-            </div>
-
-            <TreeScene
-              score={score}
-              daysCount={daysCount}
-              todayActiveCount={todayActiveCount}
-              seedCount={seedCount}
-              fruitCount={fruitCount}
-              onAdd={openAdd}
-              onOpenList={(k) => { setOpenList(k); setEditMode(false); }}
-            />
-          </>
+          <TreeScene
+            score={score}
+            daysCount={daysCount}
+            todayActiveCount={todayActiveCount}
+            seedCount={seedCount}
+            fruitCount={fruitCount}
+            onAdd={openAdd}
+            onOpenList={(k) => { setOpenList(k); setEditMode(false); }}
+          />
         )}
 
         {error && (

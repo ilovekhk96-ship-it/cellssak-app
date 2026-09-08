@@ -35,11 +35,11 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
 
   const moveLabel = activeCell
     ? cellName
-      ? `${cellName}의 기도나무로 이동`
-      : '모임 나무로 이동'
+      ? `${cellName}의 나무`
+      : '모임 나무'
     : pendingRequest
-    ? '가입 승인 기다리는 중'
-    : '모임선택하기';
+    ? '승인 대기중'
+    : '모임 선택';
 
   const vars = {
     '--ink': '#4A3B3F',
@@ -62,9 +62,12 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
       className="w-full min-h-screen"
     >
       <div className="max-w-sm mx-auto min-h-screen relative flex flex-col">
-        <div className="flex items-center justify-end gap-2 px-4 pt-3 shrink-0">
-          <ProfileMenu user={user} activeCell={activeCell} onSignOut={onSignOut} />
-          <NotificationBell />
+        <div className="flex items-center justify-between gap-2 px-4 pt-3 shrink-0">
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem' }}>셀싹</span>
+          <div className="flex items-center gap-2 shrink-0">
+            <ProfileMenu user={user} activeCell={activeCell} onSignOut={onSignOut} />
+            <NotificationBell />
+          </div>
         </div>
 
         <div style={{ flex: 1, position: 'relative' }} className="flex flex-col">
