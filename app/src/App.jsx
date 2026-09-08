@@ -287,7 +287,7 @@ export default function App({ user, onSignOut, churchId, cellId, onOpenAdmin, on
       className="w-full min-h-screen"
     >
       <div className="max-w-sm mx-auto min-h-screen relative flex flex-col">
-        <div className="flex items-center justify-start gap-2 px-4 pt-3 shrink-0">
+        <div className="flex items-center justify-end gap-2 px-4 pt-3 shrink-0">
           <div className="relative shrink-0">
             <ProfileMenu user={user} activeCell={{ churchId, cellId }} onSignOut={onSignOut} />
             {isLeader && (
@@ -302,7 +302,7 @@ export default function App({ user, onSignOut, churchId, cellId, onOpenAdmin, on
           <CellMenu onOpenMembers={onOpenMembers} onOpenAdmin={onOpenAdmin} />
         </div>
 
-        {onBackHome && <TreeMoveButton onClick={onBackHome} />}
+        {onBackHome && <TreeMoveButton onClick={onBackHome} label="나의 나무로 이동" />}
 
         {loading ? (
           <p style={{ color: 'var(--ink-soft)' }} className="text-sm py-16 text-center">

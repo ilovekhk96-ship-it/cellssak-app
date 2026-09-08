@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Plus, Sprout, Sparkles, Calendar, Timer } from 'lucide-react';
+import { Plus, Calendar, Timer } from 'lucide-react';
+import { STATUS } from '../data/constants';
+import { listenCell } from '../lib/church';
 import TreeScene from './TreeScene';
 import SceneIcon from './SceneIcon';
 import ProfileMenu from './nav/ProfileMenu';
@@ -8,8 +10,20 @@ import TreeMoveButton from './nav/TreeMoveButton';
 
 const PAGE_BG = 'linear-gradient(to bottom, #CFEFFB 0%, #E3F7EC 52%, #C3E9B9 52%, #A8DE9D 100%)';
 
-export default function PersonalHome({ user, activeCell, onOpenCellFlow, onSignOut }) {
+export default function PersonalHome({ user, activeCell, pendingRequest, onOpenCellFlow, onSignOut }) {
+  const [cellName, setCellName] = useState('');
   const [toast, setToast] = useState('');
+
+  useEffect(() => {
+    if (!activeCell) {
+      setCellName('');
+      return;
+    }
+    const unsubscribe = listenCell(activeCell.churchId, activeCell.cellId, (cell) => {
+      setCellName(cell?.name || '');
+    });
+    return unsubscribe;
+  }, [activeCell?.churchId, activeCell?.cellId]);
 
   useEffect(() => {
     if (!toast) return;
@@ -18,6 +32,14 @@ export default function PersonalHome({ user, activeCell, onOpenCellFlow, onSignO
   }, [toast]);
 
   const notReady = () => setToast('준비 중이에요');
+
+  const moveLabel = activeCell
+    ? cellName
+      ? `${cellName}의 기도나무로 이동`
+      : '모임 나무로 이동'
+    : pendingRequest
+    ? '가입 승인 기다리는 중'
+    : '모임선택하기';
 
   const vars = {
     '--ink': '#4A3B3F',
@@ -40,31 +62,32 @@ export default function PersonalHome({ user, activeCell, onOpenCellFlow, onSignO
       className="w-full min-h-screen"
     >
       <div className="max-w-sm mx-auto min-h-screen relative flex flex-col">
-        <div className="flex items-center justify-start gap-2 px-4 pt-3 shrink-0">
+        <div className="flex items-center justify-end gap-2 px-4 pt-3 shrink-0">
           <ProfileMenu user={user} activeCell={activeCell} onSignOut={onSignOut} />
           <NotificationBell />
         </div>
 
-        <h1
-          style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem' }}
-          className="text-center pt-4 pb-2 shrink-0"
-        >
-          {user.displayName}의 기도나무
-        </h1>
-
         <div style={{ flex: 1, position: 'relative' }} className="flex flex-col">
-          <TreeScene score={0} daysCount={0} todayActiveCount={0} seedCount={0} fruitCount={0} showActions={false} />
+          <TreeScene
+            score={0}
+            daysCount={0}
+            todayActiveCount={0}
+            seedCount={0}
+            fruitCount={0}
+            showActions={false}
+            treeLabel={`${user.displayName}의 기도나무`}
+          />
 
           <div style={{ position: 'absolute', left: '14px', bottom: '18px' }} className="flex flex-col items-center gap-2.5">
             <SceneIcon icon={Plus} label="추가" bg="var(--ink)" fg="#FFF8F0" onClick={notReady} />
-            <SceneIcon icon={Sprout} label="기도중" bg="#FFFDF9" fg="#6FA66B" onClick={notReady} />
-            <SceneIcon icon={Sparkles} label="응답됨" bg="#FFFDF9" fg="#E8A93C" onClick={notReady} />
+            <SceneIcon icon={STATUS.seed.icon} label={STATUS.seed.label} bg="#FFFDF9" fg={STATUS.seed.color} onClick={notReady} />
+            <SceneIcon icon={STATUS.fruit.icon} label={STATUS.fruit.label} bg="#FFFDF9" fg={STATUS.fruit.color} onClick={notReady} />
             <SceneIcon icon={Calendar} label="캘린더" bg="#FFFDF9" fg="#4A9FD8" onClick={notReady} />
             <SceneIcon icon={Timer} label="타이머" bg="#FFFDF9" fg="#C4456B" onClick={notReady} />
           </div>
         </div>
 
-        <TreeMoveButton onClick={onOpenCellFlow} />
+        <TreeMoveButton onClick={onOpenCellFlow} label={moveLabel} />
 
         {toast && (
           <div

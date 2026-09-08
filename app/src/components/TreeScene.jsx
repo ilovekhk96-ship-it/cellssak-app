@@ -20,7 +20,7 @@ function growthScale(score) {
 const MIN_USER_ZOOM = 0.6;
 const MAX_USER_ZOOM = 4;
 
-export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onAdd, onOpenList, showActions = true }) {
+export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onAdd, onOpenList, showActions = true, treeLabel }) {
   // 잎 개수 제한 없음 — score(누적 기도 일수)만큼 절차적으로 생성.
   // 채우기와 테두리를 따로 그리면(색상별로 채우기 먼저, 테두리는 나중에 한번에) 뒤에 있어야 할
   // 잎의 테두리까지 앞에 있는 잎 위로 뚫고 나와서 죄다 겹쳐 보이는 문제가 있었음 — 잎 하나마다
@@ -188,6 +188,11 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
       </div>
 
       <div className="flex flex-col items-center gap-2 pb-4 px-6">
+        {treeLabel && (
+          <p style={{ color: 'var(--ink-soft)', fontFamily: 'var(--font-display)', fontSize: '11px' }} className="text-center -mt-1">
+            {treeLabel}
+          </p>
+        )}
         <div style={{ width: '100%', maxWidth: '220px' }}>
           <p style={{ color: 'var(--ink)', fontFamily: 'var(--font-display)' }} className="text-xs font-bold text-center mb-1">
             {daysCount}일째 기도중
