@@ -4,10 +4,12 @@ import { STATUS } from '../../data/constants';
 import { addEntry } from '../../lib/prayerData';
 import { addPersonalRequest } from '../../lib/personalPrayer';
 
-// 기도씨앗 추가하기 — "나의 기도"(개인 전용)와 "중보기도"(셀 공유) 중 골라서 등록.
-// 내 기도나무/셀 나무 어느 화면에서 열든 동일한 방식으로 동작함.
-export default function AddEntrySheet({ user, activeCell, defaultType = 'mine', onClose, onAdded }) {
-  const [type, setType] = useState(activeCell ? defaultType : 'mine');
+// 기도씨앗 추가하기 — "나의 기도"(대상자 이름 없이 기도제목만)와 "중보기도"(대상자·관계·기도제목)
+// 중 골라서 등록. 이 화면이 열린 "곳"(내 기도나무 / 셀 나무)에 그대로 저장됨 — 타입 선택은
+// 입력 항목만 바꿀 뿐, 저장 위치와는 무관함. 나중에 기도씨앗 목록에서 "복사하기/공유하기"로
+// 반대쪽에도 옮길 수 있음.
+export default function AddEntrySheet({ user, destination, onClose, onAdded }) {
+  const [type, setType] = useState('mine'); // 'mine' | 'intercession'
   const [targetName, setTargetName] = useState('');
   const [relationship, setRelationship] = useState('');
   const [content, setContent] = useState('');
@@ -16,32 +18,32 @@ export default function AddEntrySheet({ user, activeCell, defaultType = 'mine', 
 
   const handleSave = async () => {
     if (saving) return;
+    const text = content.trim();
+    const name = type === 'mine' ? user.displayName : targetName.trim();
+    if (type === 'intercession' && !name) return;
     setError('');
+    setSaving(true);
     try {
-      if (type === 'mine') {
-        const text = content.trim();
-        if (!text) return;
-        setSaving(true);
-        await addPersonalRequest(user.uid, text);
-        onAdded && onAdded('mine');
+      const data = {
+        targetName: name,
+        prayerName: user.displayName,
+        relationship: type === 'intercession' ? relationship.trim() : '',
+        note: text,
+      };
+      if (destination.kind === 'personal') {
+        await addPersonalRequest(user.uid, data);
       } else {
-        const name = targetName.trim();
-        if (!name) return;
-        setSaving(true);
-        await addEntry(activeCell.churchId, activeCell.cellId, {
-          targetName: name,
-          prayerName: user.displayName,
-          relationship: relationship.trim(),
-          note: content.trim(),
+        await addEntry(destination.churchId, destination.cellId, {
+          ...data,
           status: 'seed',
           prayerCount: 0,
           lastPrayedDate: null,
           likeCount: 0,
-          createdAt: Date.now(),
           authorUid: user.uid,
+          createdAt: Date.now(),
         });
-        onAdded && onAdded('intercession', name);
       }
+      onAdded && onAdded();
       onClose();
     } catch (e) {
       setError('저장에 실패했어요. 잠시 후 다시 시도해주세요.');
@@ -65,29 +67,27 @@ export default function AddEntrySheet({ user, activeCell, defaultType = 'mine', 
           </button>
         </div>
 
-        {activeCell && (
-          <div className="flex gap-1.5">
-            {[
-              { key: 'mine', label: '나의 기도' },
-              { key: 'intercession', label: '중보기도' },
-            ].map((opt) => {
-              const selected = type === opt.key;
-              return (
-                <button
-                  key={opt.key}
-                  onClick={() => setType(opt.key)}
-                  style={{
-                    background: selected ? STATUS.seed.color : STATUS.seed.soft,
-                    color: selected ? '#FFF8F0' : STATUS.seed.color,
-                  }}
-                  className="text-xs rounded-full px-3 py-1.5 font-medium"
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
+        <div className="flex gap-1.5">
+          {[
+            { key: 'mine', label: '나의 기도' },
+            { key: 'intercession', label: '중보기도' },
+          ].map((opt) => {
+            const selected = type === opt.key;
+            return (
+              <button
+                key={opt.key}
+                onClick={() => setType(opt.key)}
+                style={{
+                  background: selected ? STATUS.seed.color : STATUS.seed.soft,
+                  color: selected ? '#FFF8F0' : STATUS.seed.color,
+                }}
+                className="text-xs rounded-full px-3 py-1.5 font-medium"
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
 
         {type === 'intercession' && (
           <>

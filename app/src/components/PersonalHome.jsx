@@ -1,19 +1,22 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Calendar, Timer } from 'lucide-react';
-import { STATUS, todayStr } from '../data/constants';
+import { STATUS, VERSES, FULL_INDEX, getIndexLabel, todayStr } from '../data/constants';
 import { listenCell } from '../lib/church';
+import { shareRequestToCell } from '../lib/prayerData';
 import {
   listenPersonalRequests,
   updatePersonalRequest,
   deletePersonalRequest,
   prayForPersonalRequest,
+  likePersonalRequest,
+  setPersonalRequestStatus,
   listenPersonalDailyActivity,
   logPersonalPrayerForToday,
 } from '../lib/personalPrayer';
 import TreeScene from './TreeScene';
 import SceneIcon from './SceneIcon';
-import PersonalListModal from './PersonalListModal';
-import PersonalEntrySheet from './PersonalEntrySheet';
+import ListModal from './ListModal';
+import EntrySheet from './EntrySheet';
 import AddEntrySheet from './entry/AddEntrySheet';
 import ProfileMenu from './nav/ProfileMenu';
 import NotificationBell from './nav/NotificationBell';
@@ -27,11 +30,13 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
   const [requests, setRequests] = useState([]);
   const [dailyActivity, setDailyActivity] = useState({}); // { 'YYYY-MM-DD'(KST): true } — 개인 기도나무 성장 근거
   const [openList, setOpenList] = useState(null); // null | 'seed' | 'fruit'
-  const [editMode, setEditMode] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [sheet, setSheet] = useState(null); // null | { editId, status }
-  const [form, setForm] = useState({ content: '', status: 'seed' });
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [form, setForm] = useState({ prayerName: '', targetName: '', relationship: '', note: '' });
+
+  const listRef = useRef(null);
+  const groupRefs = useRef({});
+  const indexBarRef = useRef(null);
 
   useEffect(() => {
     if (!activeCell) {
@@ -61,6 +66,40 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
   }, [toast]);
 
   const filtered = useMemo(() => requests.filter((r) => r.status === openList), [requests, openList]);
+
+  const grouped = useMemo(() => {
+    const map = {};
+    filtered.forEach((r) => {
+      const label = getIndexLabel(r.targetName);
+      if (!map[label]) map[label] = [];
+      map[label].push(r);
+    });
+    Object.values(map).forEach((arr) => arr.sort((a, b) => a.targetName.localeCompare(b.targetName, 'ko')));
+    return map;
+  }, [filtered]);
+
+  const groupsPresent = useMemo(() => new Set(Object.keys(grouped)), [grouped]);
+
+  const scrollToGroup = (label) => {
+    const container = listRef.current;
+    const el = groupRefs.current[label];
+    if (!container || !el) return;
+    const offset = el.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
+    container.scrollTo({ top: Math.max(offset - 4, 0), behavior: 'auto' });
+  };
+
+  const handleIndexPoint = (clientY) => {
+    const bar = indexBarRef.current;
+    if (!bar) return;
+    const rect = bar.getBoundingClientRect();
+    const relY = clientY - rect.top;
+    const itemH = rect.height / FULL_INDEX.length;
+    let idx = Math.floor(relY / itemH);
+    idx = Math.max(0, Math.min(FULL_INDEX.length - 1, idx));
+    const label = FULL_INDEX[idx];
+    if (groupsPresent.has(label)) scrollToGroup(label);
+  };
+
   const seedCount = requests.filter((r) => r.status === 'seed').length;
   const fruitCount = requests.filter((r) => r.status === 'fruit').length;
 
@@ -79,6 +118,56 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
     return diffDays + 1;
   }, [dailyActivity]);
 
+  const openEdit = (entry) => {
+    setForm({ prayerName: entry.prayerName, targetName: entry.targetName, relationship: entry.relationship, note: entry.note, status: entry.status });
+    setSheet({ editId: entry.id, status: entry.status });
+  };
+
+  const closeSheet = () => setSheet(null);
+
+  const saveForm = async () => {
+    if (!sheet) return;
+    const targetName = form.targetName.trim();
+    if (!targetName) return;
+    try {
+      await updatePersonalRequest(user.uid, sheet.editId, {
+        targetName,
+        prayerName: form.prayerName.trim(),
+        relationship: form.relationship.trim(),
+        note: form.note.trim(),
+      });
+      if (form.status !== sheet.status) {
+        const entry = requests.find((r) => r.id === sheet.editId);
+        await setPersonalRequestStatus(user.uid, entry || { id: sheet.editId }, form.status);
+        setToast(`${STATUS[form.status].label}(으)로 옮겼어요`);
+      } else {
+        setToast('수정했어요');
+      }
+    } catch (e) {
+      setToast('저장에 실패했어요.');
+    }
+    closeSheet();
+  };
+
+  const deleteEntryHandler = async (entry) => {
+    try {
+      await deletePersonalRequest(user.uid, entry.id);
+      setToast('삭제했어요');
+    } catch (e) {
+      setToast('삭제에 실패했어요.');
+    }
+  };
+
+  const shareToCell = async (entry) => {
+    if (!activeCell) return;
+    try {
+      await shareRequestToCell(activeCell.churchId, activeCell.cellId, user.uid, entry);
+      setToast(`${cellName || '셀'}에 공유했어요 🌱`);
+    } catch (e) {
+      setToast('공유에 실패했어요.');
+    }
+  };
+
   const prayFor = async (id) => {
     const today = todayStr();
     try {
@@ -89,49 +178,19 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
     }
   };
 
-  const openEdit = (entry) => {
-    setForm({ content: entry.content, status: entry.status });
-    setSheet({ editId: entry.id, status: entry.status });
-    setConfirmDeleteId(null);
-  };
-
-  const closeSheet = () => {
-    setSheet(null);
-    setConfirmDeleteId(null);
-  };
-
-  const saveForm = async () => {
-    if (!sheet) return;
-    const content = form.content.trim();
-    if (!content) return;
+  const convertToFruit = async (id, name) => {
+    const entry = requests.find((r) => r.id === id);
     try {
-      await updatePersonalRequest(user.uid, sheet.editId, { content, status: form.status });
-      setToast(form.status !== sheet.status ? `${STATUS[form.status].label}(으)로 옮겼어요` : '수정했어요');
+      await setPersonalRequestStatus(user.uid, entry || { id }, 'fruit');
+      setToast(`🎉 ${name}님이 믿음의 열매를 맺었어요!`);
     } catch (e) {
       setToast('저장에 실패했어요.');
     }
-    closeSheet();
   };
 
-  const handleDeleteFromSheet = async () => {
-    if (!sheet) return;
-    if (confirmDeleteId !== sheet.editId) {
-      setConfirmDeleteId(sheet.editId);
-      return;
-    }
+  const likeFor = async (id) => {
     try {
-      await deletePersonalRequest(user.uid, sheet.editId);
-      setToast('삭제했어요');
-    } catch (e) {
-      setToast('삭제에 실패했어요.');
-    }
-    closeSheet();
-  };
-
-  const convertToFruit = async (id) => {
-    try {
-      await updatePersonalRequest(user.uid, id, { status: 'fruit' });
-      setToast('🎉 믿음의 열매를 맺었어요!');
+      await likePersonalRequest(user.uid, id);
     } catch (e) {
       setToast('저장에 실패했어요.');
     }
@@ -193,10 +252,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
               count={seedCount}
               bg="#FFFDF9"
               fg={STATUS.seed.color}
-              onClick={() => {
-                setOpenList('seed');
-                setEditMode(false);
-              }}
+              onClick={() => setOpenList('seed')}
             />
             <SceneIcon
               icon={STATUS.fruit.icon}
@@ -204,10 +260,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
               count={fruitCount}
               bg="#FFFDF9"
               fg={STATUS.fruit.color}
-              onClick={() => {
-                setOpenList('fruit');
-                setEditMode(false);
-              }}
+              onClick={() => setOpenList('fruit')}
             />
             <SceneIcon icon={Calendar} label="캘린더" bg="#FFFDF9" fg="#4A9FD8" onClick={() => setToast('준비 중이에요')} />
             <SceneIcon icon={Timer} label="타이머" bg="#FFFDF9" fg="#C4456B" onClick={() => setToast('준비 중이에요')} />
@@ -226,39 +279,37 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
         )}
 
         {openList && (
-          <PersonalListModal
+          <ListModal
             meta={STATUS[openList]}
+            verse={VERSES[openList]}
             entries={filtered}
-            editMode={editMode}
-            setEditMode={setEditMode}
+            grouped={grouped}
+            listRef={listRef}
+            groupRefs={groupRefs}
+            indexBarRef={indexBarRef}
+            onIndexPoint={handleIndexPoint}
             onPray={prayFor}
             onConvert={convertToFruit}
+            onLike={likeFor}
+            myUid={user.uid}
+            isLeader={false}
             onEditEntry={openEdit}
+            onDeleteEntry={deleteEntryHandler}
+            onShare={activeCell ? shareToCell : null}
+            shareLabel={`${cellName || '모임'}에 공유하기`}
             onClose={() => setOpenList(null)}
             onAdd={openList === 'seed' ? () => setAddOpen(true) : null}
           />
         )}
 
-        {sheet && (
-          <PersonalEntrySheet
-            form={form}
-            setForm={setForm}
-            onClose={closeSheet}
-            onSave={saveForm}
-            onDelete={handleDeleteFromSheet}
-            confirmingDelete={confirmDeleteId === sheet.editId}
-          />
-        )}
+        {sheet && <EntrySheet form={form} setForm={setForm} onClose={closeSheet} onSave={saveForm} />}
 
         {addOpen && (
           <AddEntrySheet
             user={user}
-            activeCell={activeCell}
-            defaultType="mine"
+            destination={{ kind: 'personal' }}
             onClose={() => setAddOpen(false)}
-            onAdded={(kind, name) =>
-              setToast(kind === 'mine' ? '나의 기도에 심었어요 🌱' : `${name}님을 ${cellName || '셀'}에 기도씨앗으로 심었어요 🌱`)
-            }
+            onAdded={() => setToast('나의 기도나무에 심었어요 🌱')}
           />
         )}
       </div>

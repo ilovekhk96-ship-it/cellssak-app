@@ -1,8 +1,28 @@
-import { X, Check, Pencil, Plus } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import { FULL_INDEX } from '../data/constants';
 import EntryRow from './EntryRow';
 
-export default function ListModal({ meta, verse, entries, grouped, editMode, setEditMode, listRef, groupRefs, indexBarRef, onIndexPoint, onPray, onConvert, onLike, onEditEntry, onClose, myUid, isLeader, onAdd }) {
+export default function ListModal({
+  meta,
+  verse,
+  entries,
+  grouped,
+  listRef,
+  groupRefs,
+  indexBarRef,
+  onIndexPoint,
+  onPray,
+  onConvert,
+  onLike,
+  onEditEntry,
+  onDeleteEntry,
+  onShare,
+  shareLabel,
+  onClose,
+  myUid,
+  isLeader,
+  onAdd,
+}) {
   const Icon = meta.icon;
   const labels = FULL_INDEX.filter((l) => grouped[l] && grouped[l].length > 0);
   return (
@@ -27,29 +47,16 @@ export default function ListModal({ meta, verse, entries, grouped, editMode, set
           </p>
         </div>
 
-        <div className="flex items-center justify-between px-4 pt-2 shrink-0">
-          {onAdd ? (
+        {onAdd && (
+          <div className="flex items-center px-4 pt-2 shrink-0">
             <button onClick={onAdd} style={{ color: meta.color }} className="flex items-center gap-1 text-xs px-2 py-1 font-medium">
               <Plus size={14} /> 기도씨앗 심기
             </button>
-          ) : (
-            <span />
-          )}
-          <button onClick={() => setEditMode(!editMode)} style={{ color: editMode ? meta.color : 'var(--ink-soft)' }} className="flex items-center gap-1 text-xs px-2 py-1">
-            {editMode ? (
-              <>
-                <Check size={14} /> 완료
-              </>
-            ) : (
-              <>
-                <Pencil size={14} /> 편집
-              </>
-            )}
-          </button>
-        </div>
+          </div>
+        )}
 
         <div className="flex-1 flex min-h-0">
-          <div ref={listRef} className="flex-1 overflow-y-auto px-3 pb-4" style={{ scrollBehavior: 'smooth' }}>
+          <div ref={listRef} className="flex-1 overflow-y-auto px-3 pb-4 pt-2" style={{ scrollBehavior: 'smooth' }}>
             {entries.length === 0 && (
               <p style={{ color: 'var(--ink-soft)' }} className="text-xs text-center py-12 italic">
                 아직 이 페이지엔 이름이 없어요.
@@ -61,19 +68,25 @@ export default function ListModal({ meta, verse, entries, grouped, editMode, set
                   {label}
                 </p>
                 <div className="flex flex-col gap-2 mb-1">
-                  {grouped[label].map((entry) => (
-                    <EntryRow
-                      key={entry.id}
-                      entry={entry}
-                      meta={meta}
-                      editMode={editMode}
-                      canEdit={isLeader || entry.authorUid === myUid}
-                      onPray={onPray}
-                      onConvert={onConvert}
-                      onLike={onLike}
-                      onEditEntry={onEditEntry}
-                    />
-                  ))}
+                  {grouped[label].map((entry) => {
+                    const isOwner = entry.authorUid ? entry.authorUid === myUid : true;
+                    return (
+                      <EntryRow
+                        key={entry.id}
+                        entry={entry}
+                        meta={meta}
+                        canEdit={isLeader || isOwner}
+                        canShare={isOwner}
+                        onPray={onPray}
+                        onConvert={onConvert}
+                        onLike={onLike}
+                        onEditEntry={onEditEntry}
+                        onDeleteEntry={onDeleteEntry}
+                        onShare={onShare}
+                        shareLabel={shareLabel}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             ))}

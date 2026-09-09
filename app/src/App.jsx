@@ -10,7 +10,9 @@ import {
   prayForEntry,
   likeEntry,
   logPrayerForToday,
+  setEntryStatus,
 } from './lib/prayerData';
+import { copyEntryToPersonal } from './lib/personalPrayer';
 import TreeScene from './components/TreeScene';
 import ListModal from './components/ListModal';
 import EntrySheet from './components/EntrySheet';
@@ -28,11 +30,9 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
   const [entries, setEntries] = useState([]);
   const [dailyPrayers, setDailyPrayers] = useState({}); // { 'YYYY-MM-DD'(KST): string[] (그 날 기도했어요를 누른 사람의 uid, 중복 제거) }
   const [openList, setOpenList] = useState(null); // null | 'seed' | 'fruit'
-  const [editMode, setEditMode] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [sheet, setSheet] = useState(null); // null | { editId, status }
   const [form, setForm] = useState({ prayerName: '', targetName: '', relationship: '', note: '' });
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const listRef = useRef(null);
   const groupRefs = useRef({});
@@ -80,27 +80,30 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
   const openEdit = (entry) => {
     setForm({ prayerName: entry.prayerName, targetName: entry.targetName, relationship: entry.relationship, note: entry.note, status: entry.status });
     setSheet({ editId: entry.id, status: entry.status });
-    setConfirmDeleteId(null);
   };
 
   const closeSheet = () => {
     setSheet(null);
-    setConfirmDeleteId(null);
   };
 
   const saveForm = async () => {
     if (!sheet) return;
     const targetName = form.targetName.trim();
     if (!targetName) return;
+    const entry = entries.find((e) => e.id === sheet.editId);
     try {
       await updateEntry(churchId, cellId, sheet.editId, {
         targetName,
         prayerName: form.prayerName.trim(),
         relationship: form.relationship.trim(),
         note: form.note.trim(),
-        status: form.status,
       });
-      setToast(form.status !== sheet.status ? `${STATUS[form.status].label}(으)로 옮겼어요` : '수정했어요');
+      if (form.status !== sheet.status) {
+        await setEntryStatus(churchId, cellId, entry || { id: sheet.editId }, form.status, user.uid);
+        setToast(`${STATUS[form.status].label}(으)로 옮겼어요`);
+      } else {
+        setToast('수정했어요');
+      }
       setError('');
     } catch (e) {
       setError('저장에 실패했어요. 잠시 후 다시 시도해주세요.');
@@ -108,20 +111,23 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
     closeSheet();
   };
 
-  const handleDeleteFromSheet = async () => {
-    if (!sheet || !sheet.editId) return;
-    if (confirmDeleteId !== sheet.editId) {
-      setConfirmDeleteId(sheet.editId);
-      return;
-    }
+  const deleteEntryHandler = async (entry) => {
     try {
-      await deleteEntry(churchId, cellId, sheet.editId);
+      await deleteEntry(churchId, cellId, entry.id);
       setToast('삭제했어요');
       setError('');
     } catch (e) {
       setError('삭제에 실패했어요. 잠시 후 다시 시도해주세요.');
     }
-    closeSheet();
+  };
+
+  const shareToPersonal = async (entry) => {
+    try {
+      await copyEntryToPersonal(user.uid, churchId, cellId, entry);
+      setToast('내 기도나무로 복사했어요 🌱');
+    } catch (e) {
+      setError('복사에 실패했어요. 잠시 후 다시 시도해주세요.');
+    }
   };
 
   const prayFor = async (id) => {
@@ -137,8 +143,9 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
   };
 
   const convertToFruit = async (id, name) => {
+    const entry = entries.find((e) => e.id === id);
     try {
-      await updateEntry(churchId, cellId, id, { status: 'fruit' });
+      await setEntryStatus(churchId, cellId, entry || { id }, 'fruit', user.uid);
       setToast(`🎉 ${name}님이 믿음의 열매를 맺었어요!`);
       setError('');
     } catch (e) {
@@ -266,7 +273,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
             todayActiveCount={todayActiveCount}
             seedCount={seedCount}
             fruitCount={fruitCount}
-            onOpenList={(k) => { setOpenList(k); setEditMode(false); }}
+            onOpenList={(k) => setOpenList(k)}
             treeLabel={cellName ? `${cellName}의 기도나무` : ''}
           />
         )}
@@ -289,8 +296,6 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
             verse={VERSES[openList]}
             entries={filtered}
             grouped={grouped}
-            editMode={editMode}
-            setEditMode={setEditMode}
             listRef={listRef}
             groupRefs={groupRefs}
             indexBarRef={indexBarRef}
@@ -301,31 +306,22 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
             myUid={user.uid}
             isLeader={isLeader}
             onEditEntry={openEdit}
+            onDeleteEntry={deleteEntryHandler}
+            onShare={shareToPersonal}
+            shareLabel="내 나무로 복사하기"
             onClose={() => setOpenList(null)}
             onAdd={openList === 'seed' ? () => setAddOpen(true) : null}
           />
         )}
 
-        {sheet && (
-          <EntrySheet
-            form={form}
-            setForm={setForm}
-            onClose={closeSheet}
-            onSave={saveForm}
-            onDelete={handleDeleteFromSheet}
-            confirmingDelete={confirmDeleteId === sheet.editId}
-          />
-        )}
+        {sheet && <EntrySheet form={form} setForm={setForm} onClose={closeSheet} onSave={saveForm} />}
 
         {addOpen && (
           <AddEntrySheet
             user={user}
-            activeCell={{ churchId, cellId }}
-            defaultType="intercession"
+            destination={{ kind: 'cell', churchId, cellId }}
             onClose={() => setAddOpen(false)}
-            onAdded={(kind, name) =>
-              setToast(kind === 'mine' ? '나의 기도에 심었어요 🌱' : `${name}님을 기도씨앗에 심었어요 🌱`)
-            }
+            onAdded={() => setToast('기도씨앗을 심었어요 🌱')}
           />
         )}
       </div>

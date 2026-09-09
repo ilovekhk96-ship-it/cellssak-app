@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { X, Trash2 } from 'lucide-react';
+import { X } from 'lucide-react';
 import { STATUS } from '../data/constants';
 
-export default function EntrySheet({ form, setForm, onClose, onSave, onDelete, confirmingDelete }) {
+export default function EntrySheet({ form, setForm, onClose, onSave }) {
   const selectedStatus = form.status;
   const [pendingStatus, setPendingStatus] = useState(null); // 상태 전환 확인 대기 중인 값
 
@@ -108,13 +108,6 @@ export default function EntrySheet({ form, setForm, onClose, onSave, onDelete, c
         <button onClick={onSave} style={{ background: STATUS.seed.color, color: '#FFF8F0' }} className="w-full py-3 rounded-full text-sm font-medium mt-1">
           저장하기
         </button>
-
-        {onDelete && (
-          <button onClick={onDelete} style={{ color: confirmingDelete ? '#C4456B' : 'var(--ink-soft)' }} className="flex items-center justify-center gap-1.5 text-sm py-1">
-            <Trash2 size={14} />
-            {confirmingDelete ? '한 번 더 누르면 삭제돼요' : '이 이름 삭제하기'}
-          </button>
-        )}
       </div>
     </div>
   );
