@@ -11,6 +11,9 @@ import HeartBadge from './HeartBadge';
 // 실제로 뿌리 내린 자리에서 위로 자라나는 것처럼 보임
 const GROUND_ANCHOR = { x: TRUNK.x1, y: TRUNK.y1 };
 
+// 나무 이름표(treeLabel) 위치 — 땅 그림자(ellipse, cy 234 + ry 8 = 아래쪽 끝 242) 바로 밑
+const LABEL_Y = GROUND_ANCHOR.y + 22;
+
 // score(누적 기도 일수)가 늘어날수록 나무가 실제로 커지는 느낌을 주되, 커질수록 증가폭은
 // 점점 완만해지는 로그 곡선 — 실제 나무 성장처럼 초반엔 빠르게, 오래될수록 천천히 자람
 function growthScale(score) {
@@ -71,9 +74,11 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
       vx1 = Math.max(vx1, x);
       vy1 = Math.max(vy1, y);
     });
+    // 이름표는 확대 그룹 밖(고정 좌표)에 그려지므로, 나무가 작을 때도 잘리지 않도록 별도로 확보
+    if (treeLabel) vy1 = Math.max(vy1, LABEL_Y + 6);
     const pad = 6;
     return `${vx0 - pad} ${vy0 - pad} ${vx1 - vx0 + pad * 2} ${vy1 - vy0 + pad * 2}`;
-  }, [scale, leafPaths, visibleFruits]);
+  }, [scale, leafPaths, visibleFruits, treeLabel]);
 
   const treeTransform = `translate(${GROUND_ANCHOR.x} ${GROUND_ANCHOR.y}) scale(${scale}) translate(${-GROUND_ANCHOR.x} ${-GROUND_ANCHOR.y})`;
 
@@ -188,7 +193,7 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
           {treeLabel && (
             <text
               x={GROUND_ANCHOR.x}
-              y={GROUND_ANCHOR.y + 12}
+              y={LABEL_Y}
               textAnchor="middle"
               fontSize="9"
               style={{ fontFamily: 'var(--font-display)', fill: 'var(--ink-soft)' }}

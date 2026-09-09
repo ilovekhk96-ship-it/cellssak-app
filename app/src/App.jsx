@@ -288,6 +288,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
             fruitCount={fruitCount}
             onAdd={openAdd}
             onOpenList={(k) => { setOpenList(k); setEditMode(false); }}
+            treeLabel={cellName ? `${cellName}의 기도나무` : ''}
           />
         )}
 
