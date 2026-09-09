@@ -13,6 +13,7 @@ import {
   logFruitActivity,
 } from './lib/prayerData';
 import { copyEntryToPersonal, logPersonalPrayerForToday } from './lib/personalPrayer';
+import { myWeeklyGoldenIndicesInCell } from './lib/growth';
 import TreeScene from './components/TreeScene';
 import ListModal from './components/ListModal';
 import EntrySheet from './components/EntrySheet';
@@ -245,6 +246,9 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
     [dailyPrayers]
   );
 
+  // 황금 잎: 셀 전체 잎 개수가 아니라 "내가 이 셀에서 7번째로 활동한 날"에 내가 기여한 잎만
+  const goldenIndices = useMemo(() => myWeeklyGoldenIndicesInCell(dailyPrayers, user.uid), [dailyPrayers, user.uid]);
+
   const vars = {
     '--ink': '#4A3B3F',
     '--ink-soft': '#9C8286',
@@ -301,7 +305,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
             fruitCount={fruitCount}
             onOpenList={(k) => setOpenList(k)}
             treeLabel={cellName ? `${cellName}의 기도나무` : ''}
-            weeklyBonus
+            goldenIndices={goldenIndices}
           />
         )}
 

@@ -26,7 +26,7 @@ const MAX_USER_ZOOM = 4;
 // 일주일(7일)치 기도를 채울 때마다 보너스로 얹는 황금 잎 색
 const GOLD_LEAF_COLOR = '#E8B93C';
 
-export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onOpenList, showActions = true, treeLabel, weeklyBonus = false }) {
+export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onOpenList, showActions = true, treeLabel, goldenIndices }) {
   // 잎 개수 제한 없음 — score(누적 기도 일수)만큼 절차적으로 생성.
   // 채우기와 테두리를 따로 그리면(색상별로 채우기 먼저, 테두리는 나중에 한번에) 뒤에 있어야 할
   // 잎의 테두리까지 앞에 있는 잎 위로 뚫고 나와서 죄다 겹쳐 보이는 문제가 있었음 — 잎 하나마다
@@ -36,9 +36,11 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
     const arr = [];
     for (let i = 0; i < score; i++) {
       const leaf = getLeaf(i);
-      // weeklyBonus가 켜져 있으면 7번째(7,14,21...)마다 황금 잎으로 표시 — 개인 기도나무의
-      // "일주일 누적" 보너스. score 자체가 1일 1잎(개인)이라 인덱스만으로 정확히 매주 하나씩 맞아떨어짐
-      const isGolden = weeklyBonus && (i + 1) % 7 === 0;
+      // goldenIndices에 들어있는 인덱스만 황금 잎 — "몇 번째 잎인지"가 아니라 "누구의 몇 번째
+      // 활동일인지"를 바깥(App.jsx/PersonalHome.jsx)에서 미리 계산해서 넘겨줌. 셀 나무처럼 여러
+      // 사람 몫이 섞여 쌓이는 경우, 단순히 7번째 잎마다 금색으로 하면 "셀 전체가 7번째"가 되어
+      // 버려서 "나"의 일주일 기준과 안 맞기 때문
+      const isGolden = goldenIndices && goldenIndices.has(i);
       arr.push({
         d: leafSubpathD(leaf.x, leaf.y, leaf.rot, leaf.scale),
         x: leaf.x,
@@ -47,7 +49,7 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
       });
     }
     return arr;
-  }, [score, weeklyBonus]);
+  }, [score, goldenIndices]);
   const visibleFruits = FRUIT_SPOTS.slice(0, fruitCount);
   const dayPct = Math.max(0, Math.min(100, Math.round((daysCount / 30) * 100)));
 

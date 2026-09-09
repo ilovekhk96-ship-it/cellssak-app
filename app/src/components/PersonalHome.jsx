@@ -12,6 +12,7 @@ import {
   listenPersonalDailyActivity,
   logPersonalPrayerForToday,
 } from '../lib/personalPrayer';
+import { personalGoldenIndices } from '../lib/growth';
 import TreeScene from './TreeScene';
 import SceneIcon from './SceneIcon';
 import ListModal from './ListModal';
@@ -104,6 +105,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
 
   // 나뭇잎 개수: 기도한 날짜 수를 그대로 누적 (셀 나무와 같은 원리 — 나는 한 명뿐이라 하루 최대 1장)
   const score = useMemo(() => Object.keys(dailyActivity).length, [dailyActivity]);
+  const goldenIndices = useMemo(() => personalGoldenIndices(score), [score]);
 
   // 처음 기도한 날부터 오늘까지, 한국 기준 날짜가 지난 일수 (셀 나무의 daysCount와 동일한 계산)
   const daysCount = useMemo(() => {
@@ -250,7 +252,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
             fruitCount={fruitCount}
             showActions={false}
             treeLabel={`${user.displayName}의 기도나무`}
-            weeklyBonus
+            goldenIndices={goldenIndices}
           />
 
           <div style={{ position: 'absolute', left: '14px', bottom: '18px' }} className="flex flex-col items-center gap-2.5">
