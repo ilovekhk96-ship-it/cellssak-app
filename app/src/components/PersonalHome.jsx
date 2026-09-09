@@ -181,11 +181,11 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
     }
   };
 
-  const convertToFruit = async (id, name) => {
+  const convertToFruit = async (id) => {
     const entry = requests.find((r) => r.id === id);
     try {
       await updatePersonalRequestWithSync(user.uid, entry || { id }, { status: 'fruit' });
-      setToast(entry?.type === 'mine' ? `🎉 '${name}' 기도가 믿음의 열매를 맺었어요!` : `🎉 ${name}님이 믿음의 열매를 맺었어요!`);
+      setToast('🎉 나의 기도가 믿음의 열매를 맺었어요!');
     } catch (e) {
       setToast('저장에 실패했어요.');
     }
