@@ -43,9 +43,11 @@ export default function EntryRow({ entry, meta, canEdit, canShare, onPray, onCon
       <div className="flex items-center gap-2.5 shrink-0">
         {entry.status === 'seed' ? (
           <>
-            <button onClick={() => setConfirmingConvert(true)} title="믿음 가지게 됨" style={{ color: STATUS.fruit.color }}>
-              <Sparkles size={17} />
-            </button>
+            {canEdit && (
+              <button onClick={() => setConfirmingConvert(true)} title="믿음 가지게 됨" style={{ color: STATUS.fruit.color }}>
+                <Sparkles size={17} />
+              </button>
+            )}
 
             {confirmingConvert && (
               <div className="fixed inset-0 flex items-center justify-center z-30 px-6" style={{ maxWidth: '384px', margin: '0 auto' }}>

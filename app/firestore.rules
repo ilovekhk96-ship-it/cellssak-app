@@ -37,10 +37,11 @@ service cloud.firestore {
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoURL']);
     }
 
-    // 기도했어요/좋아요/열매전환 — 내용(대상자 이름 등)이 아니라 참여 관련 필드만 바뀌는 업데이트는 셀원 누구나 가능
+    // 기도했어요/좋아요 — 가벼운 참여 액션만 셀원 누구나 가능. 열매전환(status)은
+    // "이 기도가 응답됐다"는 결론이라 내용 수정·삭제와 같은 등급(작성자 본인/리더)으로 취급
     function isEntryEngagementUpdate() {
       return request.resource.data.diff(resource.data).affectedKeys()
-        .hasOnly(['prayerCount', 'lastPrayedDate', 'likeCount', 'status']);
+        .hasOnly(['prayerCount', 'lastPrayedDate', 'likeCount']);
     }
 
     function isEntryOwner() {
@@ -106,7 +107,7 @@ service cloud.firestore {
         match /entries/{entryId} {
           allow read: if isMember(churchId, cellId) || isSuperAdmin();
           allow create: if isMember(churchId, cellId);
-          // 기도했어요/좋아요/열매전환은 셀원 누구나, 이름·관계·기도제목 내용 수정과 삭제는 작성자 본인이나 리더만
+          // 기도했어요/좋아요는 셀원 누구나, 열매전환·이름·관계·기도제목 내용 수정과 삭제는 작성자 본인이나 리더만
           allow update: if isSuperAdmin() || isLeader(churchId, cellId) || isEntryOwner() ||
             (isMember(churchId, cellId) && isEntryEngagementUpdate());
           allow delete: if isSuperAdmin() || isLeader(churchId, cellId) || isEntryOwner();
