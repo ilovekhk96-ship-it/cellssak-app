@@ -184,15 +184,22 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
               ))}
             </g>
           </g>
+
+          {treeLabel && (
+            <text
+              x={GROUND_ANCHOR.x}
+              y={GROUND_ANCHOR.y + 12}
+              textAnchor="middle"
+              fontSize="9"
+              style={{ fontFamily: 'var(--font-display)', fill: 'var(--ink-soft)' }}
+            >
+              {treeLabel}
+            </text>
+          )}
         </svg>
       </div>
 
       <div className="flex flex-col items-center gap-2 pb-4 px-6">
-        {treeLabel && (
-          <p style={{ color: 'var(--ink-soft)', fontFamily: 'var(--font-display)', fontSize: '11px' }} className="text-center -mt-1">
-            {treeLabel}
-          </p>
-        )}
         <div style={{ width: '100%', maxWidth: '220px' }}>
           <p style={{ color: 'var(--ink)', fontFamily: 'var(--font-display)' }} className="text-xs font-bold text-center mb-1">
             {daysCount}일째 기도중
