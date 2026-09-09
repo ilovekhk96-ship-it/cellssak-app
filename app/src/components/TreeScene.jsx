@@ -23,7 +23,10 @@ function growthScale(score) {
 const MIN_USER_ZOOM = 0.6;
 const MAX_USER_ZOOM = 4;
 
-export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onOpenList, showActions = true, treeLabel }) {
+// 일주일(7일)치 기도를 채울 때마다 보너스로 얹는 황금 잎 색
+const GOLD_LEAF_COLOR = '#E8B93C';
+
+export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onOpenList, showActions = true, treeLabel, weeklyBonus = false }) {
   // 잎 개수 제한 없음 — score(누적 기도 일수)만큼 절차적으로 생성.
   // 채우기와 테두리를 따로 그리면(색상별로 채우기 먼저, 테두리는 나중에 한번에) 뒤에 있어야 할
   // 잎의 테두리까지 앞에 있는 잎 위로 뚫고 나와서 죄다 겹쳐 보이는 문제가 있었음 — 잎 하나마다
@@ -33,10 +36,18 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
     const arr = [];
     for (let i = 0; i < score; i++) {
       const leaf = getLeaf(i);
-      arr.push({ d: leafSubpathD(leaf.x, leaf.y, leaf.rot, leaf.scale), x: leaf.x, y: leaf.y, color: leaf.color });
+      // weeklyBonus가 켜져 있으면 7번째(7,14,21...)마다 황금 잎으로 표시 — 개인 기도나무의
+      // "일주일 누적" 보너스. score 자체가 1일 1잎(개인)이라 인덱스만으로 정확히 매주 하나씩 맞아떨어짐
+      const isGolden = weeklyBonus && (i + 1) % 7 === 0;
+      arr.push({
+        d: leafSubpathD(leaf.x, leaf.y, leaf.rot, leaf.scale),
+        x: leaf.x,
+        y: leaf.y,
+        color: isGolden ? GOLD_LEAF_COLOR : leaf.color,
+      });
     }
     return arr;
-  }, [score]);
+  }, [score, weeklyBonus]);
   const visibleFruits = FRUIT_SPOTS.slice(0, fruitCount);
   const dayPct = Math.max(0, Math.min(100, Math.round((daysCount / 30) * 100)));
 
@@ -196,7 +207,12 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
               y={LABEL_Y}
               textAnchor="middle"
               fontSize="9"
-              style={{ fontFamily: 'var(--font-display)', fill: 'var(--ink-soft)' }}
+              fill="#4A3B3F"
+              stroke="#FFFFFF"
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+              paintOrder="stroke fill"
+              style={{ fontFamily: 'var(--font-display)' }}
             >
               {treeLabel}
             </text>

@@ -1,8 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Calendar, Timer } from 'lucide-react';
-import { STATUS } from '../data/constants';
+import { STATUS, todayStr } from '../data/constants';
 import { listenCell } from '../lib/church';
-import { listenPersonalRequests, updatePersonalRequest, deletePersonalRequest } from '../lib/personalPrayer';
+import {
+  listenPersonalRequests,
+  updatePersonalRequest,
+  deletePersonalRequest,
+  prayForPersonalRequest,
+  listenPersonalDailyActivity,
+  logPersonalPrayerForToday,
+} from '../lib/personalPrayer';
 import TreeScene from './TreeScene';
 import SceneIcon from './SceneIcon';
 import PersonalListModal from './PersonalListModal';
@@ -18,6 +25,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
   const [cellName, setCellName] = useState('');
   const [toast, setToast] = useState('');
   const [requests, setRequests] = useState([]);
+  const [dailyActivity, setDailyActivity] = useState({}); // { 'YYYY-MM-DD'(KST): true } — 개인 기도나무 성장 근거
   const [openList, setOpenList] = useState(null); // null | 'seed' | 'fruit'
   const [editMode, setEditMode] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -42,6 +50,11 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
   }, [user.uid]);
 
   useEffect(() => {
+    const unsubscribe = listenPersonalDailyActivity(user.uid, setDailyActivity);
+    return unsubscribe;
+  }, [user.uid]);
+
+  useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(''), 1800);
     return () => clearTimeout(t);
@@ -50,6 +63,31 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
   const filtered = useMemo(() => requests.filter((r) => r.status === openList), [requests, openList]);
   const seedCount = requests.filter((r) => r.status === 'seed').length;
   const fruitCount = requests.filter((r) => r.status === 'fruit').length;
+
+  // 나뭇잎 개수: 기도한 날짜 수를 그대로 누적 (셀 나무와 같은 원리 — 나는 한 명뿐이라 하루 최대 1장)
+  const score = useMemo(() => Object.keys(dailyActivity).length, [dailyActivity]);
+
+  // 처음 기도한 날부터 오늘까지, 한국 기준 날짜가 지난 일수 (셀 나무의 daysCount와 동일한 계산)
+  const daysCount = useMemo(() => {
+    const dates = Object.keys(dailyActivity);
+    if (dates.length === 0) return 0;
+    const first = dates.sort()[0];
+    const today = todayStr();
+    const firstDate = new Date(`${first}T00:00:00+09:00`);
+    const todayDate = new Date(`${today}T00:00:00+09:00`);
+    const diffDays = Math.round((todayDate - firstDate) / 86400000);
+    return diffDays + 1;
+  }, [dailyActivity]);
+
+  const prayFor = async (id) => {
+    const today = todayStr();
+    try {
+      await prayForPersonalRequest(user.uid, id, today);
+      await logPersonalPrayerForToday(user.uid, today);
+    } catch (e) {
+      setToast('저장에 실패했어요.');
+    }
+  };
 
   const openEdit = (entry) => {
     setForm({ content: entry.content, status: entry.status });
@@ -138,13 +176,14 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
 
         <div style={{ flex: 1, position: 'relative' }} className="flex flex-col">
           <TreeScene
-            score={0}
-            daysCount={0}
+            score={score}
+            daysCount={daysCount}
             todayActiveCount={0}
             seedCount={0}
             fruitCount={0}
             showActions={false}
             treeLabel={`${user.displayName}의 기도나무`}
+            weeklyBonus
           />
 
           <div style={{ position: 'absolute', left: '14px', bottom: '18px' }} className="flex flex-col items-center gap-2.5">
@@ -192,6 +231,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
             entries={filtered}
             editMode={editMode}
             setEditMode={setEditMode}
+            onPray={prayFor}
             onConvert={convertToFruit}
             onEditEntry={openEdit}
             onClose={() => setOpenList(null)}

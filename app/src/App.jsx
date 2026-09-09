@@ -26,7 +26,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
   const [toast, setToast] = useState('');
   const [cellName, setCellName] = useState('');
   const [entries, setEntries] = useState([]);
-  const [dailyPrayers, setDailyPrayers] = useState({}); // { 'YYYY-MM-DD'(KST): string[] (그 날 기도했어요를 누른 사람 이름, 중복 제거) }
+  const [dailyPrayers, setDailyPrayers] = useState({}); // { 'YYYY-MM-DD'(KST): string[] (그 날 기도했어요를 누른 사람의 uid, 중복 제거) }
   const [openList, setOpenList] = useState(null); // null | 'seed' | 'fruit'
   const [editMode, setEditMode] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -125,12 +125,11 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
   };
 
   const prayFor = async (id) => {
-    const target = entries.find((e) => e.id === id);
-    if (!target) return;
     const today = todayStr();
     try {
       await prayForEntry(churchId, cellId, id, today);
-      await logPrayerForToday(churchId, cellId, today, target.prayerName.trim());
+      // 오늘 기도한 사람 수는 "이 항목의 기도자로 지정된 이름"이 아니라 실제로 버튼을 누른 나 자신으로 집계
+      await logPrayerForToday(churchId, cellId, today, user.uid);
       setError('');
     } catch (e) {
       setError('저장에 실패했어요. 잠시 후 다시 시도해주세요.');

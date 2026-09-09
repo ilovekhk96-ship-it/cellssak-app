@@ -60,9 +60,9 @@ export function listenDailyPrayers(churchId, cellId, callback) {
   });
 }
 
-// arrayUnion으로 같은 사람이 같은 날 여러 번 눌러도 자동으로 중복 제거됨
-export async function logPrayerForToday(churchId, cellId, date, name) {
-  if (!name) return;
+// arrayUnion으로 같은 사람이 같은 날 여러 항목에 눌러도 자동으로 중복 제거됨 (uid 기준)
+export async function logPrayerForToday(churchId, cellId, date, uid) {
+  if (!uid) return;
   const ref = doc(db, 'churches', churchId, 'cells', cellId, 'dailyPrayers', date);
-  await setDoc(ref, { names: arrayUnion(name) }, { merge: true });
+  await setDoc(ref, { names: arrayUnion(uid) }, { merge: true });
 }

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Pencil, Sparkles } from 'lucide-react';
-import { STATUS } from '../data/constants';
+import { Pencil, Sparkles, Flame } from 'lucide-react';
+import { STATUS, todayStr } from '../data/constants';
 
-export default function PersonalEntryRow({ entry, editMode, onConvert, onEditEntry }) {
+export default function PersonalEntryRow({ entry, editMode, onPray, onConvert, onEditEntry }) {
   const [confirmingConvert, setConfirmingConvert] = useState(false);
+  const prayedToday = entry.lastPrayedDate === todayStr();
 
   return (
     <div
@@ -18,7 +19,7 @@ export default function PersonalEntryRow({ entry, editMode, onConvert, onEditEnt
       {editMode ? (
         <Pencil size={15} style={{ color: 'var(--ink-soft)' }} className="shrink-0" />
       ) : entry.status === 'seed' ? (
-        <div className="shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -64,9 +65,26 @@ export default function PersonalEntryRow({ entry, editMode, onConvert, onEditEnt
               </div>
             </div>
           )}
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onPray(entry.id);
+            }}
+            style={{ color: prayedToday ? STATUS.seed.color : 'var(--ink-soft)' }}
+            className="flex flex-col items-center gap-0.5"
+          >
+            <Flame size={16} fill={prayedToday ? STATUS.seed.color : 'none'} />
+            <span style={{ fontSize: '9px', lineHeight: '10px' }}>
+              기도했어요{prayedToday ? '!' : ''} ({entry.prayerCount || 0})
+            </span>
+          </button>
         </div>
       ) : (
-        <Sparkles size={15} style={{ color: STATUS.fruit.color }} fill={STATUS.fruit.color} className="shrink-0" />
+        <div style={{ color: 'var(--ink-soft)' }} className="flex flex-col items-center gap-0.5 shrink-0" title="기도한 횟수 (고정됨)">
+          <Flame size={15} fill="var(--ink-soft)" />
+          <span style={{ fontSize: '9px', lineHeight: '10px' }}>{entry.prayerCount || 0}회</span>
+        </div>
       )}
     </div>
   );

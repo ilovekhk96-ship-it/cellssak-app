@@ -1,7 +1,7 @@
 import { X, Check, Pencil, Plus } from 'lucide-react';
 import PersonalEntryRow from './PersonalEntryRow';
 
-export default function PersonalListModal({ meta, entries, editMode, setEditMode, onConvert, onEditEntry, onClose, onAdd }) {
+export default function PersonalListModal({ meta, entries, editMode, setEditMode, onPray, onConvert, onEditEntry, onClose, onAdd }) {
   const Icon = meta.icon;
   return (
     <div className="fixed inset-0 flex items-center justify-center z-10 px-4" style={{ maxWidth: '384px', margin: '0 auto' }}>
@@ -48,7 +48,14 @@ export default function PersonalListModal({ meta, entries, editMode, setEditMode
           ) : (
             <div className="flex flex-col gap-2 mt-1">
               {entries.map((entry) => (
-                <PersonalEntryRow key={entry.id} entry={entry} editMode={editMode} onConvert={onConvert} onEditEntry={onEditEntry} />
+                <PersonalEntryRow
+                  key={entry.id}
+                  entry={entry}
+                  editMode={editMode}
+                  onPray={onPray}
+                  onConvert={onConvert}
+                  onEditEntry={onEditEntry}
+                />
               ))}
             </div>
           )}

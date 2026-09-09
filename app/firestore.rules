@@ -57,6 +57,11 @@ service cloud.firestore {
       match /prayerRequests/{reqId} {
         allow read, write: if isSignedIn() && request.auth.uid == uid;
       }
+
+      // 개인 기도나무 성장의 근거(날짜별 기도 여부) — 본인만 읽고 쓸 수 있음
+      match /dailyActivity/{date} {
+        allow read, write: if isSignedIn() && request.auth.uid == uid;
+      }
     }
 
     match /churches/{churchId} {
