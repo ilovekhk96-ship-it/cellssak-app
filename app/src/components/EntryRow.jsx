@@ -55,7 +55,7 @@ export default function EntryRow({ entry, meta, canEdit, canShare, onPray, onCon
                   className="relative rounded-3xl px-6 py-7 flex flex-col items-center gap-4 shadow-xl text-center max-w-xs"
                 >
                   <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem' }}>
-                    {entry.targetName}님을 정말 믿음열매로 바꾸시겠어요?
+                    {entry.type === 'mine' ? `'${entry.targetName}' 기도를` : `${entry.targetName}님을`} 정말 믿음열매로 바꾸시겠어요?
                   </p>
                   <div className="flex gap-2 w-full">
                     <button

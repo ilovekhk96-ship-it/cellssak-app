@@ -155,7 +155,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
     const entry = entries.find((e) => e.id === id);
     try {
       await updateEntryWithSync(churchId, cellId, entry || { id }, { status: 'fruit' }, user.uid);
-      setToast(`🎉 ${name}님이 믿음의 열매를 맺었어요!`);
+      setToast(entry?.type === 'mine' ? `🎉 '${name}' 기도가 믿음의 열매를 맺었어요!` : `🎉 ${name}님이 믿음의 열매를 맺었어요!`);
       setError('');
     } catch (e) {
       setError('저장에 실패했어요. 잠시 후 다시 시도해주세요.');

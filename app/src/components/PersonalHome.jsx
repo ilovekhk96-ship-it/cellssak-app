@@ -185,7 +185,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
     const entry = requests.find((r) => r.id === id);
     try {
       await updatePersonalRequestWithSync(user.uid, entry || { id }, { status: 'fruit' });
-      setToast(`🎉 ${name}님이 믿음의 열매를 맺었어요!`);
+      setToast(entry?.type === 'mine' ? `🎉 '${name}' 기도가 믿음의 열매를 맺었어요!` : `🎉 ${name}님이 믿음의 열매를 맺었어요!`);
     } catch (e) {
       setToast('저장에 실패했어요.');
     }
@@ -241,8 +241,8 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
             score={score}
             daysCount={daysCount}
             todayActiveCount={0}
-            seedCount={0}
-            fruitCount={0}
+            seedCount={seedCount}
+            fruitCount={fruitCount}
             showActions={false}
             treeLabel={`${user.displayName}의 기도나무`}
             weeklyBonus
