@@ -1,8 +1,8 @@
-import { X, Check, Pencil } from 'lucide-react';
+import { X, Check, Pencil, Plus } from 'lucide-react';
 import { FULL_INDEX } from '../data/constants';
 import EntryRow from './EntryRow';
 
-export default function ListModal({ meta, verse, entries, grouped, editMode, setEditMode, listRef, groupRefs, indexBarRef, onIndexPoint, onPray, onConvert, onLike, onEditEntry, onClose, myUid, isLeader }) {
+export default function ListModal({ meta, verse, entries, grouped, editMode, setEditMode, listRef, groupRefs, indexBarRef, onIndexPoint, onPray, onConvert, onLike, onEditEntry, onClose, myUid, isLeader, onAdd }) {
   const Icon = meta.icon;
   const labels = FULL_INDEX.filter((l) => grouped[l] && grouped[l].length > 0);
   return (
@@ -27,7 +27,14 @@ export default function ListModal({ meta, verse, entries, grouped, editMode, set
           </p>
         </div>
 
-        <div className="flex items-center justify-end px-4 pt-2 shrink-0">
+        <div className="flex items-center justify-between px-4 pt-2 shrink-0">
+          {onAdd ? (
+            <button onClick={onAdd} style={{ color: meta.color }} className="flex items-center gap-1 text-xs px-2 py-1 font-medium">
+              <Plus size={14} /> 기도씨앗 심기
+            </button>
+          ) : (
+            <span />
+          )}
           <button onClick={() => setEditMode(!editMode)} style={{ color: editMode ? meta.color : 'var(--ink-soft)' }} className="flex items-center gap-1 text-xs px-2 py-1">
             {editMode ? (
               <>

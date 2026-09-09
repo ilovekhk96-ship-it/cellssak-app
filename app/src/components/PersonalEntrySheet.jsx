@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, Trash2 } from 'lucide-react';
 import { STATUS } from '../data/constants';
 
-export default function EntrySheet({ form, setForm, onClose, onSave, onDelete, confirmingDelete }) {
+export default function PersonalEntrySheet({ form, setForm, onClose, onSave, onDelete, confirmingDelete }) {
   const selectedStatus = form.status;
   const [pendingStatus, setPendingStatus] = useState(null); // 상태 전환 확인 대기 중인 값
 
@@ -44,12 +44,16 @@ export default function EntrySheet({ form, setForm, onClose, onSave, onDelete, c
           </div>
         </div>
       )}
-      <div style={{ background: 'var(--paper)', fontFamily: 'var(--font-body)' }} className="relative w-full rounded-t-3xl px-5 pt-5 pb-8 flex flex-col gap-3.5">
+
+      <div
+        style={{ background: 'var(--paper, #FFF8F0)', fontFamily: "'Gowun Dodum', sans-serif" }}
+        className="relative w-full rounded-t-3xl px-5 pt-5 pb-8 flex flex-col gap-3.5"
+      >
         <div className="flex items-center justify-between">
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem' }} className="font-bold">
-            정보 수정하기
+            나의 기도 수정하기
           </span>
-          <button onClick={onClose} style={{ color: 'var(--ink-soft)' }}>
+          <button onClick={onClose} style={{ color: 'var(--ink-soft, #9C8286)' }}>
             <X size={20} />
           </button>
         </div>
@@ -74,35 +78,14 @@ export default function EntrySheet({ form, setForm, onClose, onSave, onDelete, c
           })}
         </div>
 
-        <input
-          value={form.prayerName}
-          onChange={(e) => setForm({ ...form, prayerName: e.target.value })}
-          placeholder="기도자 이름"
-          style={{ borderBottom: '1px solid var(--line)' }}
-          className="bg-transparent outline-none py-2 text-base"
-          autoFocus
-        />
-        <input
-          value={form.targetName}
-          onChange={(e) => setForm({ ...form, targetName: e.target.value })}
-          placeholder="대상자 이름"
-          style={{ borderBottom: '1px solid var(--line)' }}
-          className="bg-transparent outline-none py-2 text-base"
-        />
-        <input
-          value={form.relationship}
-          onChange={(e) => setForm({ ...form, relationship: e.target.value })}
-          placeholder="관계 (예: 가족, 친구, 직장동료)"
-          style={{ borderBottom: '1px solid var(--line)' }}
-          className="bg-transparent outline-none py-2 text-sm"
-        />
         <textarea
-          value={form.note}
-          onChange={(e) => setForm({ ...form, note: e.target.value })}
-          placeholder="기도제목 (선택)"
-          rows={2}
-          style={{ borderBottom: '1px solid var(--line)' }}
+          value={form.content}
+          onChange={(e) => setForm({ ...form, content: e.target.value })}
+          placeholder="기도제목"
+          rows={4}
+          style={{ borderBottom: '1px solid var(--line, #F0E2E3)' }}
           className="bg-transparent outline-none py-2 text-sm resize-none"
+          autoFocus
         />
 
         <button onClick={onSave} style={{ background: STATUS.seed.color, color: '#FFF8F0' }} className="w-full py-3 rounded-full text-sm font-medium mt-1">
@@ -110,9 +93,9 @@ export default function EntrySheet({ form, setForm, onClose, onSave, onDelete, c
         </button>
 
         {onDelete && (
-          <button onClick={onDelete} style={{ color: confirmingDelete ? '#C4456B' : 'var(--ink-soft)' }} className="flex items-center justify-center gap-1.5 text-sm py-1">
+          <button onClick={onDelete} style={{ color: confirmingDelete ? '#C4456B' : 'var(--ink-soft, #9C8286)' }} className="flex items-center justify-center gap-1.5 text-sm py-1">
             <Trash2 size={14} />
-            {confirmingDelete ? '한 번 더 누르면 삭제돼요' : '이 이름 삭제하기'}
+            {confirmingDelete ? '한 번 더 누르면 삭제돼요' : '이 기도제목 삭제하기'}
           </button>
         )}
       </div>

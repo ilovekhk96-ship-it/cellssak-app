@@ -52,6 +52,11 @@ service cloud.firestore {
       allow read: if isSignedIn() && request.auth.uid == uid;
       // 본인은 자유롭게, 관리자는 셀 삭제 시 소속 멤버들의 activeCell을 정리하기 위해 쓸 수 있음
       allow write: if isSignedIn() && (request.auth.uid == uid || isSuperAdmin());
+
+      // 개인 기도제목 — 셀과 무관하게 본인만 읽고 쓸 수 있음 ("나의 기도")
+      match /prayerRequests/{reqId} {
+        allow read, write: if isSignedIn() && request.auth.uid == uid;
+      }
     }
 
     match /churches/{churchId} {
