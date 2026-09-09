@@ -51,6 +51,18 @@ export async function deletePersonalRequest(uid, reqId) {
   await deleteDoc(doc(db, 'users', uid, 'prayerRequests', reqId));
 }
 
+// 삭제하면서, 연결된 셀 항목이 있으면 그쪽의 연결 표시도 같이 지워서 나중에 다시 공유할 수 있게 함
+// (개인 컬렉션은 항상 본인 소유라 연결된 셀 항목도 항상 같은 사람이 작성자라 권한 문제 없음)
+export async function deletePersonalRequestWithUnlink(uid, request) {
+  const batch = writeBatch(db);
+  batch.delete(doc(db, 'users', uid, 'prayerRequests', request.id));
+  if (request.linkedRef) {
+    const { churchId, cellId, entryId } = request.linkedRef;
+    batch.update(doc(db, 'churches', churchId, 'cells', cellId, 'entries', entryId), { linkedRef: null });
+  }
+  await batch.commit();
+}
+
 export async function prayForPersonalRequest(uid, reqId, today) {
   await updatePersonalRequest(uid, reqId, { prayerCount: increment(1), lastPrayedDate: today });
 }

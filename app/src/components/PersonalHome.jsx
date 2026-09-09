@@ -6,7 +6,7 @@ import { shareRequestToCell } from '../lib/prayerData';
 import {
   listenPersonalRequests,
   updatePersonalRequest,
-  deletePersonalRequest,
+  deletePersonalRequestWithUnlink,
   prayForPersonalRequest,
   likePersonalRequest,
   setPersonalRequestStatus,
@@ -151,7 +151,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
 
   const deleteEntryHandler = async (entry) => {
     try {
-      await deletePersonalRequest(user.uid, entry.id);
+      await deletePersonalRequestWithUnlink(user.uid, entry);
       setToast('삭제했어요');
     } catch (e) {
       setToast('삭제에 실패했어요.');

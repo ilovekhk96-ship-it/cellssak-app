@@ -1,6 +1,6 @@
 export default function TreeMoveButton({ onClick, lineTop, lineBottom }) {
   return (
-    <div className="fixed inset-0 pointer-events-none z-20" style={{ maxWidth: '384px', margin: '0 auto' }}>
+    <div className="fixed inset-0 pointer-events-none" style={{ maxWidth: '384px', margin: '0 auto', zIndex: 5 }}>
       <div className="absolute bottom-6 right-4 pointer-events-auto">
         <button onClick={onClick} style={{ width: '58px', height: '58px', position: 'relative' }} aria-label="기도나무 이동">
           <svg

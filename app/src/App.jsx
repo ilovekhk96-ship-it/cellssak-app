@@ -6,7 +6,7 @@ import {
   listenEntries,
   listenDailyPrayers,
   updateEntry,
-  deleteEntry,
+  deleteEntryWithUnlink,
   prayForEntry,
   likeEntry,
   logPrayerForToday,
@@ -113,7 +113,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
 
   const deleteEntryHandler = async (entry) => {
     try {
-      await deleteEntry(churchId, cellId, entry.id);
+      await deleteEntryWithUnlink(churchId, cellId, entry, user.uid);
       setToast('삭제했어요');
       setError('');
     } catch (e) {

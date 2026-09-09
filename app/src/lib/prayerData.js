@@ -43,6 +43,17 @@ export async function deleteEntry(churchId, cellId, entryId) {
   await deleteDoc(doc(db, 'churches', churchId, 'cells', cellId, 'entries', entryId));
 }
 
+// 삭제하면서, 연결된 개인 기도제목이 있고(+ 지금 지우는 사람이 이 항목의 작성자 본인일 때만)
+// 그쪽의 연결 표시도 같이 지워서 나중에 다시 공유할 수 있게 함
+export async function deleteEntryWithUnlink(churchId, cellId, entry, actingUid) {
+  const batch = writeBatch(db);
+  batch.delete(doc(db, 'churches', churchId, 'cells', cellId, 'entries', entry.id));
+  if (entry.linkedRef && entry.authorUid === actingUid) {
+    batch.update(doc(db, 'users', entry.linkedRef.uid, 'prayerRequests', entry.linkedRef.reqId), { linkedRef: null });
+  }
+  await batch.commit();
+}
+
 export async function prayForEntry(churchId, cellId, entryId, today) {
   await updateEntry(churchId, cellId, entryId, { prayerCount: increment(1), lastPrayedDate: today });
 }
