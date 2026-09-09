@@ -75,27 +75,14 @@ export default function EntrySheet({ form, setForm, onClose, onSave }) {
           })}
         </div>
 
-        <div className="flex gap-1.5">
-          {[
-            { key: 'mine', label: '나의 기도' },
-            { key: 'intercession', label: '중보기도' },
-          ].map((opt) => {
-            const selected = type === opt.key;
-            return (
-              <button
-                key={opt.key}
-                onClick={() => setForm({ ...form, type: opt.key })}
-                style={{
-                  background: selected ? STATUS.seed.color : STATUS.seed.soft,
-                  color: selected ? '#FFF8F0' : STATUS.seed.color,
-                }}
-                className="text-xs rounded-full px-3 py-1.5 font-medium"
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
+        {/* 나의기도/중보기도 구분은 처음 등록할 때만 고르고, 수정 중엔 바꿀 수 없음 —
+            내용(이름 vs 기도제목) 의미가 완전히 달라서 나중에 바꾸면 헷갈림 */}
+        <span
+          style={{ background: STATUS.seed.soft, color: STATUS.seed.color }}
+          className="text-xs rounded-full px-3 py-1.5 font-medium w-fit"
+        >
+          {type === 'mine' ? '나의 기도' : '중보기도'}
+        </span>
 
         {form.prayerName && (
           <p style={{ color: 'var(--ink-soft)' }} className="text-xs">
