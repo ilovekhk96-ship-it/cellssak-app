@@ -99,13 +99,13 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
     }
   };
 
-  const moveLabel = activeCell
+  const moveLine = activeCell
     ? cellName
-      ? `${cellName}의 나무`
-      : '모임 나무'
+      ? { top: cellName, bottom: '나무' }
+      : { top: '모임', bottom: '나무' }
     : pendingRequest
-    ? '승인 대기중'
-    : '모임 선택';
+    ? { top: '승인', bottom: '대기중' }
+    : { top: '모임', bottom: '선택' };
 
   const vars = {
     '--ink': '#4A3B3F',
@@ -175,7 +175,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
           </div>
         </div>
 
-        <TreeMoveButton onClick={onOpenCellFlow} label={moveLabel} />
+        <TreeMoveButton onClick={onOpenCellFlow} lineTop={moveLine.top} lineBottom={moveLine.bottom} />
 
         {toast && (
           <div

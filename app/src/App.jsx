@@ -254,7 +254,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
           </div>
         </div>
 
-        {onBackHome && <TreeMoveButton onClick={onBackHome} label="나의 나무" />}
+        {onBackHome && <TreeMoveButton onClick={onBackHome} lineTop="나의" lineBottom="나무" />}
 
         {loading ? (
           <p style={{ color: 'var(--ink-soft)' }} className="text-sm py-16 text-center">
