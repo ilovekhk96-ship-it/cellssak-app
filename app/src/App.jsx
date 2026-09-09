@@ -5,12 +5,11 @@ import { listenCell, clearActiveCell } from './lib/church';
 import {
   listenEntries,
   listenDailyPrayers,
-  updateEntry,
   deleteEntryWithUnlink,
   prayForEntry,
   likeEntry,
   logPrayerForToday,
-  setEntryStatus,
+  updateEntryWithSync,
 } from './lib/prayerData';
 import { copyEntryToPersonal } from './lib/personalPrayer';
 import TreeScene from './components/TreeScene';
@@ -78,7 +77,14 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
   }, [toast]);
 
   const openEdit = (entry) => {
-    setForm({ prayerName: entry.prayerName, targetName: entry.targetName, relationship: entry.relationship, note: entry.note, status: entry.status });
+    setForm({
+      type: entry.type || 'intercession',
+      prayerName: entry.prayerName,
+      targetName: entry.targetName,
+      relationship: entry.relationship,
+      note: entry.note,
+      status: entry.status,
+    });
     setSheet({ editId: entry.id, status: entry.status });
   };
 
@@ -92,18 +98,21 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
     if (!targetName) return;
     const entry = entries.find((e) => e.id === sheet.editId);
     try {
-      await updateEntry(churchId, cellId, sheet.editId, {
-        targetName,
-        prayerName: form.prayerName.trim(),
-        relationship: form.relationship.trim(),
-        note: form.note.trim(),
-      });
-      if (form.status !== sheet.status) {
-        await setEntryStatus(churchId, cellId, entry || { id: sheet.editId }, form.status, user.uid);
-        setToast(`${STATUS[form.status].label}(으)로 옮겼어요`);
-      } else {
-        setToast('수정했어요');
-      }
+      await updateEntryWithSync(
+        churchId,
+        cellId,
+        entry || { id: sheet.editId },
+        {
+          type: form.type,
+          targetName,
+          prayerName: form.prayerName.trim(),
+          relationship: form.type === 'intercession' ? form.relationship.trim() : '',
+          note: form.note.trim(),
+          status: form.status,
+        },
+        user.uid
+      );
+      setToast(form.status !== sheet.status ? `${STATUS[form.status].label}(으)로 옮겼어요` : '수정했어요');
       setError('');
     } catch (e) {
       setError('저장에 실패했어요. 잠시 후 다시 시도해주세요.');
@@ -145,7 +154,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
   const convertToFruit = async (id, name) => {
     const entry = entries.find((e) => e.id === id);
     try {
-      await setEntryStatus(churchId, cellId, entry || { id }, 'fruit', user.uid);
+      await updateEntryWithSync(churchId, cellId, entry || { id }, { status: 'fruit' }, user.uid);
       setToast(`🎉 ${name}님이 믿음의 열매를 맺었어요!`);
       setError('');
     } catch (e) {

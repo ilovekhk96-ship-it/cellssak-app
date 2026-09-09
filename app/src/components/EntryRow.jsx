@@ -112,11 +112,11 @@ export default function EntryRow({ entry, meta, canEdit, canShare, onPray, onCon
       </div>
 
       {menuOpen && (
-        <div className="fixed inset-0 flex items-end justify-center z-30" style={{ maxWidth: '384px', margin: '0 auto' }}>
-          <div style={{ background: '#00000033' }} className="absolute inset-0" onClick={closeMenu} />
+        <div className="fixed inset-0 flex items-center justify-center z-30 px-6" style={{ maxWidth: '384px', margin: '0 auto' }}>
+          <div style={{ background: '#00000040' }} className="absolute inset-0" onClick={closeMenu} />
           <div
             style={{ background: 'var(--paper, #FFF8F0)', color: 'var(--ink)' }}
-            className="relative w-full rounded-t-3xl px-5 pt-5 pb-8 flex flex-col gap-1"
+            className="relative w-full rounded-3xl shadow-xl px-5 py-6 flex flex-col gap-1"
           >
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }} className="mb-2">
               {entry.targetName}

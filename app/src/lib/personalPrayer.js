@@ -5,6 +5,7 @@ import {
   updateDoc,
   deleteDoc,
   setDoc,
+  getDoc,
   onSnapshot,
   query,
   orderBy,
@@ -51,14 +52,20 @@ export async function deletePersonalRequest(uid, reqId) {
   await deleteDoc(doc(db, 'users', uid, 'prayerRequests', reqId));
 }
 
-// 삭제하면서, 연결된 셀 항목이 있으면 그쪽의 연결 표시도 같이 지워서 나중에 다시 공유할 수 있게 함
-// (개인 컬렉션은 항상 본인 소유라 연결된 셀 항목도 항상 같은 사람이 작성자라 권한 문제 없음)
+// 삭제하면서, 연결된 셀 항목이 아직 남아있으면 그쪽의 연결 표시도 같이 지워서 나중에 다시
+// 공유할 수 있게 함 (개인 컬렉션은 항상 본인 소유라 연결된 셀 항목도 항상 같은 사람이
+// 작성자라 권한 문제 없음). 연결된 문서가 이미 지워져 있으면(상대가 먼저 지운 경우) 배치에서
+// 존재하지 않는 문서를 update하면 전체 배치가 실패하므로, 먼저 존재를 확인한 뒤에만 같이 지움
 export async function deletePersonalRequestWithUnlink(uid, request) {
   const batch = writeBatch(db);
   batch.delete(doc(db, 'users', uid, 'prayerRequests', request.id));
   if (request.linkedRef) {
     const { churchId, cellId, entryId } = request.linkedRef;
-    batch.update(doc(db, 'churches', churchId, 'cells', cellId, 'entries', entryId), { linkedRef: null });
+    const linkedRef = doc(db, 'churches', churchId, 'cells', cellId, 'entries', entryId);
+    const linkedSnap = await getDoc(linkedRef);
+    if (linkedSnap.exists()) {
+      batch.update(linkedRef, { linkedRef: null });
+    }
   }
   await batch.commit();
 }
@@ -71,14 +78,19 @@ export async function likePersonalRequest(uid, reqId) {
   await updatePersonalRequest(uid, reqId, { likeCount: increment(1) });
 }
 
-// 상태(기도씨앗/믿음열매) 변경 — 셀 쪽과 연결(linkedRef)돼 있으면 그쪽도 같이 바꿔줌.
-// 개인 컬렉션은 항상 본인 소유라 연결된 셀 쪽 문서도 항상 같은 사람이 작성자이므로 권한 문제 없음
-export async function setPersonalRequestStatus(uid, request, status) {
+// 내용/상태 수정 — 셀 쪽과 연결(linkedRef)돼 있으면 그쪽도 같은 내용으로 같이 바꿔줌.
+// 개인 컬렉션은 항상 본인 소유라 연결된 셀 쪽 문서도 항상 같은 사람이 작성자이므로 권한 문제
+// 없음. 연결된 문서가 이미 지워졌으면(상대가 먼저 지운 경우) 동기화를 건너뛰고 개인 쪽만 반영
+export async function updatePersonalRequestWithSync(uid, request, patch) {
   const batch = writeBatch(db);
-  batch.update(doc(db, 'users', uid, 'prayerRequests', request.id), { status });
+  batch.update(doc(db, 'users', uid, 'prayerRequests', request.id), patch);
   if (request.linkedRef) {
     const { churchId, cellId, entryId } = request.linkedRef;
-    batch.update(doc(db, 'churches', churchId, 'cells', cellId, 'entries', entryId), { status });
+    const linkedRef = doc(db, 'churches', churchId, 'cells', cellId, 'entries', entryId);
+    const linkedSnap = await getDoc(linkedRef);
+    if (linkedSnap.exists()) {
+      batch.update(linkedRef, patch);
+    }
   }
   await batch.commit();
 }
@@ -90,6 +102,7 @@ export async function copyEntryToPersonal(uid, churchId, cellId, entry) {
   const personalRef = doc(requestsCol(uid));
   const cellRef = doc(db, 'churches', churchId, 'cells', cellId, 'entries', entry.id);
   batch.set(personalRef, {
+    type: entry.type || 'intercession',
     targetName: entry.targetName,
     prayerName: entry.prayerName,
     relationship: entry.relationship || '',

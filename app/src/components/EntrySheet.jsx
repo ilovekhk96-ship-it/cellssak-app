@@ -4,6 +4,7 @@ import { STATUS } from '../data/constants';
 
 export default function EntrySheet({ form, setForm, onClose, onSave }) {
   const selectedStatus = form.status;
+  const type = form.type || 'intercession';
   const [pendingStatus, setPendingStatus] = useState(null); // 상태 전환 확인 대기 중인 값
 
   const applyPendingStatus = () => {
@@ -12,7 +13,7 @@ export default function EntrySheet({ form, setForm, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 flex items-end justify-center z-20" style={{ maxWidth: '384px', margin: '0 auto' }}>
+    <div className="fixed inset-0 flex items-center justify-center z-20 px-6" style={{ maxWidth: '384px', margin: '0 auto' }}>
       <div style={{ background: '#00000033' }} className="absolute inset-0" onClick={onClose} />
 
       {pendingStatus && (
@@ -44,7 +45,7 @@ export default function EntrySheet({ form, setForm, onClose, onSave }) {
           </div>
         </div>
       )}
-      <div style={{ background: 'var(--paper)', fontFamily: 'var(--font-body)' }} className="relative w-full rounded-t-3xl px-5 pt-5 pb-8 flex flex-col gap-3.5">
+      <div style={{ background: 'var(--paper)', fontFamily: 'var(--font-body)' }} className="relative w-full rounded-3xl shadow-xl px-5 py-6 flex flex-col gap-3.5">
         <div className="flex items-center justify-between">
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem' }} className="font-bold">
             정보 수정하기
@@ -74,6 +75,28 @@ export default function EntrySheet({ form, setForm, onClose, onSave }) {
           })}
         </div>
 
+        <div className="flex gap-1.5">
+          {[
+            { key: 'mine', label: '나의 기도' },
+            { key: 'intercession', label: '중보기도' },
+          ].map((opt) => {
+            const selected = type === opt.key;
+            return (
+              <button
+                key={opt.key}
+                onClick={() => setForm({ ...form, type: opt.key })}
+                style={{
+                  background: selected ? STATUS.seed.color : STATUS.seed.soft,
+                  color: selected ? '#FFF8F0' : STATUS.seed.color,
+                }}
+                className="text-xs rounded-full px-3 py-1.5 font-medium"
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+
         <input
           value={form.prayerName}
           onChange={(e) => setForm({ ...form, prayerName: e.target.value })}
@@ -85,22 +108,24 @@ export default function EntrySheet({ form, setForm, onClose, onSave }) {
         <input
           value={form.targetName}
           onChange={(e) => setForm({ ...form, targetName: e.target.value })}
-          placeholder="대상자 이름"
+          placeholder={type === 'mine' ? '기도제목' : '대상자 이름'}
           style={{ borderBottom: '1px solid var(--line)' }}
           className="bg-transparent outline-none py-2 text-base"
         />
-        <input
-          value={form.relationship}
-          onChange={(e) => setForm({ ...form, relationship: e.target.value })}
-          placeholder="관계 (예: 가족, 친구, 직장동료)"
-          style={{ borderBottom: '1px solid var(--line)' }}
-          className="bg-transparent outline-none py-2 text-sm"
-        />
+        {type === 'intercession' && (
+          <input
+            value={form.relationship}
+            onChange={(e) => setForm({ ...form, relationship: e.target.value })}
+            placeholder="관계 (예: 가족, 친구, 직장동료)"
+            style={{ borderBottom: '1px solid var(--line)' }}
+            className="bg-transparent outline-none py-2 text-sm"
+          />
+        )}
         <textarea
           value={form.note}
           onChange={(e) => setForm({ ...form, note: e.target.value })}
-          placeholder="기도제목 (선택)"
-          rows={2}
+          placeholder={type === 'mine' ? '내용 (선택)' : '기도제목'}
+          rows={type === 'mine' ? 3 : 2}
           style={{ borderBottom: '1px solid var(--line)' }}
           className="bg-transparent outline-none py-2 text-sm resize-none"
         />

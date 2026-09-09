@@ -6,9 +6,10 @@ import { addPersonalRequest } from '../../lib/personalPrayer';
 
 // 기도씨앗 추가하기 — "나의 기도"(기도제목+내용)와 "중보기도"(대상자·관계·기도제목) 중
 // 골라서 등록. targetName 필드를 그대로 재사용해서 나의기도는 기도제목이, 중보기도는
-// 대상자 이름이 목록에서 굵은 제목으로 보임. 이 화면이 열린 "곳"(내 기도나무 / 셀 나무)에
-// 그대로 저장됨 — 타입 선택은 입력 항목만 바꿀 뿐, 저장 위치와는 무관함. 나중에 기도씨앗
-// 목록에서 "복사하기/공유하기"로 반대쪽에도 옮길 수 있음.
+// 대상자 이름이 목록에서 굵은 제목으로 보임. type도 같이 저장해둬서 나중에 수정할 때
+// 같은 탭이 뜨도록 함. 이 화면이 열린 "곳"(내 기도나무 / 셀 나무)에 그대로 저장됨 —
+// 타입 선택은 입력 항목만 바꿀 뿐, 저장 위치와는 무관함. 나중에 기도씨앗 목록에서
+// "복사하기/공유하기"로 반대쪽에도 옮길 수 있음.
 export default function AddEntrySheet({ user, destination, onClose, onAdded }) {
   const [type, setType] = useState('mine'); // 'mine' | 'intercession'
   const [targetName, setTargetName] = useState('');
@@ -26,6 +27,7 @@ export default function AddEntrySheet({ user, destination, onClose, onAdded }) {
     setSaving(true);
     try {
       const data = {
+        type,
         targetName: name,
         prayerName: user.displayName,
         relationship: type === 'intercession' ? relationship.trim() : '',
@@ -53,11 +55,11 @@ export default function AddEntrySheet({ user, destination, onClose, onAdded }) {
   };
 
   return (
-    <div className="fixed inset-0 flex items-end justify-center z-20" style={{ maxWidth: '384px', margin: '0 auto' }}>
-      <div style={{ background: '#00000033' }} className="absolute inset-0" onClick={onClose} />
+    <div className="fixed inset-0 flex items-center justify-center z-20 px-6" style={{ maxWidth: '384px', margin: '0 auto' }}>
+      <div style={{ background: '#00000040' }} className="absolute inset-0" onClick={onClose} />
       <div
         style={{ background: 'var(--paper, #FFF8F0)', fontFamily: "'Gowun Dodum', sans-serif" }}
-        className="relative w-full rounded-t-3xl px-5 pt-5 pb-8 flex flex-col gap-3.5"
+        className="relative w-full rounded-3xl shadow-xl px-5 py-6 flex flex-col gap-3.5"
       >
         <div className="flex items-center justify-between">
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem' }} className="font-bold">

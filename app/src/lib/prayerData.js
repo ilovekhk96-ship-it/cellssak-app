@@ -5,13 +5,13 @@ import {
   updateDoc,
   deleteDoc,
   setDoc,
+  getDoc,
   onSnapshot,
   query,
   orderBy,
   increment,
   arrayUnion,
   writeBatch,
-  serverTimestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -43,13 +43,19 @@ export async function deleteEntry(churchId, cellId, entryId) {
   await deleteDoc(doc(db, 'churches', churchId, 'cells', cellId, 'entries', entryId));
 }
 
-// 삭제하면서, 연결된 개인 기도제목이 있고(+ 지금 지우는 사람이 이 항목의 작성자 본인일 때만)
-// 그쪽의 연결 표시도 같이 지워서 나중에 다시 공유할 수 있게 함
+// 삭제하면서, 연결된 개인 기도제목이 아직 남아있고(+ 지금 지우는 사람이 이 항목의 작성자
+// 본인일 때만) 그쪽의 연결 표시도 같이 지워서 나중에 다시 공유할 수 있게 함. 연결된 문서가
+// 이미 지워져 있으면(상대가 먼저 지운 경우) 배치에서 존재하지 않는 문서를 update하면 전체
+// 배치가 실패하므로, 먼저 존재를 확인한 뒤에만 같이 지움
 export async function deleteEntryWithUnlink(churchId, cellId, entry, actingUid) {
   const batch = writeBatch(db);
   batch.delete(doc(db, 'churches', churchId, 'cells', cellId, 'entries', entry.id));
   if (entry.linkedRef && entry.authorUid === actingUid) {
-    batch.update(doc(db, 'users', entry.linkedRef.uid, 'prayerRequests', entry.linkedRef.reqId), { linkedRef: null });
+    const linkedRef = doc(db, 'users', entry.linkedRef.uid, 'prayerRequests', entry.linkedRef.reqId);
+    const linkedSnap = await getDoc(linkedRef);
+    if (linkedSnap.exists()) {
+      batch.update(linkedRef, { linkedRef: null });
+    }
   }
   await batch.commit();
 }
@@ -62,14 +68,19 @@ export async function likeEntry(churchId, cellId, entryId) {
   await updateEntry(churchId, cellId, entryId, { likeCount: increment(1) });
 }
 
-// 상태(기도씨앗/믿음열매) 변경 — 개인 기도나무와 연결(linkedRef)돼 있고, 지금 조작하는 사람이
-// 그 항목의 작성자 본인일 때만 개인 쪽도 같이 바꿔줌 (다른 셀원이 바꿀 땐 권한이 없어 동기화하지 않고
-// 셀 쪽만 반영 — 개인 컬렉션은 본인만 쓸 수 있기 때문)
-export async function setEntryStatus(churchId, cellId, entry, status, actingUid) {
+// 내용/상태 수정 — 개인 기도나무와 연결(linkedRef)돼 있고, 지금 조작하는 사람이 그 항목의
+// 작성자 본인일 때만 개인 쪽도 같은 내용으로 같이 바꿔줌 (다른 셀원이 바꿀 땐 권한이 없어
+// 동기화하지 않고 셀 쪽만 반영 — 개인 컬렉션은 본인만 쓸 수 있기 때문). 연결된 문서가 이미
+// 지워졌으면(상대가 먼저 지운 경우) 동기화를 건너뛰고 셀 쪽만 반영
+export async function updateEntryWithSync(churchId, cellId, entry, patch, actingUid) {
   const batch = writeBatch(db);
-  batch.update(doc(db, 'churches', churchId, 'cells', cellId, 'entries', entry.id), { status });
+  batch.update(doc(db, 'churches', churchId, 'cells', cellId, 'entries', entry.id), patch);
   if (entry.linkedRef && entry.authorUid === actingUid) {
-    batch.update(doc(db, 'users', entry.linkedRef.uid, 'prayerRequests', entry.linkedRef.reqId), { status });
+    const linkedRef = doc(db, 'users', entry.linkedRef.uid, 'prayerRequests', entry.linkedRef.reqId);
+    const linkedSnap = await getDoc(linkedRef);
+    if (linkedSnap.exists()) {
+      batch.update(linkedRef, patch);
+    }
   }
   await batch.commit();
 }
@@ -81,6 +92,7 @@ export async function shareRequestToCell(churchId, cellId, uid, request) {
   const cellRef = doc(entriesCol(churchId, cellId));
   const personalRef = doc(db, 'users', uid, 'prayerRequests', request.id);
   batch.set(cellRef, {
+    type: request.type || 'intercession',
     targetName: request.targetName,
     prayerName: request.prayerName,
     relationship: request.relationship || '',

@@ -5,11 +5,10 @@ import { listenCell } from '../lib/church';
 import { shareRequestToCell } from '../lib/prayerData';
 import {
   listenPersonalRequests,
-  updatePersonalRequest,
   deletePersonalRequestWithUnlink,
   prayForPersonalRequest,
   likePersonalRequest,
-  setPersonalRequestStatus,
+  updatePersonalRequestWithSync,
   listenPersonalDailyActivity,
   logPersonalPrayerForToday,
 } from '../lib/personalPrayer';
@@ -119,7 +118,14 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
   }, [dailyActivity]);
 
   const openEdit = (entry) => {
-    setForm({ prayerName: entry.prayerName, targetName: entry.targetName, relationship: entry.relationship, note: entry.note, status: entry.status });
+    setForm({
+      type: entry.type || 'intercession',
+      prayerName: entry.prayerName,
+      targetName: entry.targetName,
+      relationship: entry.relationship,
+      note: entry.note,
+      status: entry.status,
+    });
     setSheet({ editId: entry.id, status: entry.status });
   };
 
@@ -130,19 +136,16 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
     const targetName = form.targetName.trim();
     if (!targetName) return;
     try {
-      await updatePersonalRequest(user.uid, sheet.editId, {
+      const entry = requests.find((r) => r.id === sheet.editId);
+      await updatePersonalRequestWithSync(user.uid, entry || { id: sheet.editId }, {
+        type: form.type,
         targetName,
         prayerName: form.prayerName.trim(),
-        relationship: form.relationship.trim(),
+        relationship: form.type === 'intercession' ? form.relationship.trim() : '',
         note: form.note.trim(),
+        status: form.status,
       });
-      if (form.status !== sheet.status) {
-        const entry = requests.find((r) => r.id === sheet.editId);
-        await setPersonalRequestStatus(user.uid, entry || { id: sheet.editId }, form.status);
-        setToast(`${STATUS[form.status].label}(으)로 옮겼어요`);
-      } else {
-        setToast('수정했어요');
-      }
+      setToast(form.status !== sheet.status ? `${STATUS[form.status].label}(으)로 옮겼어요` : '수정했어요');
     } catch (e) {
       setToast('저장에 실패했어요.');
     }
@@ -181,7 +184,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
   const convertToFruit = async (id, name) => {
     const entry = requests.find((r) => r.id === id);
     try {
-      await setPersonalRequestStatus(user.uid, entry || { id }, 'fruit');
+      await updatePersonalRequestWithSync(user.uid, entry || { id }, { status: 'fruit' });
       setToast(`🎉 ${name}님이 믿음의 열매를 맺었어요!`);
     } catch (e) {
       setToast('저장에 실패했어요.');
