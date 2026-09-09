@@ -137,10 +137,11 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
     if (!targetName) return;
     try {
       const entry = requests.find((r) => r.id === sheet.editId);
+      // 개인 컬렉션은 항상 본인 소유라 기도자 이름은 항상 지금 프로필 이름으로 자동 갱신
       await updatePersonalRequestWithSync(user.uid, entry || { id: sheet.editId }, {
         type: form.type,
         targetName,
-        prayerName: form.prayerName.trim(),
+        prayerName: user.displayName,
         relationship: form.type === 'intercession' ? form.relationship.trim() : '',
         note: form.note.trim(),
         status: form.status,

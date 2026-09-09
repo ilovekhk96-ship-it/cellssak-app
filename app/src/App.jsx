@@ -97,6 +97,9 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
     const targetName = form.targetName.trim();
     if (!targetName) return;
     const entry = entries.find((e) => e.id === sheet.editId);
+    // 기도자 이름은 더 이상 직접 입력받지 않고 프로필과 연동 — 본인 항목을 수정할 때는 지금
+    // 프로필 이름으로 자동 갱신하고, 리더가 남의 항목을 수정할 때는 원래 기도자 이름을 그대로 둠
+    const isMine = !entry || entry.authorUid === user.uid;
     try {
       await updateEntryWithSync(
         churchId,
@@ -105,7 +108,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
         {
           type: form.type,
           targetName,
-          prayerName: form.prayerName.trim(),
+          prayerName: isMine ? user.displayName : form.prayerName,
           relationship: form.type === 'intercession' ? form.relationship.trim() : '',
           note: form.note.trim(),
           status: form.status,

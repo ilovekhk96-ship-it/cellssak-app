@@ -97,20 +97,18 @@ export default function EntrySheet({ form, setForm, onClose, onSave }) {
           })}
         </div>
 
-        <input
-          value={form.prayerName}
-          onChange={(e) => setForm({ ...form, prayerName: e.target.value })}
-          placeholder="기도자 이름"
-          style={{ borderBottom: '1px solid var(--line)' }}
-          className="bg-transparent outline-none py-2 text-base"
-          autoFocus
-        />
+        {form.prayerName && (
+          <p style={{ color: 'var(--ink-soft)' }} className="text-xs">
+            기도자 {form.prayerName}
+          </p>
+        )}
         <input
           value={form.targetName}
           onChange={(e) => setForm({ ...form, targetName: e.target.value })}
           placeholder={type === 'mine' ? '기도제목' : '대상자 이름'}
           style={{ borderBottom: '1px solid var(--line)' }}
           className="bg-transparent outline-none py-2 text-base"
+          autoFocus
         />
         {type === 'intercession' && (
           <input
