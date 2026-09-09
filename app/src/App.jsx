@@ -12,7 +12,7 @@ import {
   updateEntryWithSync,
   logFruitActivity,
 } from './lib/prayerData';
-import { copyEntryToPersonal } from './lib/personalPrayer';
+import { copyEntryToPersonal, logPersonalPrayerForToday } from './lib/personalPrayer';
 import TreeScene from './components/TreeScene';
 import ListModal from './components/ListModal';
 import EntrySheet from './components/EntrySheet';
@@ -149,6 +149,8 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
       await prayForEntry(churchId, cellId, id, today);
       // 오늘 기도한 사람 수는 "이 항목의 기도자로 지정된 이름"이 아니라 실제로 버튼을 누른 나 자신으로 집계
       await logPrayerForToday(churchId, cellId, today, user.uid);
+      // 셀에서 기도해도 "오늘 기도했다"는 사실은 똑같으니 내 개인 기도나무에도 같이 반영
+      await logPersonalPrayerForToday(user.uid, today);
       setError('');
     } catch (e) {
       setError('저장에 실패했어요. 잠시 후 다시 시도해주세요.');
@@ -299,6 +301,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
             fruitCount={fruitCount}
             onOpenList={(k) => setOpenList(k)}
             treeLabel={cellName ? `${cellName}의 기도나무` : ''}
+            weeklyBonus
           />
         )}
 

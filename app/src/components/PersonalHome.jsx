@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { Calendar, Timer } from 'lucide-react';
 import { STATUS, VERSES, FULL_INDEX, getIndexLabel, todayStr } from '../data/constants';
 import { listenCell } from '../lib/church';
-import { shareRequestToCell } from '../lib/prayerData';
+import { shareRequestToCell, logPrayerForToday } from '../lib/prayerData';
 import {
   listenPersonalRequests,
   deletePersonalRequestWithUnlink,
@@ -177,6 +177,10 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
     try {
       await prayForPersonalRequest(user.uid, id, today);
       await logPersonalPrayerForToday(user.uid, today);
+      // 내 기도나무에서 기도해도 "오늘 기도했다"는 사실은 똑같으니 속한 셀의 나무에도 같이 반영
+      if (activeCell) {
+        await logPrayerForToday(activeCell.churchId, activeCell.cellId, today, user.uid);
+      }
     } catch (e) {
       setToast('저장에 실패했어요.');
     }
