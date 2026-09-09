@@ -10,6 +10,7 @@ import {
   likeEntry,
   logPrayerForToday,
   updateEntryWithSync,
+  logFruitActivity,
 } from './lib/prayerData';
 import { copyEntryToPersonal } from './lib/personalPrayer';
 import TreeScene from './components/TreeScene';
@@ -159,6 +160,16 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
     const isMine = !entry || entry.authorUid === user.uid;
     try {
       await updateEntryWithSync(churchId, cellId, entry || { id }, { status: 'fruit' }, user.uid);
+      if (entry) {
+        // 다른 셀원의 알림 목록에 뜨도록 활동 기록을 남김 (본인 것도 남기지만, 알림에서
+        // 본인이 한 행동은 걸러서 안 보여줌 — 이미 이 토스트로 확인했으니까)
+        await logFruitActivity(churchId, cellId, {
+          targetName: entry.targetName,
+          prayerName: entry.prayerName,
+          actorUid: user.uid,
+          entryType: entry.type || 'intercession',
+        });
+      }
       setToast(isMine ? '🎉 나의 기도가 믿음의 열매를 맺었어요!' : `🎉 ${entry.prayerName}님의 기도가 믿음의 열매를 맺었어요!`);
       setError('');
     } catch (e) {

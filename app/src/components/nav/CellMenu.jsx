@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Users, Pencil, Check } from 'lucide-react';
-import { renameCell } from '../../lib/church';
+import { renameCell, listenPendingRequests } from '../../lib/church';
 import MemberList from '../members/MemberList';
 import AdminApprovals from '../admin/AdminApprovals';
 
@@ -10,6 +10,18 @@ export default function CellMenu({ churchId, cellId, cellName, myUid, isLeader }
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const [saving, setSaving] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+
+  // 리더한테만 가입승인 대기 인원을 실시간으로 구독해서 배지로 알려줌 — 멤버는 애초에 이 목록을
+  // 읽을 권한이 없음
+  useEffect(() => {
+    if (!isLeader) {
+      setPendingCount(0);
+      return;
+    }
+    const unsubscribe = listenPendingRequests(churchId, cellId, (list) => setPendingCount(list.length));
+    return unsubscribe;
+  }, [churchId, cellId, isLeader]);
 
   const startEdit = () => {
     setNameDraft(cellName);
@@ -41,13 +53,19 @@ export default function CellMenu({ churchId, cellId, cellName, myUid, isLeader }
       <button
         onClick={() => {
           setOpen(true);
-          setTab('members');
+          setTab(pendingCount > 0 ? 'admin' : 'members');
           setEditingName(false);
         }}
-        style={{ background: '#FFFDF9', color: '#4A3B3F' }}
+        style={{ background: '#FFFDF9', color: '#4A3B3F', position: 'relative' }}
         className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium shadow-sm shrink-0"
       >
         <Users size={13} /> 모임설정
+        {pendingCount > 0 && (
+          <span
+            style={{ background: '#F2678A', width: '9px', height: '9px', border: '1.5px solid #FFFDF9' }}
+            className="absolute -top-0.5 -right-0.5 rounded-full"
+          />
+        )}
       </button>
 
       {open && (
@@ -92,8 +110,13 @@ export default function CellMenu({ churchId, cellId, cellName, myUid, isLeader }
                 셀원
               </button>
               {isLeader && (
-                <button onClick={() => setTab('admin')} style={tabBtnStyle('admin')} className="px-4 py-2 rounded-t-2xl text-sm font-medium">
+                <button onClick={() => setTab('admin')} style={tabBtnStyle('admin')} className="px-4 py-2 rounded-t-2xl text-sm font-medium flex items-center gap-1">
                   가입승인
+                  {pendingCount > 0 && (
+                    <span style={{ background: '#F2678A', color: '#FFF8F0' }} className="text-[10px] leading-none rounded-full px-1.5 py-0.5">
+                      {pendingCount}
+                    </span>
+                  )}
                 </button>
               )}
             </div>

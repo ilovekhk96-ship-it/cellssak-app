@@ -233,7 +233,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem' }}>셀싹</span>
           <div className="flex items-center gap-2 shrink-0">
             <ProfileMenu user={user} activeCell={activeCell} onSignOut={onSignOut} />
-            <NotificationBell />
+            <NotificationBell activeCell={activeCell} myUid={user.uid} prayedToday={Boolean(dailyActivity[todayStr()])} score={score} />
           </div>
         </div>
 

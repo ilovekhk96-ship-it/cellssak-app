@@ -116,6 +116,11 @@ service cloud.firestore {
         match /dailyPrayers/{date} {
           allow read, write: if isMember(churchId, cellId) || isSuperAdmin();
         }
+
+        // 알림에 쓰는 활동 기록(믿음열매 전환 등) — 셀원이면 누구나 읽고 남길 수 있음, 수정/삭제 없음
+        match /activity/{activityId} {
+          allow read, create: if isMember(churchId, cellId) || isSuperAdmin();
+        }
       }
     }
   }

@@ -9,6 +9,7 @@ import {
   onSnapshot,
   query,
   orderBy,
+  limit,
   increment,
   arrayUnion,
   writeBatch,
@@ -21,6 +22,10 @@ function entriesCol(churchId, cellId) {
 
 function dailyCol(churchId, cellId) {
   return collection(db, 'churches', churchId, 'cells', cellId, 'dailyPrayers');
+}
+
+function activityCol(churchId, cellId) {
+  return collection(db, 'churches', churchId, 'cells', cellId, 'activity');
 }
 
 // 셀의 기도 대상자 목록을 실시간으로 구독 — 셀원 누구든 추가/기도/열매전환하면 모두에게 즉시 반영됨
@@ -125,4 +130,23 @@ export async function logPrayerForToday(churchId, cellId, date, uid) {
   if (!uid) return;
   const ref = doc(db, 'churches', churchId, 'cells', cellId, 'dailyPrayers', date);
   await setDoc(ref, { names: arrayUnion(uid) }, { merge: true });
+}
+
+// 셀 활동 기록 — 알림에 쓰기 위한 용도(지금은 믿음열매 전환만). 최근 20건만 구독
+export function listenCellActivity(churchId, cellId, callback) {
+  const q = query(activityCol(churchId, cellId), orderBy('createdAt', 'desc'), limit(20));
+  return onSnapshot(q, (snap) => {
+    callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  });
+}
+
+export async function logFruitActivity(churchId, cellId, { targetName, prayerName, actorUid, entryType }) {
+  await addDoc(activityCol(churchId, cellId), {
+    type: 'fruit',
+    targetName,
+    prayerName,
+    actorUid,
+    entryType,
+    createdAt: Date.now(),
+  });
 }
