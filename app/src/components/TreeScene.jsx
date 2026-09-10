@@ -167,23 +167,24 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
       }}
       className="flex flex-col"
     >
-      {/* 구름은 top만 고정하고 left는 애니메이션(driftCloud)이 전담 — 화면 왼쪽 완전
-          바깥에서 시작해 오른쪽 완전 바깥까지 끊김없이 지나감. 지속시간을 서로 소수에
-          가깝게 달리해서 통과하는 조합이 매번 달라 보이게 함 */}
-      <div style={{ top: '0%', zIndex: 0, animationDuration: '61s' }} className="drift-cloud">
-        <Cloud w="95%" variant={0} />
+      {/* 구름은 top·width를 고정값으로 못박고 left만 애니메이션(driftCloud)이 움직임 —
+          세로 위치·크기는 절대 안 바뀌고 가로로만 왼쪽 끝→오른쪽 끝을 끊김없이 지나감.
+          top은 하늘색 배경 안(위쪽 14% 이내)에만 오도록 좁게 잡아서 잔디·나무 쪽으로
+          안 내려가게 함 */}
+      <div style={{ top: '0%', width: '85%', zIndex: 0, animationDuration: '61s' }} className="drift-cloud">
+        <Cloud variant={0} />
       </div>
-      <div style={{ top: '10%', zIndex: 0, animationDuration: '83s', animationDelay: '-27s' }} className="drift-cloud">
-        <Cloud w="78%" variant={1} />
+      <div style={{ top: '6%', width: '68%', zIndex: 0, animationDuration: '83s', animationDelay: '-27s' }} className="drift-cloud">
+        <Cloud variant={1} />
       </div>
-      <div style={{ top: '22%', zIndex: 0, animationDuration: '71s', animationDelay: '-52s' }} className="drift-cloud">
-        <Cloud w="60%" variant={2} />
+      <div style={{ top: '11%', width: '52%', zIndex: 0, animationDuration: '71s', animationDelay: '-52s' }} className="drift-cloud">
+        <Cloud variant={2} />
       </div>
-      <div style={{ top: '3%', zIndex: 0, animationDuration: '97s', animationDelay: '-11s' }} className="drift-cloud">
-        <Cloud w="70%" variant={1} />
+      <div style={{ top: '2%', width: '60%', zIndex: 0, animationDuration: '97s', animationDelay: '-11s' }} className="drift-cloud">
+        <Cloud variant={1} />
       </div>
-      <div style={{ top: '17%', zIndex: 0, animationDuration: '89s', animationDelay: '-64s' }} className="drift-cloud">
-        <Cloud w="50%" variant={0} />
+      <div style={{ top: '9%', width: '44%', zIndex: 0, animationDuration: '89s', animationDelay: '-64s' }} className="drift-cloud">
+        <Cloud variant={0} />
       </div>
 
       <ThoughtBubble />
@@ -223,8 +224,8 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
             <image href="/images/tree.png" x={-5} y={-3} width={250} height={235} preserveAspectRatio="xMidYMax meet" />
 
             {leafPaths.map((l, i) => {
-              const w = 10 * l.scale;
-              const h = 10 * l.scale;
+              const w = 17 * l.scale;
+              const h = 17 * l.scale;
               return (
                 // 바깥 g: 가지에 붙는 자리·방향을 고정(속성 transform). 안쪽 g: 그 자리에 붙은
                 // 채로 잎사귀 끝만 바람에 부채꼴로 흔들리도록 CSS 애니메이션(leaf-fan)을 따로 줌
