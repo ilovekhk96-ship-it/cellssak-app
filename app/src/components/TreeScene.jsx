@@ -157,14 +157,17 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
       }}
       className="flex flex-col"
     >
-      <div style={{ position: 'absolute', top: '4%', left: '2%', zIndex: 0, animationDuration: '46s' }} className="drift-cloud">
-        <Cloud w={100} variant={0} />
+      <div style={{ position: 'absolute', top: '2%', left: '-4%', zIndex: 0, animationDuration: '46s' }} className="drift-cloud">
+        <Cloud w={190} variant={0} />
       </div>
-      <div style={{ position: 'absolute', top: '15%', right: '4%', zIndex: 0, animationDuration: '58s', animationDelay: '-20s' }} className="drift-cloud">
-        <Cloud w={80} variant={1} />
+      <div style={{ position: 'absolute', top: '13%', right: '-6%', zIndex: 0, animationDuration: '58s', animationDelay: '-20s' }} className="drift-cloud">
+        <Cloud w={150} variant={1} />
       </div>
-      <div style={{ position: 'absolute', top: '24%', left: '30%', zIndex: 0, animationDuration: '52s', animationDelay: '-38s' }} className="drift-cloud">
-        <Cloud w={68} variant={2} />
+      <div style={{ position: 'absolute', top: '22%', left: '22%', zIndex: 0, animationDuration: '52s', animationDelay: '-38s' }} className="drift-cloud">
+        <Cloud w={120} variant={2} />
+      </div>
+      <div style={{ position: 'absolute', top: '3%', left: '58%', zIndex: 0, animationDuration: '64s', animationDelay: '-8s' }} className="drift-cloud">
+        <Cloud w={100} variant={1} />
       </div>
 
       <ThoughtBubble />
@@ -188,8 +191,6 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
             transition: interacting ? 'none' : 'transform 0.25s ease',
           }}
         >
-          <ellipse cx="119" cy="234" rx="46" ry="8" fill="#8FCB86" opacity="0.55" />
-
           <g transform={treeTransform} style={{ transition: 'transform 0.8s ease' }}>
             <image href="/images/tree.png" x={-5} y={-3} width={250} height={235} preserveAspectRatio="xMidYMax meet" />
 
