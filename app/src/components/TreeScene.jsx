@@ -178,8 +178,8 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
         <svg
           viewBox={viewBox}
           style={{
-            width: '86%',
-            maxWidth: '260px',
+            width: '92%',
+            maxWidth: '300px',
             height: 'auto',
             transform: `scale(${userZoom})`,
             transition: interacting ? 'none' : 'transform 0.25s ease',
@@ -221,7 +221,14 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
 
       <div className="flex flex-col items-center gap-2 pb-4 px-6">
         <div style={{ width: '100%', maxWidth: '220px' }}>
-          <p style={{ color: 'var(--ink)', fontFamily: 'var(--font-display)' }} className="text-xs font-bold text-center mb-1">
+          <p
+            style={{
+              color: 'var(--ink)',
+              fontFamily: 'var(--font-display)',
+              textShadow: '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 5px #fff',
+            }}
+            className="text-xs font-bold text-center mb-1"
+          >
             {daysCount}일째 기도중
           </p>
           <div style={{ position: 'relative' }}>

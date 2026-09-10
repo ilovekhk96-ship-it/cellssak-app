@@ -13,7 +13,8 @@ export default function Login({ onSignIn }) {
   return (
     <div
       style={{
-        background: "#A8DE9D url('/images/bg-field.jpg') center / cover no-repeat",
+        background:
+          "linear-gradient(to bottom, rgba(168,222,157,0) 30%, rgba(107,168,95,0.72) 100%), url('/images/bg-field.jpg') center bottom / cover no-repeat",
       }}
       className="w-full min-h-screen flex flex-col items-center justify-center gap-8 px-6 relative"
     >

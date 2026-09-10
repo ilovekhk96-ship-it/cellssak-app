@@ -262,7 +262,8 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
     <div
       style={{
         ...vars,
-        background: "#A8DE9D url('/images/bg-field.jpg') center / cover no-repeat",
+        background:
+          "linear-gradient(to bottom, rgba(168,222,157,0) 30%, rgba(107,168,95,0.72) 100%), url('/images/bg-field.jpg') center bottom / cover no-repeat",
         fontFamily: 'var(--font-body)',
         color: 'var(--ink)',
         overflowX: 'hidden',
