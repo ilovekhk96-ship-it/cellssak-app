@@ -27,6 +27,17 @@ const MAX_USER_ZOOM = 4;
 const LEAF_IMAGES = ['/images/leaf-1.png', '/images/leaf-2.png'];
 const GOLD_LEAF_FILTER = 'sepia(1) saturate(6) hue-rotate(-10deg) brightness(1.05)';
 
+// 나무 발치를 가로지르는 풀잎들 — 트렁크 밑동을 살짝 덮어서 나무가 잔디 위에 서 있는
+// 느낌을 줌. scale/성장과 무관하게 땅에 고정된 위치·크기
+const GRASS_BLADES = [
+  { x: 70, w: 16, flip: false, delay: 0 },
+  { x: 92, w: 20, flip: true, delay: -0.6 },
+  { x: 118, w: 15, flip: false, delay: -1.4 },
+  { x: 128, w: 19, flip: true, delay: -0.3 },
+  { x: 150, w: 17, flip: false, delay: -2.1 },
+  { x: 172, w: 21, flip: true, delay: -1.0 },
+];
+
 export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onOpenList, showActions = true, treeLabel, goldenIndices }) {
   // 나무 그림자 블러 필터 id — 화면에 TreeScene이 동시에 여러 개 떠도(예: 추후 비교 화면)
   // id가 겹치지 않도록 컴포넌트 인스턴스마다 고유하게 생성
@@ -175,20 +186,20 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
           세로 위치·크기는 절대 안 바뀌고 가로로만 왼쪽 끝→오른쪽 끝을 끊김없이 지나감.
           top 범위를 하늘 위쪽부터 산 능선 근처(약 -2%~30%)까지 넓게 펴서 하늘 전체에
           퍼져 보이게 하고, 나무 캐노피보다는 위쪽에 머물게 함 */}
-      <div style={{ top: '-2%', width: '85%', zIndex: 0, animationDuration: '150s' }} className="drift-cloud">
-        <Cloud variant={0} />
+      <div style={{ top: '-2%', width: '62%', zIndex: 0, animationDuration: '150s' }} className="drift-cloud">
+        <Cloud />
       </div>
-      <div style={{ top: '10%', width: '68%', zIndex: 0, animationDuration: '190s', animationDelay: '-70s' }} className="drift-cloud">
-        <Cloud variant={1} />
+      <div style={{ top: '10%', width: '48%', zIndex: 0, animationDuration: '190s', animationDelay: '-70s' }} className="drift-cloud">
+        <Cloud flip />
       </div>
-      <div style={{ top: '22%', width: '52%', zIndex: 0, animationDuration: '170s', animationDelay: '-120s' }} className="drift-cloud">
-        <Cloud variant={2} />
+      <div style={{ top: '22%', width: '38%', zIndex: 0, animationDuration: '170s', animationDelay: '-120s' }} className="drift-cloud">
+        <Cloud />
       </div>
-      <div style={{ top: '4%', width: '60%', zIndex: 0, animationDuration: '220s', animationDelay: '-30s' }} className="drift-cloud">
-        <Cloud variant={1} />
+      <div style={{ top: '4%', width: '42%', zIndex: 0, animationDuration: '220s', animationDelay: '-30s' }} className="drift-cloud">
+        <Cloud flip />
       </div>
-      <div style={{ top: '29%', width: '44%', zIndex: 0, animationDuration: '200s', animationDelay: '-150s' }} className="drift-cloud">
-        <Cloud variant={0} />
+      <div style={{ top: '29%', width: '32%', zIndex: 0, animationDuration: '200s', animationDelay: '-150s' }} className="drift-cloud">
+        <Cloud flip />
       </div>
 
       <ThoughtBubble />
@@ -212,17 +223,17 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
             transition: interacting ? 'none' : 'transform 0.25s ease',
           }}
         >
-          {/* 배경 사진의 햇빛이 왼쪽 위에서 오므로, 그림자는 나무 발치에서 오른쪽 아래로
-              비스듬히 늘어지게 — scale과 무관하게 땅에 고정된 크기로 표시. 트렁크 바로
-              밑은 진하고 좁게, 멀어질수록 흐리고 넓게 퍼지는 두 겹 + 블러로 경계를 부드럽게 */}
+          {/* 나무 발치를 넓게 덮는 그림자 — 트렁크 바로 밑은 진하고, 바깥으로 갈수록 흐리고
+              넓게 퍼지는 두 겹 + 블러. 배경 사진의 햇빛이 왼쪽 위에서 오므로 살짝만
+              오른쪽으로 치우치게(약한 회전) 해서 방향성을 은근히만 암시 */}
           <defs>
             <filter id={shadowBlurId} x="-60%" y="-150%" width="220%" height="400%">
-              <feGaussianBlur stdDeviation="3.2" />
+              <feGaussianBlur stdDeviation="4" />
             </filter>
           </defs>
-          <g transform={`rotate(14 ${GROUND_ANCHOR.x} ${GROUND_ANCHOR.y})`} filter={`url(#${shadowBlurId})`}>
-            <ellipse cx={GROUND_ANCHOR.x + 30} cy={GROUND_ANCHOR.y + 2} rx={58} ry={8} fill="#1F3D22" opacity="0.14" />
-            <ellipse cx={GROUND_ANCHOR.x + 10} cy={GROUND_ANCHOR.y + 1} rx={30} ry={7} fill="#1A331D" opacity="0.24" />
+          <g transform={`rotate(8 ${GROUND_ANCHOR.x} ${GROUND_ANCHOR.y})`} filter={`url(#${shadowBlurId})`}>
+            <ellipse cx={GROUND_ANCHOR.x + 8} cy={GROUND_ANCHOR.y + 2} rx={82} ry={13} fill="#1F3D22" opacity="0.13" />
+            <ellipse cx={GROUND_ANCHOR.x} cy={GROUND_ANCHOR.y + 1} rx={42} ry={9} fill="#1A331D" opacity="0.22" />
           </g>
 
           <g transform={treeTransform} style={{ transition: 'transform 0.8s ease' }}>
@@ -253,6 +264,20 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
               <circle key={`f${i}`} cx={f.x} cy={f.y} r="5.5" fill={STATUS.fruit.color} stroke="#FFF6F0" strokeWidth="1" />
             ))}
           </g>
+
+          {/* 트렁크 밑동을 가로지르는 풀잎 — 나무 그림 다음(=앞)에 그려서 밑동을 살짝
+              덮음. 그루당 기준 높이(GRASS_H)에서 blade별 폭만 다르게 줘서 크기는 고정,
+              바람은 leaf-fan과 같은 방식(바깥 g=위치 고정, 안쪽 g=CSS sway)으로 흔들림 */}
+          {GRASS_BLADES.map((g, i) => {
+            const GRASS_H = 26;
+            return (
+              <g key={`g${i}`} transform={`translate(${g.x} ${GROUND_ANCHOR.y + 4}) scale(${g.flip ? -1 : 1},1)`}>
+                <g className="sway-grass" style={{ animationDelay: `${g.delay}s` }}>
+                  <image href="/images/grass-1.png" x={-g.w / 2} y={-GRASS_H} width={g.w} height={GRASS_H} preserveAspectRatio="xMidYMax meet" />
+                </g>
+              </g>
+            );
+          })}
 
           {treeLabel && (
             <text
