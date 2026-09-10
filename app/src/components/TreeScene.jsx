@@ -35,19 +35,20 @@ const GOLD_LEAF_FILTER = 'sepia(1) saturate(6) hue-rotate(-10deg) brightness(1.0
 function makeGrassBlades(count, seed) {
   return Array.from({ length: count }, (_, i) => ({
     x: Math.round(-8 + (i / (count - 1)) * 256 + (((i * 47 + seed) % 13) - 6)),
-    w: 12 + ((i * 29 + seed) % 10),
+    y: ((i * 53 + seed) % 7) - 3,
+    w: 11 + ((i * 29 + seed) % 11),
     flip: (i * 7 + seed) % 3 !== 0,
     delay: -(((i * 41 + seed) % 320) / 100),
   }));
 }
 // 앞줄: 나무보다 나중에 그려서 밑동을 살짝 덮음 — 키를 낮게 둬서 나무를 가리지 않음
-const GRASS_FRONT = makeGrassBlades(30, 0);
+const GRASS_FRONT = makeGrassBlades(70, 0);
 // 뒷줄: 나무보다 먼저 그려서 줄기·가지에 자연스럽게 가려지며 깊이감을 줌
-const GRASS_BACK = makeGrassBlades(22, 5);
+const GRASS_BACK = makeGrassBlades(50, 5);
 
 function GrassRow({ blades, height, keyPrefix }) {
   return blades.map((g, i) => (
-    <g key={`${keyPrefix}${i}`} transform={`translate(${g.x} ${GROUND_ANCHOR.y + 4}) scale(${g.flip ? -1 : 1},1)`}>
+    <g key={`${keyPrefix}${i}`} transform={`translate(${g.x} ${GROUND_ANCHOR.y + 4 + g.y}) scale(${g.flip ? -1 : 1},1)`}>
       <g className="sway-grass" style={{ animationDelay: `${g.delay}s` }}>
         <image href="/images/grass-1.png" x={-g.w / 2} y={-height} width={g.w} height={height} preserveAspectRatio="xMidYMax meet" />
       </g>
