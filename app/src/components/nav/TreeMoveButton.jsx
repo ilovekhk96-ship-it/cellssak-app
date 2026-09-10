@@ -2,22 +2,24 @@ export default function TreeMoveButton({ onClick, lineTop, lineBottom }) {
   return (
     <div className="fixed inset-0 pointer-events-none" style={{ maxWidth: '384px', margin: '0 auto', zIndex: 5 }}>
       <div className="absolute bottom-6 right-4 pointer-events-auto">
-        <button onClick={onClick} style={{ width: '62px', height: '62px', position: 'relative' }} aria-label="기도나무 이동">
-          {/* 잎 사진이 배경(하늘/잔디)이랑 초록끼리 묻혀서 안 보이길래, 흰 원판을 깔아
-              어디서든 도드라지게 함 */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: '2px',
-              borderRadius: '50%',
-              background: '#FFFDF9',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.28)',
-            }}
-          />
+        <button onClick={onClick} style={{ width: '70px', height: '70px', position: 'relative' }} aria-label="기도나무 이동">
+          {/* 흰 원판 대신, 글씨에 쓰는 것과 같은 방식(흰색을 여러 방향으로 겹쳐서 테두리처럼
+              보이게)을 잎 사진 실루엣에도 적용 — drop-shadow는 이미지의 알파(투명/불투명)
+              모양을 그대로 따라가므로 잎 모양 그대로 흰 테두리가 둘러짐 */}
           <img
             src="/images/leaf-badge.png"
             alt=""
-            style={{ width: '84%', height: '84%', position: 'absolute', inset: '8%', objectFit: 'contain' }}
+            style={{
+              width: '94%',
+              height: '94%',
+              position: 'absolute',
+              inset: '3%',
+              objectFit: 'contain',
+              filter:
+                'drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) ' +
+                'drop-shadow(1.5px 1.5px 0 #fff) drop-shadow(-1.5px -1.5px 0 #fff) drop-shadow(1.5px -1.5px 0 #fff) drop-shadow(-1.5px 1.5px 0 #fff) ' +
+                'drop-shadow(0 2px 3px rgba(0,0,0,0.3))',
+            }}
           />
           <div
             style={{
@@ -27,17 +29,18 @@ export default function TreeMoveButton({ onClick, lineTop, lineBottom }) {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
+              paddingTop: '14px',
             }}
           >
             <span
               style={{
                 fontFamily: 'var(--font-display)',
                 color: '#000',
-                WebkitTextStroke: '1.2px #FFFFFF',
+                WebkitTextStroke: '1px #FFFFFF',
                 paintOrder: 'stroke fill',
-                fontSize: '10px',
-                lineHeight: '11px',
-                maxWidth: '48px',
+                fontSize: '9px',
+                lineHeight: '10px',
+                maxWidth: '44px',
                 textAlign: 'center',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -50,10 +53,10 @@ export default function TreeMoveButton({ onClick, lineTop, lineBottom }) {
               style={{
                 fontFamily: 'var(--font-display)',
                 color: '#000',
-                WebkitTextStroke: '1.2px #FFFFFF',
+                WebkitTextStroke: '1px #FFFFFF',
                 paintOrder: 'stroke fill',
-                fontSize: '10px',
-                lineHeight: '11px',
+                fontSize: '9px',
+                lineHeight: '10px',
               }}
             >
               {lineBottom}
