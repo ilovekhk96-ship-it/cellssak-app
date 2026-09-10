@@ -157,14 +157,14 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
       }}
       className="flex flex-col"
     >
-      <div style={{ position: 'absolute', top: '4%', left: '2%', animationDuration: '46s' }} className="drift-cloud">
-        <Cloud w={62} variant={0} />
+      <div style={{ position: 'absolute', top: '4%', left: '2%', zIndex: 0, animationDuration: '46s' }} className="drift-cloud">
+        <Cloud w={100} variant={0} />
       </div>
-      <div style={{ position: 'absolute', top: '15%', right: '4%', animationDuration: '58s', animationDelay: '-20s' }} className="drift-cloud">
-        <Cloud w={48} variant={1} />
+      <div style={{ position: 'absolute', top: '15%', right: '4%', zIndex: 0, animationDuration: '58s', animationDelay: '-20s' }} className="drift-cloud">
+        <Cloud w={80} variant={1} />
       </div>
-      <div style={{ position: 'absolute', top: '24%', left: '30%', animationDuration: '52s', animationDelay: '-38s' }} className="drift-cloud">
-        <Cloud w={40} variant={2} />
+      <div style={{ position: 'absolute', top: '24%', left: '30%', zIndex: 0, animationDuration: '52s', animationDelay: '-38s' }} className="drift-cloud">
+        <Cloud w={68} variant={2} />
       </div>
 
       <ThoughtBubble />
