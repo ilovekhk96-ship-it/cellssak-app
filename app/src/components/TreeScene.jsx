@@ -188,12 +188,9 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
           <ellipse cx="119" cy="234" rx="46" ry="8" fill="#8FCB86" opacity="0.55" />
 
           <g transform={treeTransform} style={{ transition: 'transform 0.8s ease' }}>
-            <line x1={TRUNK.x1} y1={TRUNK.y1} x2={TRUNK.x2} y2={TRUNK.y2} stroke={TRUNK.c} strokeWidth={TRUNK.w} strokeLinecap="round" />
+            <image href="/images/tree.png" x={-5} y={-3} width={250} height={235} preserveAspectRatio="xMidYMax meet" />
 
             <g className="sway-leaves">
-              {BRANCHES.map((b, i) => (
-                <line key={`b${i}`} x1={b.x1} y1={b.y1} x2={b.x2} y2={b.y2} stroke={b.c} strokeWidth={b.w} strokeLinecap="round" />
-              ))}
               {leafPaths.map((l, i) => (
                 <path key={i} d={l.d} fill={l.color} stroke="rgba(24,46,26,0.45)" strokeWidth="0.4" />
               ))}
