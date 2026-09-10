@@ -16,13 +16,12 @@ export default function TreeMoveButton({ onClick, lineTop, lineBottom }) {
               inset: '3%',
               objectFit: 'contain',
               filter:
-                'drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff) ' +
+                'drop-shadow(1.2px 0 0 #fff) drop-shadow(-1.2px 0 0 #fff) drop-shadow(0 1.2px 0 #fff) drop-shadow(0 -1.2px 0 #fff) ' +
                 'drop-shadow(0 2px 3px rgba(0,0,0,0.3))',
             }}
           />
-          {/* 잎 테두리를 얇게 유지하면서 글씨는 확실히 보이게, 글씨 뒤에만 작은 흰 쪽지를
-              따로 깔아줌 — 잎 무늬(잎맥의 연한 노란빛 등)가 배경이면 글씨의 흰 테두리만으론
-              대비가 약해서 안 보이는 경우가 있었음 */}
+          {/* 흰 배경 칩 대신, 글씨 자체를 굵게 + 테두리를 더 두껍게 해서 잎 무늬 위에서도
+              바로 읽히도록 함 */}
           <div
             style={{
               position: 'absolute',
@@ -34,43 +33,37 @@ export default function TreeMoveButton({ onClick, lineTop, lineBottom }) {
               paddingTop: '14px',
             }}
           >
-            <div
+            <span
               style={{
-                background: 'rgba(255,253,249,0.92)',
-                borderRadius: '6px',
-                padding: '2px 5px',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
+                fontFamily: 'var(--font-display)',
+                fontWeight: 700,
+                color: '#000',
+                WebkitTextStroke: '1.6px #FFFFFF',
+                paintOrder: 'stroke fill',
+                fontSize: '9px',
+                lineHeight: '10px',
+                maxWidth: '44px',
+                textAlign: 'center',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
               }}
             >
-              <span
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  color: '#3A2E1F',
-                  display: 'block',
-                  fontSize: '9px',
-                  lineHeight: '11px',
-                  maxWidth: '44px',
-                  textAlign: 'center',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {lineTop}
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  color: '#3A2E1F',
-                  display: 'block',
-                  fontSize: '9px',
-                  lineHeight: '11px',
-                  textAlign: 'center',
-                }}
-              >
-                {lineBottom}
-              </span>
-            </div>
+              {lineTop}
+            </span>
+            <span
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontWeight: 700,
+                color: '#000',
+                WebkitTextStroke: '1.6px #FFFFFF',
+                paintOrder: 'stroke fill',
+                fontSize: '9px',
+                lineHeight: '10px',
+              }}
+            >
+              {lineBottom}
+            </span>
           </div>
         </button>
       </div>
