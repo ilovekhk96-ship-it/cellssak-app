@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { Sprout, Sparkles } from 'lucide-react';
 import { STATUS } from '../data/constants';
-import { TRUNK, BRANCHES, FRUIT_SPOTS, getLeaf, leafSubpathD } from '../data/treeData';
+import { TRUNK, BRANCHES, FRUIT_SPOTS, getLeaf } from '../data/treeData';
 import Cloud from './Cloud';
 import ThoughtBubble from './ThoughtBubble';
 import SceneIcon from './SceneIcon';
@@ -23,8 +23,9 @@ function growthScale(score) {
 const MIN_USER_ZOOM = 0.6;
 const MAX_USER_ZOOM = 4;
 
-// 일주일(7일)치 기도를 채울 때마다 보너스로 얹는 황금 잎 색
-const GOLD_LEAF_COLOR = '#E8B93C';
+// 실사 잎 사진 2종을 잎마다 번갈아 사용 — 벡터 색상 대신 사진이라 golden은 필터로 색을 입힘
+const LEAF_IMAGES = ['/images/leaf-1.png', '/images/leaf-2.png'];
+const GOLD_LEAF_FILTER = 'sepia(1) saturate(6) hue-rotate(-10deg) brightness(1.05)';
 
 export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onOpenList, showActions = true, treeLabel, goldenIndices }) {
   // 잎 개수 제한 없음 — score(누적 기도 일수)만큼 절차적으로 생성.
@@ -42,10 +43,12 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
       // 버려서 "나"의 일주일 기준과 안 맞기 때문
       const isGolden = goldenIndices && goldenIndices.has(i);
       arr.push({
-        d: leafSubpathD(leaf.x, leaf.y, leaf.rot, leaf.scale),
         x: leaf.x,
         y: leaf.y,
-        color: isGolden ? GOLD_LEAF_COLOR : leaf.color,
+        rot: leaf.rot,
+        scale: leaf.scale,
+        src: LEAF_IMAGES[i % LEAF_IMAGES.length],
+        isGolden,
       });
     }
     return arr;
@@ -157,24 +160,24 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
       }}
       className="flex flex-col"
     >
-      <div style={{ position: 'absolute', top: '2%', left: '-4%', zIndex: 0, animationDuration: '46s' }} className="drift-cloud">
-        <Cloud w={190} variant={0} />
+      <div style={{ position: 'absolute', top: '1%', left: '-10%', zIndex: 0, animationDuration: '46s' }} className="drift-cloud">
+        <Cloud w="60%" variant={0} />
       </div>
-      <div style={{ position: 'absolute', top: '13%', right: '-6%', zIndex: 0, animationDuration: '58s', animationDelay: '-20s' }} className="drift-cloud">
-        <Cloud w={150} variant={1} />
+      <div style={{ position: 'absolute', top: '12%', right: '-14%', zIndex: 0, animationDuration: '58s', animationDelay: '-20s' }} className="drift-cloud">
+        <Cloud w="48%" variant={1} />
       </div>
-      <div style={{ position: 'absolute', top: '22%', left: '22%', zIndex: 0, animationDuration: '52s', animationDelay: '-38s' }} className="drift-cloud">
-        <Cloud w={120} variant={2} />
+      <div style={{ position: 'absolute', top: '23%', left: '18%', zIndex: 0, animationDuration: '52s', animationDelay: '-38s' }} className="drift-cloud">
+        <Cloud w="38%" variant={2} />
       </div>
-      <div style={{ position: 'absolute', top: '3%', left: '58%', zIndex: 0, animationDuration: '64s', animationDelay: '-8s' }} className="drift-cloud">
-        <Cloud w={100} variant={1} />
+      <div style={{ position: 'absolute', top: '2%', left: '54%', zIndex: 0, animationDuration: '64s', animationDelay: '-8s' }} className="drift-cloud">
+        <Cloud w="32%" variant={0} />
       </div>
 
       <ThoughtBubble />
 
       <div
         className="flex-1 flex items-center justify-center w-full px-4"
-        style={{ marginTop: '4px', position: 'relative', overflow: 'hidden', touchAction: 'pan-y' }}
+        style={{ marginTop: '4px', position: 'relative', overflow: interacting ? 'visible' : 'hidden', touchAction: 'pan-y' }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={endPointer}
@@ -195,9 +198,23 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
             <image href="/images/tree.png" x={-5} y={-3} width={250} height={235} preserveAspectRatio="xMidYMax meet" />
 
             <g className="sway-leaves">
-              {leafPaths.map((l, i) => (
-                <path key={i} d={l.d} fill={l.color} stroke="rgba(24,46,26,0.45)" strokeWidth="0.4" />
-              ))}
+              {leafPaths.map((l, i) => {
+                const w = 10 * l.scale;
+                const h = 10 * l.scale;
+                return (
+                  <image
+                    key={i}
+                    href={l.src}
+                    x={l.x - w / 2}
+                    y={l.y - h / 2}
+                    width={w}
+                    height={h}
+                    preserveAspectRatio="xMidYMid meet"
+                    transform={`rotate(${l.rot} ${l.x} ${l.y})`}
+                    style={l.isGolden ? { filter: GOLD_LEAF_FILTER } : undefined}
+                  />
+                );
+              })}
               {visibleFruits.map((f, i) => (
                 <circle key={`f${i}`} cx={f.x} cy={f.y} r="5.5" fill={STATUS.fruit.color} stroke="#FFF6F0" strokeWidth="1" />
               ))}

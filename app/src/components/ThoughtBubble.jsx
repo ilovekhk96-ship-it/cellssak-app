@@ -4,7 +4,7 @@ import { PRAYER_VERSES } from '../data/constants';
 export default function ThoughtBubble() {
   const [verse] = useState(() => PRAYER_VERSES[Math.floor(Math.random() * PRAYER_VERSES.length)]);
   return (
-    <div className="thought-bubble flex flex-col items-center pt-4 px-6">
+    <div className="thought-bubble flex flex-col items-center pt-4 px-6" style={{ position: 'relative', zIndex: 1 }}>
       <div style={{ background: '#FFFDF9', maxWidth: '260px' }} className="rounded-3xl px-4 py-3 shadow-sm text-center">
         <p style={{ color: 'var(--ink)' }} className="text-xs leading-relaxed">
           &ldquo;{verse.text}&rdquo;
