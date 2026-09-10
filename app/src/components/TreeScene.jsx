@@ -27,16 +27,16 @@ const MAX_USER_ZOOM = 4;
 const LEAF_IMAGES = ['/images/leaf-1.png', '/images/leaf-2.png'];
 const GOLD_LEAF_FILTER = 'sepia(1) saturate(6) hue-rotate(-10deg) brightness(1.05)';
 
-// 나무 발치를 가로지르는 풀잎들 — 트렁크 밑동을 살짝 덮어서 나무가 잔디 위에 서 있는
-// 느낌을 줌. scale/성장과 무관하게 땅에 고정된 위치·크기
-const GRASS_BLADES = [
-  { x: 70, w: 16, flip: false, delay: 0 },
-  { x: 92, w: 20, flip: true, delay: -0.6 },
-  { x: 118, w: 15, flip: false, delay: -1.4 },
-  { x: 128, w: 19, flip: true, delay: -0.3 },
-  { x: 150, w: 17, flip: false, delay: -2.1 },
-  { x: 172, w: 21, flip: true, delay: -1.0 },
-];
+// 나무 발치뿐 아니라 기본 화면 폭(0~240) 전체에 촘촘히 깔아서 사방이 잔디로 덮인
+// 느낌을 줌 — 폭을 너무 늘리면 viewBox가 넓어져 나무가 상대적으로 작아 보이므로,
+// 넓게 퍼뜨리기보다 기존 프레임 안에서 개수를 늘려 밀도로 "많다"는 느낌을 줌.
+// scale/성장과 무관하게 땅에 고정된 위치·크기
+const GRASS_BLADES = Array.from({ length: 30 }, (_, i) => ({
+  x: Math.round(-8 + (i / 29) * 256 + (((i * 47) % 13) - 6)),
+  w: 12 + ((i * 29) % 10),
+  flip: (i * 7) % 3 !== 0,
+  delay: -(((i * 41) % 320) / 100),
+}));
 
 export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onOpenList, showActions = true, treeLabel, goldenIndices }) {
   // 나무 그림자 블러 필터 id — 화면에 TreeScene이 동시에 여러 개 떠도(예: 추후 비교 화면)
@@ -107,6 +107,10 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
     });
     // 이름표는 확대 그룹 밖(고정 좌표)에 그려지므로, 나무가 작을 때도 잘리지 않도록 별도로 확보
     if (treeLabel) vy1 = Math.max(vy1, LABEL_Y + 6);
+    // 잔디도 확대 그룹 밖(고정 좌표, -14~250 범위)이라 나무가 작을 때도 잘리지 않게 확보 —
+    // 기본 프레임(0~240)보다 살짝만 넓혀서 나무가 상대적으로 작아 보이지 않게 함
+    vx0 = Math.min(vx0, -14);
+    vx1 = Math.max(vx1, 250);
     const pad = 6;
     return `${vx0 - pad} ${vy0 - pad} ${vx1 - vx0 + pad * 2} ${vy1 - vy0 + pad * 2}`;
   }, [scale, leafPaths, visibleFruits, treeLabel]);
@@ -184,21 +188,21 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
     >
       {/* 구름은 top·width를 고정값으로 못박고 left만 애니메이션(driftCloud)이 움직임 —
           세로 위치·크기는 절대 안 바뀌고 가로로만 왼쪽 끝→오른쪽 끝을 끊김없이 지나감.
-          top 범위를 하늘 위쪽부터 산 능선 근처(약 -2%~30%)까지 넓게 펴서 하늘 전체에
-          퍼져 보이게 하고, 나무 캐노피보다는 위쪽에 머물게 함 */}
-      <div style={{ top: '-2%', width: '62%', zIndex: 0, animationDuration: '150s' }} className="drift-cloud">
+          top 범위를 화면 맨 위쪽(-4%~14%)으로 좁혀서 산 능선을 가리지 않게 하고,
+          지속시간도 늘려서 훨씬 천천히·부드럽게 흘러가게 함 */}
+      <div style={{ top: '-4%', width: '58%', zIndex: 0, animationDuration: '260s' }} className="drift-cloud">
         <Cloud />
       </div>
-      <div style={{ top: '10%', width: '48%', zIndex: 0, animationDuration: '190s', animationDelay: '-70s' }} className="drift-cloud">
+      <div style={{ top: '4%', width: '46%', zIndex: 0, animationDuration: '310s', animationDelay: '-120s' }} className="drift-cloud">
         <Cloud flip />
       </div>
-      <div style={{ top: '22%', width: '38%', zIndex: 0, animationDuration: '170s', animationDelay: '-120s' }} className="drift-cloud">
+      <div style={{ top: '10%', width: '36%', zIndex: 0, animationDuration: '280s', animationDelay: '-200s' }} className="drift-cloud">
         <Cloud />
       </div>
-      <div style={{ top: '4%', width: '42%', zIndex: 0, animationDuration: '220s', animationDelay: '-30s' }} className="drift-cloud">
+      <div style={{ top: '0%', width: '40%', zIndex: 0, animationDuration: '340s', animationDelay: '-60s' }} className="drift-cloud">
         <Cloud flip />
       </div>
-      <div style={{ top: '29%', width: '32%', zIndex: 0, animationDuration: '200s', animationDelay: '-150s' }} className="drift-cloud">
+      <div style={{ top: '13%', width: '30%', zIndex: 0, animationDuration: '300s', animationDelay: '-250s' }} className="drift-cloud">
         <Cloud flip />
       </div>
 
