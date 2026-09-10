@@ -204,23 +204,15 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
       }}
       className="flex flex-col"
     >
-      {/* 구름은 top·width를 고정값으로 못박고 left만 애니메이션(driftCloud)이 움직임 —
-          세로 위치·크기는 절대 안 바뀌고 가로로만 왼쪽 끝→오른쪽 끝을 끊김없이 지나감.
-          top 범위를 화면 맨 위쪽(-4%~14%)으로 좁혀서 산 능선을 가리지 않게 하고,
-          지속시간도 늘려서 훨씬 천천히·부드럽게 흘러가게 함 */}
-      <div style={{ top: '-4%', width: '58%', zIndex: 0, animationDuration: '260s' }} className="drift-cloud">
+      {/* 구름 사진을 꽉 채운 크기로 다시 잘라서(예전엔 캔버스에 여백이 많아 세로로
+          너무 길게 렌더링됐었음) 키워도 서로 안 겹치도록 세로 구간(top)을 넉넉히
+          나눠서 배치. left 애니메이션은 transform(translateX, vw단위)으로 바꿔서
+          — left는 매 프레임 레이아웃을 다시 계산해 느릴 때 뚝뚝 끊겨 보였는데,
+          transform은 합성만 타서 훨씬 매끄럽고 훨씬 천천히 흘러가게 함 */}
+      <div style={{ top: '-6%', width: '54%', zIndex: 0, animationDuration: '300s' }} className="drift-cloud">
         <Cloud />
       </div>
-      <div style={{ top: '4%', width: '46%', zIndex: 0, animationDuration: '310s', animationDelay: '-120s' }} className="drift-cloud">
-        <Cloud flip />
-      </div>
-      <div style={{ top: '10%', width: '36%', zIndex: 0, animationDuration: '280s', animationDelay: '-200s' }} className="drift-cloud">
-        <Cloud />
-      </div>
-      <div style={{ top: '0%', width: '40%', zIndex: 0, animationDuration: '340s', animationDelay: '-60s' }} className="drift-cloud">
-        <Cloud flip />
-      </div>
-      <div style={{ top: '13%', width: '30%', zIndex: 0, animationDuration: '300s', animationDelay: '-250s' }} className="drift-cloud">
+      <div style={{ top: '17%', width: '38%', zIndex: 0, animationDuration: '360s', animationDelay: '-180s' }} className="drift-cloud">
         <Cloud flip />
       </div>
 

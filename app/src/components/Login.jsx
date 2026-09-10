@@ -13,7 +13,7 @@ export default function Login({ onSignIn }) {
   return (
     <div
       style={{
-        background: "url('/images/bg-field.jpg') center bottom / cover no-repeat",
+        background: "url('/images/bg-field.jpg') center 72% / cover no-repeat",
       }}
       className="w-full min-h-screen flex flex-col items-center justify-center gap-8 px-6 relative"
     >

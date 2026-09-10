@@ -38,7 +38,7 @@ export default function PendingApproval({ user, pendingRequest, onBackHome }) {
 
   return (
     <div
-      style={{ background: "url('/images/bg-field.jpg') center bottom / cover no-repeat" }}
+      style={{ background: "url('/images/bg-field.jpg') center 72% / cover no-repeat" }}
       className="w-full min-h-screen flex flex-col items-center justify-center gap-5 px-8 text-center"
     >
       {status === 'rejected' ? (

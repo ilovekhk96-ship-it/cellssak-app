@@ -12,7 +12,7 @@ import {
   markLeaderNotified,
 } from '../../lib/church';
 
-const PAGE_BG = "url('/images/bg-field.jpg') center bottom / cover no-repeat";
+const PAGE_BG = "url('/images/bg-field.jpg') center 72% / cover no-repeat";
 
 export default function Onboarding({ user, onBackHome }) {
   const [step, setStep] = useState('church'); // 'church' | 'cell'

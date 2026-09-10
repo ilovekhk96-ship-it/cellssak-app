@@ -22,7 +22,7 @@ import ProfileMenu from './nav/ProfileMenu';
 import NotificationBell from './nav/NotificationBell';
 import TreeMoveButton from './nav/TreeMoveButton';
 
-const PAGE_BG = "url('/images/bg-field.jpg') center bottom / cover no-repeat";
+const PAGE_BG = "url('/images/bg-field.jpg') center 72% / cover no-repeat";
 
 export default function PersonalHome({ user, activeCell, pendingRequest, onOpenCellFlow, onSignOut }) {
   const [cellName, setCellName] = useState('');

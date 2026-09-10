@@ -262,7 +262,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
     <div
       style={{
         ...vars,
-        background: "url('/images/bg-field.jpg') center bottom / cover no-repeat",
+        background: "url('/images/bg-field.jpg') center 72% / cover no-repeat",
         fontFamily: 'var(--font-body)',
         color: 'var(--ink)',
         overflowX: 'hidden',

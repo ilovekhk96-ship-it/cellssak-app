@@ -26,8 +26,8 @@
   100% { transform: rotate(-3deg); }
 }
 @keyframes driftCloud {
-  from { left: -65%; }
-  to { left: 165%; }
+  from { transform: translateX(-100vw); }
+  to { transform: translateX(100vw); }
 }
 @keyframes leafFan {
   0%, 100% { transform: rotate(0deg); }
@@ -40,9 +40,10 @@
 
 .sway-twigs { animation: swayTwigs 3.6s ease-in-out infinite; transform-origin: 120px 170px; }
 .sway-grass { animation: swayGrass 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
-/* left(%)를 애니메이션 — 컨테이너 폭 기준 비율이라 화면 크기가 달라져도 항상 왼쪽 완전
-   바깥에서 시작해 오른쪽 완전 바깥까지 끊김없이 지나감 */
-.drift-cloud { position: absolute; animation-name: driftCloud; animation-timing-function: linear; animation-iteration-count: infinite; }
+/* left 대신 transform(translateX)을 애니메이션 — left는 매 프레임 레이아웃을 다시
+   계산해야 해서(리플로우) 느릴 때 뚝뚝 끊겨 보였음. transform은 합성(GPU)만 타서
+   훨씬 매끄러움. vw 단위라 뷰포트 폭 기준으로 항상 완전히 화면 밖까지 지나감 */
+.drift-cloud { position: absolute; left: 0; animation-name: driftCloud; animation-timing-function: linear; animation-iteration-count: infinite; will-change: transform; }
 /* 잎사귀 기준점(줄기 쪽)을 (0,0)에 두고 그 점을 축으로 부채꼴로 흔들림 */
 .leaf-fan { animation: leafFan 3.4s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
 .thought-bubble { animation: bubblePop 0.4s ease; }

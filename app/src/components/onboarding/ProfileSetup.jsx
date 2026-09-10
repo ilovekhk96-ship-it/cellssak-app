@@ -3,7 +3,7 @@ import { Camera } from 'lucide-react';
 import { setNickname, setProfilePhoto } from '../../lib/church';
 import { uploadProfilePhoto } from '../../lib/photoUpload';
 
-const PAGE_BG = "url('/images/bg-field.jpg') center bottom / cover no-repeat";
+const PAGE_BG = "url('/images/bg-field.jpg') center 72% / cover no-repeat";
 
 export default function ProfileSetup({ user }) {
   const [nickname, setNicknameDraft] = useState('');
