@@ -30,13 +30,30 @@ const GOLD_LEAF_FILTER = 'sepia(1) saturate(6) hue-rotate(-10deg) brightness(1.0
 // 나무 발치뿐 아니라 기본 화면 폭(0~240) 전체에 촘촘히 깔아서 사방이 잔디로 덮인
 // 느낌을 줌 — 폭을 너무 늘리면 viewBox가 넓어져 나무가 상대적으로 작아 보이므로,
 // 넓게 퍼뜨리기보다 기존 프레임 안에서 개수를 늘려 밀도로 "많다"는 느낌을 줌.
-// scale/성장과 무관하게 땅에 고정된 위치·크기
-const GRASS_BLADES = Array.from({ length: 30 }, (_, i) => ({
-  x: Math.round(-8 + (i / 29) * 256 + (((i * 47) % 13) - 6)),
-  w: 12 + ((i * 29) % 10),
-  flip: (i * 7) % 3 !== 0,
-  delay: -(((i * 41) % 320) / 100),
-}));
+// scale/성장과 무관하게 땅에 고정된 위치·크기. seed를 다르게 줘서 앞줄/뒷줄이
+// 같은 자리에 안 겹치도록 함
+function makeGrassBlades(count, seed) {
+  return Array.from({ length: count }, (_, i) => ({
+    x: Math.round(-8 + (i / (count - 1)) * 256 + (((i * 47 + seed) % 13) - 6)),
+    w: 12 + ((i * 29 + seed) % 10),
+    flip: (i * 7 + seed) % 3 !== 0,
+    delay: -(((i * 41 + seed) % 320) / 100),
+  }));
+}
+// 앞줄: 나무보다 나중에 그려서 밑동을 살짝 덮음 — 키를 낮게 둬서 나무를 가리지 않음
+const GRASS_FRONT = makeGrassBlades(30, 0);
+// 뒷줄: 나무보다 먼저 그려서 줄기·가지에 자연스럽게 가려지며 깊이감을 줌
+const GRASS_BACK = makeGrassBlades(22, 5);
+
+function GrassRow({ blades, height, keyPrefix }) {
+  return blades.map((g, i) => (
+    <g key={`${keyPrefix}${i}`} transform={`translate(${g.x} ${GROUND_ANCHOR.y + 4}) scale(${g.flip ? -1 : 1},1)`}>
+      <g className="sway-grass" style={{ animationDelay: `${g.delay}s` }}>
+        <image href="/images/grass-1.png" x={-g.w / 2} y={-height} width={g.w} height={height} preserveAspectRatio="xMidYMax meet" />
+      </g>
+    </g>
+  ));
+}
 
 export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onOpenList, showActions = true, treeLabel, goldenIndices }) {
   // 나무 그림자 블러 필터 id — 화면에 TreeScene이 동시에 여러 개 떠도(예: 추후 비교 화면)
@@ -240,6 +257,9 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
             <ellipse cx={GROUND_ANCHOR.x} cy={GROUND_ANCHOR.y + 1} rx={42} ry={9} fill="#1A331D" opacity="0.22" />
           </g>
 
+          {/* 뒷줄 잔디 — 나무 그림보다 먼저 그려서 줄기·가지에 자연스럽게 가려짐 */}
+          <GrassRow blades={GRASS_BACK} height={30} keyPrefix="gb" />
+
           <g transform={treeTransform} style={{ transition: 'transform 0.8s ease' }}>
             <image href="/images/tree.png" x={-5} y={-3} width={250} height={235} preserveAspectRatio="xMidYMax meet" />
 
@@ -269,19 +289,9 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
             ))}
           </g>
 
-          {/* 트렁크 밑동을 가로지르는 풀잎 — 나무 그림 다음(=앞)에 그려서 밑동을 살짝
-              덮음. 그루당 기준 높이(GRASS_H)에서 blade별 폭만 다르게 줘서 크기는 고정,
-              바람은 leaf-fan과 같은 방식(바깥 g=위치 고정, 안쪽 g=CSS sway)으로 흔들림 */}
-          {GRASS_BLADES.map((g, i) => {
-            const GRASS_H = 26;
-            return (
-              <g key={`g${i}`} transform={`translate(${g.x} ${GROUND_ANCHOR.y + 4}) scale(${g.flip ? -1 : 1},1)`}>
-                <g className="sway-grass" style={{ animationDelay: `${g.delay}s` }}>
-                  <image href="/images/grass-1.png" x={-g.w / 2} y={-GRASS_H} width={g.w} height={GRASS_H} preserveAspectRatio="xMidYMax meet" />
-                </g>
-              </g>
-            );
-          })}
+          {/* 앞줄 잔디 — 나무 그림 다음(=앞)에 그려서 밑동을 살짝 덮되, 키를 낮게 둬서
+              나무 자체는 가리지 않음 */}
+          <GrassRow blades={GRASS_FRONT} height={26} keyPrefix="gf" />
 
           {treeLabel && (
             <text
