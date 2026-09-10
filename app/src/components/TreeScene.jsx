@@ -23,8 +23,13 @@ function growthScale(score) {
 const MIN_USER_ZOOM = 0.6;
 const MAX_USER_ZOOM = 4;
 
-// 실사 잎 사진 2종을 잎마다 번갈아 사용 — 벡터 색상 대신 사진이라 golden은 필터로 색을 입힘
-const LEAF_IMAGES = ['/images/leaf-1.png', '/images/leaf-2.png'];
+// 실사 잎 사진 2종을 잎마다 번갈아 사용 — 벡터 색상 대신 사진이라 golden은 필터로 색을 입힘.
+// 두 사진이 줄기 위치가 서로 달라서(leaf-1은 줄기가 아래, leaf-2는 줄기가 위) 흔들리는
+// 축(origin)도 사진마다 따로 지정 — 안 그러면 줄기 반대쪽(잎 끝)을 축으로 흔들려 보임
+const LEAF_IMAGES = [
+  { src: '/images/leaf-1.png', origin: '50% 96%' },
+  { src: '/images/leaf-2.png', origin: '48% 6%' },
+];
 const GOLD_LEAF_FILTER = 'sepia(1) saturate(6) hue-rotate(-10deg) brightness(1.05)';
 
 // 나무 발치뿐 아니라 기본 화면 폭(0~240) 전체에 촘촘히 깔아서 사방이 잔디로 덮인
@@ -81,7 +86,7 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
         y: leaf.y,
         rot: leaf.rot,
         scale: leaf.scale,
-        src: LEAF_IMAGES[i % LEAF_IMAGES.length],
+        variant: LEAF_IMAGES[i % LEAF_IMAGES.length],
         isGolden,
       });
     }
@@ -274,12 +279,13 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
                   <g
                     className="leaf-fan"
                     style={{
+                      transformOrigin: l.variant.origin,
                       animationDelay: `${-((i * 37) % 340) / 100}s`,
                       animationDuration: `${3 + (i % 5) * 0.35}s`,
                       filter: l.isGolden ? GOLD_LEAF_FILTER : undefined,
                     }}
                   >
-                    <image href={l.src} x={-w / 2} y={-h / 2} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
+                    <image href={l.variant.src} x={-w / 2} y={-h / 2} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
                   </g>
                 </g>
               );
