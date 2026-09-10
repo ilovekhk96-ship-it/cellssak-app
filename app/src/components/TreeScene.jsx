@@ -210,17 +210,16 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
           나눠서 배치. left 애니메이션은 transform(translateX, vw단위)으로 바꿔서
           — left는 매 프레임 레이아웃을 다시 계산해 느릴 때 뚝뚝 끊겨 보였는데,
           transform은 합성만 타서 훨씬 매끄럽고 훨씬 천천히 흘러가게 함 */}
-      {/* 나무(최대 300px, 컨테이너 폭의 92%)보다 살짝 작은 크기감을 주려고 제일 큰
-          구름을 폭 80%까지 키움 — 세로로도 커지는 만큼 구간을 넉넉히 벌림. 나무·잔디는
-          뒤에서 DOM상 더 나중(=더 위)에 그려지므로 구름이 그 영역까지 걸쳐도 나무를
-          가리지 않고 자연스럽게 나무 뒤로 지나감 */}
-      <div style={{ top: '-10%', width: '80%', zIndex: 0, animationDuration: '340s' }} className="drift-cloud">
+      {/* 구름은 화면 맨 위부터 "나무 위쪽 1/3 지점"까지만(대략 -8%~48%) 다니도록 —
+          실측해보니 나무 SVG 영역이 대략 34%~81% 지점이라 그 위쪽 1/3 지점은 약 50%.
+          그 안에서 세 구름이 서로 안 겹치게 세로 구간을 나눠 배치 */}
+      <div style={{ top: '-8%', width: '56%', zIndex: 0, animationDuration: '340s' }} className="drift-cloud">
         <Cloud />
       </div>
-      <div style={{ top: '26%', width: '52%', zIndex: 0, animationDuration: '400s', animationDelay: '-220s' }} className="drift-cloud">
+      <div style={{ top: '17%', width: '44%', zIndex: 0, animationDuration: '400s', animationDelay: '-220s' }} className="drift-cloud">
         <Cloud flip />
       </div>
-      <div style={{ top: '52%', width: '34%', zIndex: 0, animationDuration: '370s', animationDelay: '-300s' }} className="drift-cloud">
+      <div style={{ top: '38%', width: '26%', zIndex: 0, animationDuration: '370s', animationDelay: '-300s' }} className="drift-cloud">
         <Cloud />
       </div>
 
