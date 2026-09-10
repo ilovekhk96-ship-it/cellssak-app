@@ -290,9 +290,21 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
                 </g>
               );
             })}
-            {visibleFruits.map((f, i) => (
-              <circle key={`f${i}`} cx={f.x} cy={f.y} r="5.5" fill={STATUS.fruit.color} stroke="#FFF6F0" strokeWidth="1" />
-            ))}
+            {visibleFruits.map((f, i) => {
+              const fw = 12;
+              const fh = 14;
+              return (
+                <image
+                  key={`f${i}`}
+                  href={i % 2 === 0 ? '/images/grape-1.png' : '/images/grape-2.png'}
+                  x={f.x - fw / 2}
+                  y={f.y - fh / 2}
+                  width={fw}
+                  height={fh}
+                  preserveAspectRatio="xMidYMid meet"
+                />
+              );
+            })}
           </g>
 
           {/* 앞줄 잔디 — 나무 그림 다음(=앞)에 그려서 밑동을 살짝 덮되, 키를 낮게 둬서
