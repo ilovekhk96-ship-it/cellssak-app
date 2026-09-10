@@ -11,7 +11,7 @@ import HeartBadge from './HeartBadge';
 // 실제로 뿌리 내린 자리에서 위로 자라나는 것처럼 보임
 const GROUND_ANCHOR = { x: TRUNK.x1, y: TRUNK.y1 };
 
-// 나무 이름표(treeLabel) 위치 — 땅 그림자(ellipse, cy 234 + ry 8 = 아래쪽 끝 242) 바로 밑
+// 나무 이름표(treeLabel) 위치 — 땅(트렁크 밑동) 바로 밑
 const LABEL_Y = GROUND_ANCHOR.y + 22;
 
 // score(누적 기도 일수)가 늘어날수록 나무가 실제로 커지는 느낌을 주되, 커질수록 증가폭은
@@ -103,6 +103,10 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
   // 스르륵 돌아옴. 자동으로 계산되는 위 viewBox/scale과는 별개로 잠깐 얹는 값
   const [userZoom, setUserZoom] = useState(1);
   const [interacting, setInteracting] = useState(false);
+  // interacting이 꺼진 뒤에도 배율이 1로 스르륵 돌아오는 0.25s 트랜지션이 끝날 때까지는
+  // overflow를 계속 열어둬야 축소되는 중간 과정에서 나무가 잘려 보이지 않음
+  const [settling, setSettling] = useState(false);
+  const settleTimer = useRef(null);
   const pointers = useRef(new Map());
   const pinchStart = useRef(null);
   const wheelIdleTimer = useRef(null);
@@ -112,6 +116,9 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
   const snapBack = () => {
     setInteracting(false);
     setUserZoom(1);
+    setSettling(true);
+    if (settleTimer.current) clearTimeout(settleTimer.current);
+    settleTimer.current = setTimeout(() => setSettling(false), 320);
   };
 
   const handlePointerDown = (e) => {
@@ -160,24 +167,30 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
       }}
       className="flex flex-col"
     >
-      <div style={{ position: 'absolute', top: '1%', left: '-10%', zIndex: 0, animationDuration: '46s' }} className="drift-cloud">
-        <Cloud w="60%" variant={0} />
+      {/* 구름은 top만 고정하고 left는 애니메이션(driftCloud)이 전담 — 화면 왼쪽 완전
+          바깥에서 시작해 오른쪽 완전 바깥까지 끊김없이 지나감. 지속시간을 서로 소수에
+          가깝게 달리해서 통과하는 조합이 매번 달라 보이게 함 */}
+      <div style={{ top: '0%', zIndex: 0, animationDuration: '61s' }} className="drift-cloud">
+        <Cloud w="95%" variant={0} />
       </div>
-      <div style={{ position: 'absolute', top: '12%', right: '-14%', zIndex: 0, animationDuration: '58s', animationDelay: '-20s' }} className="drift-cloud">
-        <Cloud w="48%" variant={1} />
+      <div style={{ top: '10%', zIndex: 0, animationDuration: '83s', animationDelay: '-27s' }} className="drift-cloud">
+        <Cloud w="78%" variant={1} />
       </div>
-      <div style={{ position: 'absolute', top: '23%', left: '18%', zIndex: 0, animationDuration: '52s', animationDelay: '-38s' }} className="drift-cloud">
-        <Cloud w="38%" variant={2} />
+      <div style={{ top: '22%', zIndex: 0, animationDuration: '71s', animationDelay: '-52s' }} className="drift-cloud">
+        <Cloud w="60%" variant={2} />
       </div>
-      <div style={{ position: 'absolute', top: '2%', left: '54%', zIndex: 0, animationDuration: '64s', animationDelay: '-8s' }} className="drift-cloud">
-        <Cloud w="32%" variant={0} />
+      <div style={{ top: '3%', zIndex: 0, animationDuration: '97s', animationDelay: '-11s' }} className="drift-cloud">
+        <Cloud w="70%" variant={1} />
+      </div>
+      <div style={{ top: '17%', zIndex: 0, animationDuration: '89s', animationDelay: '-64s' }} className="drift-cloud">
+        <Cloud w="50%" variant={0} />
       </div>
 
       <ThoughtBubble />
 
       <div
         className="flex-1 flex items-center justify-center w-full px-4"
-        style={{ marginTop: '4px', position: 'relative', overflow: interacting ? 'visible' : 'hidden', touchAction: 'pan-y' }}
+        style={{ marginTop: '4px', position: 'relative', overflow: interacting || settling ? 'visible' : 'hidden', touchAction: 'pan-y' }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={endPointer}
@@ -194,31 +207,45 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
             transition: interacting ? 'none' : 'transform 0.25s ease',
           }}
         >
+          {/* 배경 사진의 햇빛이 왼쪽 위에서 오므로, 그림자는 나무 발치에서 오른쪽 아래로
+              비스듬히 늘어지게 — scale과 무관하게 땅에 고정된 크기로 표시 */}
+          <ellipse
+            cx={GROUND_ANCHOR.x + 16}
+            cy={GROUND_ANCHOR.y + 3}
+            rx={52}
+            ry={9}
+            fill="#1F3D22"
+            opacity="0.18"
+            transform={`rotate(14 ${GROUND_ANCHOR.x} ${GROUND_ANCHOR.y})`}
+          />
+
           <g transform={treeTransform} style={{ transition: 'transform 0.8s ease' }}>
             <image href="/images/tree.png" x={-5} y={-3} width={250} height={235} preserveAspectRatio="xMidYMax meet" />
 
-            <g className="sway-leaves">
-              {leafPaths.map((l, i) => {
-                const w = 10 * l.scale;
-                const h = 10 * l.scale;
-                return (
-                  <image
-                    key={i}
-                    href={l.src}
-                    x={l.x - w / 2}
-                    y={l.y - h / 2}
-                    width={w}
-                    height={h}
-                    preserveAspectRatio="xMidYMid meet"
-                    transform={`rotate(${l.rot} ${l.x} ${l.y})`}
-                    style={l.isGolden ? { filter: GOLD_LEAF_FILTER } : undefined}
-                  />
-                );
-              })}
-              {visibleFruits.map((f, i) => (
-                <circle key={`f${i}`} cx={f.x} cy={f.y} r="5.5" fill={STATUS.fruit.color} stroke="#FFF6F0" strokeWidth="1" />
-              ))}
-            </g>
+            {leafPaths.map((l, i) => {
+              const w = 10 * l.scale;
+              const h = 10 * l.scale;
+              return (
+                // 바깥 g: 가지에 붙는 자리·방향을 고정(속성 transform). 안쪽 g: 그 자리에 붙은
+                // 채로 잎사귀 끝만 바람에 부채꼴로 흔들리도록 CSS 애니메이션(leaf-fan)을 따로 줌
+                // — 속성 transform과 CSS 애니메이션 transform은 같은 요소에 같이 못 걸려서 분리함
+                <g key={i} transform={`translate(${l.x} ${l.y}) rotate(${l.rot})`}>
+                  <g
+                    className="leaf-fan"
+                    style={{
+                      animationDelay: `${-((i * 37) % 340) / 100}s`,
+                      animationDuration: `${3 + (i % 5) * 0.35}s`,
+                      filter: l.isGolden ? GOLD_LEAF_FILTER : undefined,
+                    }}
+                  >
+                    <image href={l.src} x={-w / 2} y={-h / 2} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
+                  </g>
+                </g>
+              );
+            })}
+            {visibleFruits.map((f, i) => (
+              <circle key={`f${i}`} cx={f.x} cy={f.y} r="5.5" fill={STATUS.fruit.color} stroke="#FFF6F0" strokeWidth="1" />
+            ))}
           </g>
 
           {treeLabel && (

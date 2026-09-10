@@ -26,20 +26,27 @@
   100% { transform: rotate(-3deg); }
 }
 @keyframes driftCloud {
-  from { transform: translateX(-40px); }
-  to { transform: translateX(280px); }
+  from { left: -65%; }
+  to { left: 165%; }
+}
+@keyframes leafFan {
+  0%, 100% { transform: rotate(0deg); }
+  55% { transform: rotate(16deg); }
 }
 @keyframes bubblePop {
   0% { opacity: 0; transform: translateY(6px) scale(0.96); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.sway-leaves { animation: swayLeaves 4.5s ease-in-out infinite; transform-origin: 120px 170px; }
 .sway-twigs { animation: swayTwigs 3.6s ease-in-out infinite; transform-origin: 120px 170px; }
 .sway-grass { animation: swayGrass 3.2s ease-in-out infinite; transform-origin: bottom center; }
-.drift-cloud { animation-name: driftCloud; animation-timing-function: linear; animation-iteration-count: infinite; }
+/* left(%)를 애니메이션 — 컨테이너 폭 기준 비율이라 화면 크기가 달라져도 항상 왼쪽 완전
+   바깥에서 시작해 오른쪽 완전 바깥까지 끊김없이 지나감 */
+.drift-cloud { position: absolute; animation-name: driftCloud; animation-timing-function: linear; animation-iteration-count: infinite; }
+/* 잎사귀 기준점(줄기 쪽)을 (0,0)에 두고 그 점을 축으로 부채꼴로 흔들림 */
+.leaf-fan { animation: leafFan 3.4s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
 .thought-bubble { animation: bubblePop 0.4s ease; }
 
 @media (prefers-reduced-motion: reduce) {
-  .sway-leaves, .sway-twigs, .sway-grass, .drift-cloud { animation: none !important; }
+  .sway-twigs, .sway-grass, .drift-cloud, .leaf-fan { animation: none !important; }
 }
