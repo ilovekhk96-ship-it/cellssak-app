@@ -4,7 +4,7 @@ export default function TreeMoveButton({ onClick, lineTop, lineBottom }) {
       <div className="absolute bottom-6 right-4 pointer-events-auto">
         <button onClick={onClick} style={{ width: '58px', height: '58px', position: 'relative' }} aria-label="기도나무 이동">
           <img
-            src="/images/leaf-1.png"
+            src="/images/leaf-badge.png"
             alt=""
             style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, objectFit: 'contain', filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.25))' }}
           />
