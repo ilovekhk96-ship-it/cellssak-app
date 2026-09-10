@@ -16,8 +16,7 @@ export default function TreeMoveButton({ onClick, lineTop, lineBottom }) {
               inset: '3%',
               objectFit: 'contain',
               filter:
-                'drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) ' +
-                'drop-shadow(1.5px 1.5px 0 #fff) drop-shadow(-1.5px -1.5px 0 #fff) drop-shadow(1.5px -1.5px 0 #fff) drop-shadow(-1.5px 1.5px 0 #fff) ' +
+                'drop-shadow(0.6px 0 0 #fff) drop-shadow(-0.6px 0 0 #fff) drop-shadow(0 0.6px 0 #fff) drop-shadow(0 -0.6px 0 #fff) ' +
                 'drop-shadow(0 2px 3px rgba(0,0,0,0.3))',
             }}
           />
