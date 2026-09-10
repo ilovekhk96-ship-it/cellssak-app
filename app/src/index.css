@@ -26,8 +26,8 @@
   100% { transform: rotate(-3deg); }
 }
 @keyframes driftCloud {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(16px); }
+  from { transform: translateX(-40px); }
+  to { transform: translateX(280px); }
 }
 @keyframes bubblePop {
   0% { opacity: 0; transform: translateY(6px) scale(0.96); }
@@ -37,7 +37,7 @@
 .sway-leaves { animation: swayLeaves 4.5s ease-in-out infinite; transform-origin: 120px 170px; }
 .sway-twigs { animation: swayTwigs 3.6s ease-in-out infinite; transform-origin: 120px 170px; }
 .sway-grass { animation: swayGrass 3.2s ease-in-out infinite; transform-origin: bottom center; }
-.drift-cloud { animation: driftCloud 9s ease-in-out infinite alternate; }
+.drift-cloud { animation-name: driftCloud; animation-timing-function: linear; animation-iteration-count: infinite; }
 .thought-bubble { animation: bubblePop 0.4s ease; }
 
 @media (prefers-reduced-motion: reduce) {

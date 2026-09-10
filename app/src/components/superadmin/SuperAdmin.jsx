@@ -11,8 +11,7 @@ import {
   setMemberRoleAsAdmin,
 } from '../../lib/superAdmin';
 
-const PAGE_BG =
-  "linear-gradient(to bottom, rgba(168,222,157,0) 30%, rgba(107,168,95,0.72) 100%), url('/images/bg-field.jpg') center bottom / cover no-repeat";
+const PAGE_BG = "url('/images/bg-field.jpg') center bottom / cover no-repeat";
 
 export default function SuperAdmin({ onBack }) {
   const [churches, setChurches] = useState([]);
