@@ -324,7 +324,9 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
             style={{
               color: 'var(--ink)',
               fontFamily: 'var(--font-display)',
-              textShadow: '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 5px #fff',
+              // 5px 블러 글로우가 작은 글씨에서 번져 보여서 "깨진" 것처럼 보였음 —
+              // 블러 없이 또렷한 1px 테두리만 남김 (버튼 글씨와 같은 방식)
+              textShadow: '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff',
             }}
             className="text-xs font-bold text-center mb-1"
           >
