@@ -169,21 +169,21 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
     >
       {/* 구름은 top·width를 고정값으로 못박고 left만 애니메이션(driftCloud)이 움직임 —
           세로 위치·크기는 절대 안 바뀌고 가로로만 왼쪽 끝→오른쪽 끝을 끊김없이 지나감.
-          top은 하늘색 배경 안(위쪽 14% 이내)에만 오도록 좁게 잡아서 잔디·나무 쪽으로
-          안 내려가게 함 */}
-      <div style={{ top: '0%', width: '85%', zIndex: 0, animationDuration: '61s' }} className="drift-cloud">
+          top은 화면 맨 위쪽(0% 안팎)으로 더 올리고, 지속시간도 150~220s로 늘려서
+          실제 구름처럼 아주 천천히 흘러가게 함 */}
+      <div style={{ top: '-2%', width: '85%', zIndex: 0, animationDuration: '150s' }} className="drift-cloud">
         <Cloud variant={0} />
       </div>
-      <div style={{ top: '6%', width: '68%', zIndex: 0, animationDuration: '83s', animationDelay: '-27s' }} className="drift-cloud">
+      <div style={{ top: '3%', width: '68%', zIndex: 0, animationDuration: '190s', animationDelay: '-70s' }} className="drift-cloud">
         <Cloud variant={1} />
       </div>
-      <div style={{ top: '11%', width: '52%', zIndex: 0, animationDuration: '71s', animationDelay: '-52s' }} className="drift-cloud">
+      <div style={{ top: '7%', width: '52%', zIndex: 0, animationDuration: '170s', animationDelay: '-120s' }} className="drift-cloud">
         <Cloud variant={2} />
       </div>
-      <div style={{ top: '2%', width: '60%', zIndex: 0, animationDuration: '97s', animationDelay: '-11s' }} className="drift-cloud">
+      <div style={{ top: '0%', width: '60%', zIndex: 0, animationDuration: '220s', animationDelay: '-30s' }} className="drift-cloud">
         <Cloud variant={1} />
       </div>
-      <div style={{ top: '9%', width: '44%', zIndex: 0, animationDuration: '89s', animationDelay: '-64s' }} className="drift-cloud">
+      <div style={{ top: '5%', width: '44%', zIndex: 0, animationDuration: '200s', animationDelay: '-150s' }} className="drift-cloud">
         <Cloud variant={0} />
       </div>
 
