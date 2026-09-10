@@ -210,11 +210,14 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
           나눠서 배치. left 애니메이션은 transform(translateX, vw단위)으로 바꿔서
           — left는 매 프레임 레이아웃을 다시 계산해 느릴 때 뚝뚝 끊겨 보였는데,
           transform은 합성만 타서 훨씬 매끄럽고 훨씬 천천히 흘러가게 함 */}
-      <div style={{ top: '-6%', width: '54%', zIndex: 0, animationDuration: '300s' }} className="drift-cloud">
+      <div style={{ top: '-6%', width: '58%', zIndex: 0, animationDuration: '300s' }} className="drift-cloud">
         <Cloud />
       </div>
-      <div style={{ top: '17%', width: '38%', zIndex: 0, animationDuration: '360s', animationDelay: '-180s' }} className="drift-cloud">
+      <div style={{ top: '15%', width: '42%', zIndex: 0, animationDuration: '360s', animationDelay: '-180s' }} className="drift-cloud">
         <Cloud flip />
+      </div>
+      <div style={{ top: '33%', width: '28%', zIndex: 0, animationDuration: '330s', animationDelay: '-260s' }} className="drift-cloud">
+        <Cloud />
       </div>
 
       <ThoughtBubble />
