@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useId, useMemo, useRef, useState } from 'react';
 import { Sprout, Sparkles } from 'lucide-react';
 import { STATUS } from '../data/constants';
 import { TRUNK, BRANCHES, FRUIT_SPOTS, getLeaf } from '../data/treeData';
@@ -28,6 +28,10 @@ const LEAF_IMAGES = ['/images/leaf-1.png', '/images/leaf-2.png'];
 const GOLD_LEAF_FILTER = 'sepia(1) saturate(6) hue-rotate(-10deg) brightness(1.05)';
 
 export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onOpenList, showActions = true, treeLabel, goldenIndices }) {
+  // 나무 그림자 블러 필터 id — 화면에 TreeScene이 동시에 여러 개 떠도(예: 추후 비교 화면)
+  // id가 겹치지 않도록 컴포넌트 인스턴스마다 고유하게 생성
+  const shadowBlurId = `tree-shadow-blur-${useId()}`;
+
   // 잎 개수 제한 없음 — score(누적 기도 일수)만큼 절차적으로 생성.
   // 채우기와 테두리를 따로 그리면(색상별로 채우기 먼저, 테두리는 나중에 한번에) 뒤에 있어야 할
   // 잎의 테두리까지 앞에 있는 잎 위로 뚫고 나와서 죄다 겹쳐 보이는 문제가 있었음 — 잎 하나마다
@@ -169,21 +173,21 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
     >
       {/* 구름은 top·width를 고정값으로 못박고 left만 애니메이션(driftCloud)이 움직임 —
           세로 위치·크기는 절대 안 바뀌고 가로로만 왼쪽 끝→오른쪽 끝을 끊김없이 지나감.
-          top은 화면 맨 위쪽(0% 안팎)으로 더 올리고, 지속시간도 150~220s로 늘려서
-          실제 구름처럼 아주 천천히 흘러가게 함 */}
+          top 범위를 하늘 위쪽부터 산 능선 근처(약 -2%~30%)까지 넓게 펴서 하늘 전체에
+          퍼져 보이게 하고, 나무 캐노피보다는 위쪽에 머물게 함 */}
       <div style={{ top: '-2%', width: '85%', zIndex: 0, animationDuration: '150s' }} className="drift-cloud">
         <Cloud variant={0} />
       </div>
-      <div style={{ top: '3%', width: '68%', zIndex: 0, animationDuration: '190s', animationDelay: '-70s' }} className="drift-cloud">
+      <div style={{ top: '10%', width: '68%', zIndex: 0, animationDuration: '190s', animationDelay: '-70s' }} className="drift-cloud">
         <Cloud variant={1} />
       </div>
-      <div style={{ top: '7%', width: '52%', zIndex: 0, animationDuration: '170s', animationDelay: '-120s' }} className="drift-cloud">
+      <div style={{ top: '22%', width: '52%', zIndex: 0, animationDuration: '170s', animationDelay: '-120s' }} className="drift-cloud">
         <Cloud variant={2} />
       </div>
-      <div style={{ top: '0%', width: '60%', zIndex: 0, animationDuration: '220s', animationDelay: '-30s' }} className="drift-cloud">
+      <div style={{ top: '4%', width: '60%', zIndex: 0, animationDuration: '220s', animationDelay: '-30s' }} className="drift-cloud">
         <Cloud variant={1} />
       </div>
-      <div style={{ top: '5%', width: '44%', zIndex: 0, animationDuration: '200s', animationDelay: '-150s' }} className="drift-cloud">
+      <div style={{ top: '29%', width: '44%', zIndex: 0, animationDuration: '200s', animationDelay: '-150s' }} className="drift-cloud">
         <Cloud variant={0} />
       </div>
 
@@ -209,16 +213,17 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
           }}
         >
           {/* 배경 사진의 햇빛이 왼쪽 위에서 오므로, 그림자는 나무 발치에서 오른쪽 아래로
-              비스듬히 늘어지게 — scale과 무관하게 땅에 고정된 크기로 표시 */}
-          <ellipse
-            cx={GROUND_ANCHOR.x + 16}
-            cy={GROUND_ANCHOR.y + 3}
-            rx={52}
-            ry={9}
-            fill="#1F3D22"
-            opacity="0.18"
-            transform={`rotate(14 ${GROUND_ANCHOR.x} ${GROUND_ANCHOR.y})`}
-          />
+              비스듬히 늘어지게 — scale과 무관하게 땅에 고정된 크기로 표시. 트렁크 바로
+              밑은 진하고 좁게, 멀어질수록 흐리고 넓게 퍼지는 두 겹 + 블러로 경계를 부드럽게 */}
+          <defs>
+            <filter id={shadowBlurId} x="-60%" y="-150%" width="220%" height="400%">
+              <feGaussianBlur stdDeviation="3.2" />
+            </filter>
+          </defs>
+          <g transform={`rotate(14 ${GROUND_ANCHOR.x} ${GROUND_ANCHOR.y})`} filter={`url(#${shadowBlurId})`}>
+            <ellipse cx={GROUND_ANCHOR.x + 30} cy={GROUND_ANCHOR.y + 2} rx={58} ry={8} fill="#1F3D22" opacity="0.14" />
+            <ellipse cx={GROUND_ANCHOR.x + 10} cy={GROUND_ANCHOR.y + 1} rx={30} ry={7} fill="#1A331D" opacity="0.24" />
+          </g>
 
           <g transform={treeTransform} style={{ transition: 'transform 0.8s ease' }}>
             <image href="/images/tree.png" x={-5} y={-3} width={250} height={235} preserveAspectRatio="xMidYMax meet" />
