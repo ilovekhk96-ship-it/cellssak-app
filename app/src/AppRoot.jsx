@@ -20,15 +20,23 @@ const WHITE_STROKE = '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1p
 function Loading() {
   return (
     <div
-      style={{ background: "#A8DE9D url('/images/loading.jpg') center / cover no-repeat" }}
+      style={{ background: "url('/images/loading.jpg') center / cover no-repeat" }}
       className="w-full min-h-screen relative"
     >
       <div
         style={{ position: 'absolute', left: '57%', top: '40%', transform: 'translate(-50%, -50%)' }}
         className="flex flex-col items-center gap-1"
       >
-        <p style={{ fontFamily: "'Cafe24Dongdong', 'Gowun Dodum', sans-serif", fontSize: '1.8rem', color: '#4A3B3F', textShadow: WHITE_STROKE }}>
-          셀싹
+        <p
+          style={{
+            fontFamily: "'Cafe24Dongdong', 'Gowun Dodum', sans-serif",
+            fontSize: '1.05rem',
+            color: '#4A3B3F',
+            textShadow: WHITE_STROKE,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          셀싹 : 나의 기도 나무 성장기
         </p>
         <p style={{ color: '#4A3B3F', textShadow: WHITE_STROKE }} className="text-sm">
           펼치는 중...
