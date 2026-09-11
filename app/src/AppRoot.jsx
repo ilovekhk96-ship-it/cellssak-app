@@ -13,51 +13,43 @@ import PendingApproval from './components/onboarding/PendingApproval';
 import SuperAdmin from './components/superadmin/SuperAdmin';
 import App from './App';
 
-// 사진 속 밝은 하늘(햇빛 번지는 부분)이 대략 가로 55~60%, 세로 38~42% 지점이라
-// 글씨를 그 위에 얹음 — 화면 크기가 달라져도 cover라 사진 속 상대 위치는 거의 그대로 유지됨
-const WHITE_STROKE = '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 6px #fff';
-// 테두리(선) 대신, 글씨 뒤에서 은은하게 퍼지는 흰 블러 — 오프셋 없이 블러만 여러 겹 줘서
-// 마치 글씨 뒤에 흐릿한 흰 빛이 깔린 것처럼 보이게 함
-const WHITE_GLOW = '0 0 4px #fff, 0 0 8px #fff, 0 0 14px #fff';
-
+// 사진 속 밝은 하늘(빈 여백)이 대략 세로 55~90% 구간이라 글씨를 그 위에 얹음 —
+// 그 자리 자체가 배경이 밝고 평평해서 흰 테두리/글로우 없이 진한 색 글씨만으로도 잘 읽힘
 function Loading() {
   return (
     <div
       style={{ background: "url('/images/loading.jpg') center / cover no-repeat" }}
       className="w-full min-h-screen relative"
     >
-      {/* 제목 블록: 작은 잎 아이콘 + 셀싹(큼) + 부제(작음), 사진 속 밝은 하늘 자리에 */}
       <div
-        style={{ position: 'absolute', left: '63%', top: '48%', transform: 'translate(-50%, -50%)' }}
-        className="flex flex-col items-center gap-1"
+        style={{ position: 'absolute', left: '50%', top: '64%', transform: 'translate(-50%, -50%)', width: '80%', maxWidth: '300px' }}
+        className="flex flex-col items-center"
       >
         <img
           src="/images/leaf-badge.png"
           alt=""
-          style={{ width: '26px', height: '26px', objectFit: 'contain', marginBottom: '2px', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))' }}
+          style={{ width: '28px', height: '28px', objectFit: 'contain', marginBottom: '10px' }}
         />
         <p
           style={{
             fontFamily: "'Cafe24Dongdong', 'Gowun Dodum', sans-serif",
-            fontSize: '1.6rem',
-            color: '#4A3B3F',
-            textShadow: WHITE_STROKE,
+            fontSize: '1.5rem',
+            lineHeight: 1.35,
+            color: '#3F5942',
+            textAlign: 'center',
           }}
         >
-          셀싹
+          기도가<br />열매가 되는 곳
         </p>
-        <p style={{ color: '#4A3B3F', textShadow: WHITE_STROKE, fontSize: '0.75rem' }}>: 기도 나무 성장기</p>
-      </div>
-
-      {/* 로딩 표시: 화면 맨 아래에 얇은 바 + "펼치는 중..." */}
-      <div
-        style={{ position: 'absolute', left: '50%', bottom: '8%', transform: 'translateX(-50%)', width: '55%', maxWidth: '220px' }}
-        className="flex flex-col items-center gap-2"
-      >
-        <div style={{ width: '100%', height: '3px', borderRadius: '999px', background: '#FFFFFF66', overflow: 'hidden' }}>
-          <div style={{ width: '40%', height: '100%', borderRadius: '999px', background: '#4A3B3F' }} className="loading-bar-slide" />
+        <p style={{ color: '#6B8067', fontSize: '0.8rem', lineHeight: 1.5, textAlign: 'center', marginTop: '10px' }}>
+          오늘도,<br />당신의 기도가 자라납니다.
+        </p>
+        <div
+          style={{ width: '55%', maxWidth: '180px', height: '4px', borderRadius: '999px', background: '#D8DED2', overflow: 'hidden', marginTop: '20px' }}
+        >
+          <div style={{ width: '40%', height: '100%', borderRadius: '999px', background: '#5C7A55' }} className="loading-bar-slide" />
         </div>
-        <p style={{ color: '#4A3B3F', textShadow: WHITE_GLOW, fontSize: '0.95rem' }}>펼치는 중...</p>
+        <p style={{ color: '#7C8B78', fontSize: '0.78rem', marginTop: '10px' }}>어플을 펼치는 중...</p>
       </div>
     </div>
   );
