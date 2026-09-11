@@ -13,8 +13,9 @@ import PendingApproval from './components/onboarding/PendingApproval';
 import SuperAdmin from './components/superadmin/SuperAdmin';
 import App from './App';
 
-// 사진 속 밝은 하늘(빈 여백)이 대략 세로 55~90% 구간이라 글씨를 그 위에 얹음 —
-// 그 자리 자체가 배경이 밝고 평평해서 흰 테두리/글로우 없이 진한 색 글씨만으로도 잘 읽힘
+// 사진 속 밝은 하늘(빈 여백)이 왼쪽 절반, 세로 55~95% 구간에 걸쳐 있어서 그 안쪽(가운데보다
+// 살짝 왼쪽)에 글씨를 얹음 — 그 자리 자체가 배경이 밝고 평평해서 흰 테두리/글로우 없이
+// 진한 색 글씨만으로도 잘 읽힘
 function Loading() {
   return (
     <div
@@ -22,34 +23,31 @@ function Loading() {
       className="w-full min-h-screen relative"
     >
       <div
-        style={{ position: 'absolute', left: '50%', top: '64%', transform: 'translate(-50%, -50%)', width: '80%', maxWidth: '300px' }}
+        style={{ position: 'absolute', left: '44%', top: '70%', transform: 'translate(-50%, -50%)', width: '75%', maxWidth: '260px' }}
         className="flex flex-col items-center"
       >
         <img
           src="/images/leaf-badge.png"
           alt=""
-          style={{ width: '28px', height: '28px', objectFit: 'contain', marginBottom: '10px' }}
+          style={{ width: '26px', height: '26px', objectFit: 'contain', marginBottom: '6px' }}
         />
         <p
           style={{
             fontFamily: "'Cafe24Dongdong', 'Gowun Dodum', sans-serif",
-            fontSize: '1.5rem',
-            lineHeight: 1.35,
+            fontSize: '1.6rem',
             color: '#3F5942',
             textAlign: 'center',
           }}
         >
-          기도가<br />열매가 되는 곳
+          셀싹
         </p>
-        <p style={{ color: '#6B8067', fontSize: '0.8rem', lineHeight: 1.5, textAlign: 'center', marginTop: '10px' }}>
-          오늘도,<br />당신의 기도가 자라납니다.
-        </p>
+        <p style={{ color: '#6B8067', fontSize: '0.75rem', textAlign: 'center' }}>: 기도 나무 성장기</p>
         <div
-          style={{ width: '55%', maxWidth: '180px', height: '4px', borderRadius: '999px', background: '#D8DED2', overflow: 'hidden', marginTop: '20px' }}
+          style={{ width: '55%', maxWidth: '180px', height: '4px', borderRadius: '999px', background: '#D8DED2', overflow: 'hidden', marginTop: '16px' }}
         >
           <div style={{ width: '40%', height: '100%', borderRadius: '999px', background: '#5C7A55' }} className="loading-bar-slide" />
         </div>
-        <p style={{ color: '#7C8B78', fontSize: '0.78rem', marginTop: '10px' }}>어플을 펼치는 중...</p>
+        <p style={{ color: '#7C8B78', fontSize: '0.78rem', marginTop: '10px' }}>펼치는 중...</p>
       </div>
     </div>
   );
