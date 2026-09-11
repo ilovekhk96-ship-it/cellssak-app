@@ -50,6 +50,12 @@
   0% { opacity: 0; transform: translateY(6px) scale(0.96); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
+/* 실제 로딩 진행률을 모르는 상태(불확정형)라 정해진 %를 채우는 대신, 짧은 구간이
+   왔다갔다 움직이며 "로딩 중"임을 보여주는 방식 */
+@keyframes loadingBarSlide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
 
 .sway-grass { animation: grassGust 6.5s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
 /* left 대신 transform(translateX)을 애니메이션 — left는 매 프레임 레이아웃을 다시
@@ -61,7 +67,8 @@
    느낌을 내기 위함), duration은 모든 잎이 같아야 그 순서가 흐트러지지 않음 */
 .leaf-fan { animation: leafGust 6.5s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
 .thought-bubble { animation: bubblePop 0.4s ease; }
+.loading-bar-slide { animation: loadingBarSlide 1.1s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
-  .sway-grass, .drift-cloud, .leaf-fan { animation: none !important; }
+  .sway-grass, .drift-cloud, .leaf-fan, .loading-bar-slide { animation: none !important; }
 }

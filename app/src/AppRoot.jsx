@@ -23,24 +23,38 @@ function Loading() {
       style={{ background: "url('/images/loading.jpg') center / cover no-repeat" }}
       className="w-full min-h-screen relative"
     >
+      {/* 제목 블록: 작은 잎 아이콘 + 셀싹(큼) + 부제(작음), 사진 속 밝은 하늘 자리에 */}
       <div
-        style={{ position: 'absolute', left: '57%', top: '40%', transform: 'translate(-50%, -50%)' }}
+        style={{ position: 'absolute', left: '57%', top: '42%', transform: 'translate(-50%, -50%)' }}
         className="flex flex-col items-center gap-1"
       >
+        <img
+          src="/images/leaf-badge.png"
+          alt=""
+          style={{ width: '26px', height: '26px', objectFit: 'contain', marginBottom: '2px', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))' }}
+        />
         <p
           style={{
             fontFamily: "'Cafe24Dongdong', 'Gowun Dodum', sans-serif",
-            fontSize: '1.05rem',
+            fontSize: '1.6rem',
             color: '#4A3B3F',
             textShadow: WHITE_STROKE,
-            whiteSpace: 'nowrap',
           }}
         >
-          셀싹 : 나의 기도 나무 성장기
+          셀싹
         </p>
-        <p style={{ color: '#4A3B3F', textShadow: WHITE_STROKE }} className="text-sm">
-          펼치는 중...
-        </p>
+        <p style={{ color: '#4A3B3F', textShadow: WHITE_STROKE, fontSize: '0.75rem' }}>: 기도 나무 성장기</p>
+      </div>
+
+      {/* 로딩 표시: 화면 맨 아래에 얇은 바 + "펼치는 중..." */}
+      <div
+        style={{ position: 'absolute', left: '50%', bottom: '8%', transform: 'translateX(-50%)', width: '55%', maxWidth: '220px' }}
+        className="flex flex-col items-center gap-2"
+      >
+        <div style={{ width: '100%', height: '3px', borderRadius: '999px', background: '#FFFFFF66', overflow: 'hidden' }}>
+          <div style={{ width: '40%', height: '100%', borderRadius: '999px', background: '#4A3B3F' }} className="loading-bar-slide" />
+        </div>
+        <p style={{ color: '#4A3B3F', textShadow: WHITE_STROKE, fontSize: '0.95rem' }}>펼치는 중...</p>
       </div>
     </div>
   );
