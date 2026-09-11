@@ -13,9 +13,8 @@ import PendingApproval from './components/onboarding/PendingApproval';
 import SuperAdmin from './components/superadmin/SuperAdmin';
 import App from './App';
 
-// 사진 속 밝은 하늘 자리(가운데보다 살짝 오른쪽)에 이름을 얹음 — 배경이 밝고 평평해서
-// 흰 테두리 없이 진한 색 글씨만으로도 잘 읽힘. "펼치는 중" 표시는 화면 맨 아래 가운데로 따로
-// 빼서 뒤에 반투명 블러 패널을 깔아 사진이 뭐가 나오든(나무껍질이든 하늘이든) 잘 읽히게 함
+// 사진 속 밝은 하늘 자리(가운데)에 이름을 얹음 — 배경이 밝고 평평해서 흰 테두리 없이
+// 진한 색 글씨만으로도 잘 읽힘. "펼치는 중" 표시는 화면 맨 아래 가운데로 따로 뺌
 function Loading() {
   return (
     <div
@@ -23,7 +22,7 @@ function Loading() {
       className="w-full min-h-screen relative"
     >
       <div
-        style={{ position: 'absolute', left: '54%', top: '68%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}
+        style={{ position: 'absolute', left: '50%', top: '68%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}
       >
         <p
           style={{
@@ -38,22 +37,10 @@ function Loading() {
       </div>
 
       <div
-        style={{
-          position: 'absolute',
-          left: '50%',
-          bottom: '7%',
-          transform: 'translateX(-50%)',
-          width: '68%',
-          maxWidth: '240px',
-          padding: '14px 20px',
-          borderRadius: '18px',
-          background: 'rgba(255,255,255,0.32)',
-          backdropFilter: 'blur(6px)',
-          WebkitBackdropFilter: 'blur(6px)',
-        }}
+        style={{ position: 'absolute', left: '50%', bottom: '7%', transform: 'translateX(-50%)', width: '55%', maxWidth: '180px' }}
         className="flex flex-col items-center gap-2"
       >
-        <div style={{ width: '55%', maxWidth: '160px', height: '4px', borderRadius: '999px', background: '#D8DED2', overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: '4px', borderRadius: '999px', background: '#D8DED2', overflow: 'hidden' }}>
           <div style={{ width: '40%', height: '100%', borderRadius: '999px', background: '#5C7A55' }} className="loading-bar-slide" />
         </div>
         <p style={{ color: '#5A5148', fontSize: '0.78rem' }}>펼치는 중...</p>
