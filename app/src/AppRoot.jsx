@@ -5,6 +5,7 @@ import { useMembership } from './hooks/useMembership';
 import { useMyRole } from './hooks/useMyRole';
 import { markLeaderNotified } from './lib/church';
 import { isSuperAdmin } from './lib/superAdmin';
+import { getLoadingTheme } from './data/loadingThemes';
 import Login from './components/Login';
 import ProfileSetup from './components/onboarding/ProfileSetup';
 import PersonalHome from './components/PersonalHome';
@@ -13,37 +14,66 @@ import PendingApproval from './components/onboarding/PendingApproval';
 import SuperAdmin from './components/superadmin/SuperAdmin';
 import App from './App';
 
-// 사진 속 밝은 하늘 자리(가운데)에 이름을 얹음 — 배경이 밝고 평평해서 흰 테두리 없이
-// 진한 색 글씨만으로도 잘 읽힘. "펼치는 중" 표시는 화면 맨 아래 가운데로 따로 뺌
-function Loading() {
+// 사진 속 밝은 하늘 자리(가운데, 잎/줄기보다 살짝 아래)에 제목 그룹을 얹음 — 배경이 밝고
+// 평평해서 흰 테두리 없이 진한 잉크색 글씨만으로도 잘 읽힘. 테마별로 바뀌는 값(배경/폰트/색/
+// 문구/장식 아이콘)은 전부 loadingThemes.js에서 가져오고, 이 컴포넌트는 레이아웃만 담당한다.
+// themeId를 지정하지 않으면 기본(실사) 테마가 쓰인다 — 추후 테마 선택 기능이 생기면
+// AppRoot에서 사용자가 고른 themeId를 그대로 넘겨주기만 하면 됨.
+function Loading({ themeId }) {
+  const theme = getLoadingTheme(themeId);
+  const Decoration = theme.decoration;
+
   return (
-    <div
-      style={{ background: "url('/images/loading.jpg') center / cover no-repeat" }}
-      className="w-full min-h-screen relative"
-    >
+    <div style={{ background: theme.background }} className="w-full min-h-screen relative">
       <div
-        style={{ position: 'absolute', left: '50%', top: '68%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}
+        style={{ position: 'absolute', left: '50%', top: '66%', transform: 'translate(-50%, -50%)' }}
+        className="flex flex-col items-center"
       >
+        {Decoration && (
+          <Decoration size={20} strokeWidth={1.8} style={{ color: theme.decorationColor, marginBottom: '6px' }} />
+        )}
         <p
           style={{
-            fontFamily: "'Cafe24Dongdong', 'Gowun Dodum', sans-serif",
-            fontSize: '1.6rem',
-            color: '#3F5942',
+            fontFamily: theme.titleFont,
+            fontWeight: theme.titleWeight,
+            fontSize: '2rem',
+            color: theme.titleColor,
+            textShadow: '0 1px 3px rgba(255,255,255,0.45)',
           }}
         >
           셀싹
         </p>
-        <p style={{ color: '#6B8067', fontSize: '0.75rem' }}>: 기도 나무 성장기</p>
-      </div>
+        <p
+          style={{
+            fontFamily: theme.subtitleFont,
+            color: theme.subtitleColor,
+            fontSize: '0.85rem',
+            marginTop: '4px',
+          }}
+        >
+          기도가 열매가 되는 곳
+        </p>
 
-      <div
-        style={{ position: 'absolute', left: '50%', bottom: '7%', transform: 'translateX(-50%)', width: '55%', maxWidth: '180px' }}
-        className="flex flex-col items-center gap-2"
-      >
-        <div style={{ width: '100%', height: '4px', borderRadius: '999px', background: '#D8DED2', overflow: 'hidden' }}>
-          <div style={{ width: '40%', height: '100%', borderRadius: '999px', background: '#5C7A55' }} className="loading-bar-slide" />
+        <div style={{ marginTop: '30px' }} className="flex flex-col items-center gap-2">
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '140px',
+              height: '3px',
+              borderRadius: '999px',
+              background: theme.progressTrackColor,
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{ width: '40%', height: '100%', borderRadius: '999px', background: theme.progressFillColor }}
+              className="loading-bar-slide"
+            />
+          </div>
+          <p style={{ fontFamily: theme.subtitleFont, color: theme.subtitleColor, fontSize: '0.78rem' }}>
+            {theme.loadingMessage}
+          </p>
         </div>
-        <p style={{ color: '#5A5148', fontSize: '0.78rem' }}>펼치는 중...</p>
       </div>
     </div>
   );
