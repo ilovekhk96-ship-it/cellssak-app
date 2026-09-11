@@ -16,6 +16,9 @@ import App from './App';
 // 사진 속 밝은 하늘(햇빛 번지는 부분)이 대략 가로 55~60%, 세로 38~42% 지점이라
 // 글씨를 그 위에 얹음 — 화면 크기가 달라져도 cover라 사진 속 상대 위치는 거의 그대로 유지됨
 const WHITE_STROKE = '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 6px #fff';
+// 테두리(선) 대신, 글씨 뒤에서 은은하게 퍼지는 흰 블러 — 오프셋 없이 블러만 여러 겹 줘서
+// 마치 글씨 뒤에 흐릿한 흰 빛이 깔린 것처럼 보이게 함
+const WHITE_GLOW = '0 0 4px #fff, 0 0 8px #fff, 0 0 14px #fff';
 
 function Loading() {
   return (
@@ -25,7 +28,7 @@ function Loading() {
     >
       {/* 제목 블록: 작은 잎 아이콘 + 셀싹(큼) + 부제(작음), 사진 속 밝은 하늘 자리에 */}
       <div
-        style={{ position: 'absolute', left: '57%', top: '42%', transform: 'translate(-50%, -50%)' }}
+        style={{ position: 'absolute', left: '63%', top: '48%', transform: 'translate(-50%, -50%)' }}
         className="flex flex-col items-center gap-1"
       >
         <img
@@ -54,7 +57,7 @@ function Loading() {
         <div style={{ width: '100%', height: '3px', borderRadius: '999px', background: '#FFFFFF66', overflow: 'hidden' }}>
           <div style={{ width: '40%', height: '100%', borderRadius: '999px', background: '#4A3B3F' }} className="loading-bar-slide" />
         </div>
-        <p style={{ color: '#4A3B3F', textShadow: WHITE_STROKE, fontSize: '0.95rem' }}>펼치는 중...</p>
+        <p style={{ color: '#4A3B3F', textShadow: WHITE_GLOW, fontSize: '0.95rem' }}>펼치는 중...</p>
       </div>
     </div>
   );
