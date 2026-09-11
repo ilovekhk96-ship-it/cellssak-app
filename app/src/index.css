@@ -20,34 +20,48 @@
   50% { transform: rotate(1.2deg); }
   100% { transform: rotate(-1.2deg); }
 }
-@keyframes swayGrass {
-  0% { transform: rotate(-3deg); }
-  50% { transform: rotate(3deg); }
-  100% { transform: rotate(-3deg); }
-}
 @keyframes driftCloud {
   from { transform: translateX(-100vw); }
   to { transform: translateX(100vw); }
 }
-@keyframes leafFan {
+/* "쏴아 - 제자리 - 살짝 흔들 - 쏴아 - 제자리": 한 방향(오른쪽)으로 훅 기울었다 돌아오고,
+   가만히 있는 동안도 아주 살짝 흔들리다가 한 번 더 훅 기울었다 돌아오는 걸 한 사이클로 */
+@keyframes leafGust {
   0%, 100% { transform: rotate(0deg); }
-  55% { transform: rotate(16deg); }
+  6% { transform: rotate(20deg); }
+  16% { transform: rotate(0deg); }
+  34% { transform: rotate(4deg); }
+  42% { transform: rotate(-1deg); }
+  50% { transform: rotate(0deg); }
+  62% { transform: rotate(20deg); }
+  72% { transform: rotate(0deg); }
+}
+@keyframes grassGust {
+  0%, 100% { transform: rotate(0deg); }
+  6% { transform: rotate(26deg); }
+  16% { transform: rotate(0deg); }
+  34% { transform: rotate(5deg); }
+  42% { transform: rotate(-1deg); }
+  50% { transform: rotate(0deg); }
+  62% { transform: rotate(26deg); }
+  72% { transform: rotate(0deg); }
 }
 @keyframes bubblePop {
   0% { opacity: 0; transform: translateY(6px) scale(0.96); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.sway-twigs { animation: swayTwigs 3.6s ease-in-out infinite; transform-origin: 120px 170px; }
-.sway-grass { animation: swayGrass 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+.sway-grass { animation: grassGust 6.5s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
 /* left 대신 transform(translateX)을 애니메이션 — left는 매 프레임 레이아웃을 다시
    계산해야 해서(리플로우) 느릴 때 뚝뚝 끊겨 보였음. transform은 합성(GPU)만 타서
    훨씬 매끄러움. vw 단위라 뷰포트 폭 기준으로 항상 완전히 화면 밖까지 지나감 */
 .drift-cloud { position: absolute; left: 0; animation-name: driftCloud; animation-timing-function: linear; animation-iteration-count: infinite; will-change: transform; }
-/* 잎사귀 기준점(줄기 쪽)을 (0,0)에 두고 그 점을 축으로 부채꼴로 흔들림 */
-.leaf-fan { animation: leafFan 3.4s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+/* 잎사귀 기준점(줄기 쪽)을 (0,0)에 두고 그 점을 축으로 부채꼴로 흔들림 — animation-delay는
+   잎의 x좌표 기준으로 TreeScene.jsx에서 개별 지정(왼쪽→오른쪽 순서로 훑고 지나가는 바람
+   느낌을 내기 위함), duration은 모든 잎이 같아야 그 순서가 흐트러지지 않음 */
+.leaf-fan { animation: leafGust 6.5s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
 .thought-bubble { animation: bubblePop 0.4s ease; }
 
 @media (prefers-reduced-motion: reduce) {
-  .sway-twigs, .sway-grass, .drift-cloud, .leaf-fan { animation: none !important; }
+  .sway-grass, .drift-cloud, .leaf-fan { animation: none !important; }
 }

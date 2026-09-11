@@ -105,7 +105,11 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
 
   // 나뭇잎 개수: 기도한 날짜 수를 그대로 누적 (셀 나무와 같은 원리 — 나는 한 명뿐이라 하루 최대 1장)
   const score = useMemo(() => Object.keys(dailyActivity).length, [dailyActivity]);
-  const goldenIndices = useMemo(() => personalGoldenIndices(score), [score]);
+  // TODO(임시 미리보기용 — 확인 끝나면 제거): 성장 단계를 순서대로 눌러보기 위한 오버라이드
+  const [previewScore, setPreviewScore] = useState(null);
+  const effectiveScore = previewScore ?? score;
+  const effectiveFruitCount = previewScore ? Math.round(previewScore / 30) : fruitCount;
+  const goldenIndices = useMemo(() => personalGoldenIndices(effectiveScore), [effectiveScore]);
 
   // 처음 기도한 날부터 오늘까지, 한국 기준 날짜가 지난 일수 (셀 나무의 daysCount와 동일한 계산)
   const daysCount = useMemo(() => {
@@ -243,13 +247,32 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
           </div>
         </div>
 
+        {/* TODO(임시 미리보기용 — 확인 끝나면 제거): 성장 단계 순서대로 눌러보는 버튼 */}
+        <div style={{ position: 'fixed', top: '52px', left: '8px', zIndex: 50, display: 'flex', flexWrap: 'wrap', gap: '4px', maxWidth: '180px' }}>
+          {[7, 30, 100, 300, 1000, 3000].map((n) => (
+            <button
+              key={n}
+              onClick={() => setPreviewScore(n)}
+              style={{ background: previewScore === n ? '#6FA66B' : '#FFFDF9', color: previewScore === n ? '#fff' : '#4A3B3F', fontSize: '10px', padding: '3px 6px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}
+            >
+              {n}
+            </button>
+          ))}
+          <button
+            onClick={() => setPreviewScore(null)}
+            style={{ background: '#FFFDF9', color: '#C4456B', fontSize: '10px', padding: '3px 6px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}
+          >
+            원래대로
+          </button>
+        </div>
+
         <div style={{ flex: 1, position: 'relative' }} className="flex flex-col">
           <TreeScene
-            score={score}
+            score={effectiveScore}
             daysCount={daysCount}
             todayActiveCount={0}
             seedCount={seedCount}
-            fruitCount={fruitCount}
+            fruitCount={effectiveFruitCount}
             showActions={false}
             treeLabel={`${user.displayName}의 기도나무`}
             goldenIndices={goldenIndices}

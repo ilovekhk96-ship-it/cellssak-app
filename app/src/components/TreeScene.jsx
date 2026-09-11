@@ -23,6 +23,17 @@ function growthScale(score) {
 const MIN_USER_ZOOM = 0.6;
 const MAX_USER_ZOOM = 4;
 
+// 나무 사진의 캐노피가 대략 이 x범위(SVG 좌표) 안에 있음 — 잎이 왼쪽에서 오른쪽으로
+// 순서대로 흔들리는 "바람이 훑고 지나가는" 느낌을 내려고, x좌표를 0~1로 정규화해서
+// 그 비율만큼 애니메이션 시작을 늦춤(왼쪽=0=제일 먼저, 오른쪽=1=제일 나중)
+const CANOPY_X_MIN = 5;
+const CANOPY_X_MAX = 235;
+const LEAF_WAVE_SPAN = 1.3; // 왼쪽 끝~오른쪽 끝을 훑는 데 걸리는 시간(초)
+function leafWaveDelay(x) {
+  const frac = Math.min(1, Math.max(0, (x - CANOPY_X_MIN) / (CANOPY_X_MAX - CANOPY_X_MIN)));
+  return frac * LEAF_WAVE_SPAN;
+}
+
 // 실사 잎 사진 2종을 잎마다 번갈아 사용 — 벡터 색상 대신 사진이라 golden은 필터로 색을 입힘.
 // 두 사진이 줄기 위치가 서로 달라서(leaf-1은 줄기가 아래, leaf-2는 줄기가 위) 흔들리는
 // 축(origin)도 사진마다 따로 지정 — 안 그러면 줄기 반대쪽(잎 끝)을 축으로 흔들려 보임
@@ -30,7 +41,9 @@ const LEAF_IMAGES = [
   { src: '/images/leaf-1.png', origin: '50% 96%' },
   { src: '/images/leaf-2.png', origin: '48% 6%' },
 ];
-const GOLD_LEAF_FILTER = 'sepia(1) saturate(6) hue-rotate(-10deg) brightness(1.05)';
+// 후광(글로우)은 없이, 초록이랑 안 부딪히면서도 또렷하게 보이는 진한 황금빛 노랑 —
+// hue-rotate를 순수 노랑 쪽(주황보다 위)으로 두고 채도를 다시 올려서 색이 흐려 보이지 않게 함
+const GOLD_LEAF_FILTER = 'sepia(1) hue-rotate(16deg) saturate(9) brightness(1.4)';
 
 // 나무 발치뿐 아니라 기본 화면 폭(0~240) 전체에 촘촘히 깔아서 사방이 잔디로 덮인
 // 느낌을 줌 — 폭을 너무 늘리면 viewBox가 넓어져 나무가 상대적으로 작아 보이므로,
@@ -93,6 +106,19 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
     return arr;
   }, [score, goldenIndices]);
   const visibleFruits = FRUIT_SPOTS.slice(0, fruitCount);
+
+  // 잎이랑 열매를 "자란 순서" 하나로 합쳐서, 열매가 맺힌 뒤에 자란 잎은 열매보다 나중에
+  // (그림상 위에) 그려지게 함 — 몇 번째 잎일 때 이 열매가 맺혔는지 정확한 기록은 없어서,
+  // 열매 k번째는 지금까지의 잎 개수(score) 사이에 고르게 있었을 거라고 추정해서 순서를 매김
+  const growthItems = useMemo(() => {
+    const items = leafPaths.map((l, i) => ({ type: 'leaf', order: i, leaf: l, i }));
+    visibleFruits.forEach((f, k) => {
+      items.push({ type: 'fruit', order: ((k + 1) / (fruitCount + 1)) * score, fruit: f, k });
+    });
+    items.sort((a, b) => a.order - b.order);
+    return items;
+  }, [leafPaths, visibleFruits, fruitCount, score]);
+
   const dayPct = Math.max(0, Math.min(100, Math.round((daysCount / 30) * 100)));
 
   const scale = useMemo(() => growthScale(score), [score]);
@@ -268,40 +294,47 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
           <g transform={treeTransform} style={{ transition: 'transform 0.8s ease' }}>
             <image href="/images/tree.png" x={-5} y={-3} width={250} height={235} preserveAspectRatio="xMidYMax meet" />
 
-            {leafPaths.map((l, i) => {
-              const w = 17 * l.scale;
-              const h = 17 * l.scale;
-              return (
-                // 바깥 g: 가지에 붙는 자리·방향을 고정(속성 transform). 안쪽 g: 그 자리에 붙은
-                // 채로 잎사귀 끝만 바람에 부채꼴로 흔들리도록 CSS 애니메이션(leaf-fan)을 따로 줌
-                // — 속성 transform과 CSS 애니메이션 transform은 같은 요소에 같이 못 걸려서 분리함
-                <g key={i} transform={`translate(${l.x} ${l.y}) rotate(${l.rot})`}>
-                  <g
-                    className="leaf-fan"
-                    style={{
-                      transformOrigin: l.variant.origin,
-                      animationDelay: `${-((i * 37) % 340) / 100}s`,
-                      animationDuration: `${3 + (i % 5) * 0.35}s`,
-                      filter: l.isGolden ? GOLD_LEAF_FILTER : undefined,
-                    }}
-                  >
-                    <image href={l.variant.src} x={-w / 2} y={-h / 2} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
+            {growthItems.map((item) => {
+              if (item.type === 'leaf') {
+                const l = item.leaf;
+                const i = item.i;
+                const w = 17 * l.scale;
+                const h = 17 * l.scale;
+                return (
+                  // 바깥 g: 가지에 붙는 자리·방향을 고정(속성 transform). 안쪽 g: 그 자리에 붙은
+                  // 채로 잎사귀 끝만 바람에 부채꼴로 흔들리도록 CSS 애니메이션(leaf-fan)을 따로 줌
+                  // — 속성 transform과 CSS 애니메이션 transform은 같은 요소에 같이 못 걸려서 분리함
+                  // x좌표가 왼쪽일수록 먼저(delay가 더 -), 오른쪽일수록 나중에 흔들리기 시작하게
+                  // 해서 "왼쪽에서 오른쪽으로 쏴아 훑고 지나가는" 바람처럼 보이게 함. duration은
+                  // 전부 같아야(CSS 쪽 leafGust 6.5s 고정) 이 순서가 안 흐트러짐
+                  <g key={`l${i}`} transform={`translate(${l.x} ${l.y}) rotate(${l.rot})`}>
+                    <g
+                      className="leaf-fan"
+                      style={{
+                        transformOrigin: l.variant.origin,
+                        animationDelay: `${-(leafWaveDelay(l.x) + (i % 7) * 0.03)}s`,
+                        filter: l.isGolden ? GOLD_LEAF_FILTER : undefined,
+                      }}
+                    >
+                      <image href={l.variant.src} x={-w / 2} y={-h / 2} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
+                    </g>
                   </g>
-                </g>
-              );
-            })}
-            {visibleFruits.map((f, i) => {
+                );
+              }
+              const f = item.fruit;
+              const k = item.k;
               const fw = 12;
               const fh = 14;
               return (
                 <image
-                  key={`f${i}`}
-                  href={i % 2 === 0 ? '/images/grape-1.png' : '/images/grape-2.png'}
+                  key={`f${k}`}
+                  href={k % 2 === 0 ? '/images/grape-1.png' : '/images/grape-2.png'}
                   x={f.x - fw / 2}
                   y={f.y - fh / 2}
                   width={fw}
                   height={fh}
                   preserveAspectRatio="xMidYMid meet"
+                  style={{ filter: 'brightness(1.55) saturate(0.7) contrast(0.92)' }}
                 />
               );
             })}
