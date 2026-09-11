@@ -13,9 +13,9 @@ import PendingApproval from './components/onboarding/PendingApproval';
 import SuperAdmin from './components/superadmin/SuperAdmin';
 import App from './App';
 
-// 사진 속 밝은 하늘(빈 여백)이 왼쪽 절반, 세로 55~95% 구간에 걸쳐 있어서 그 안쪽(가운데보다
-// 살짝 왼쪽)에 글씨를 얹음 — 그 자리 자체가 배경이 밝고 평평해서 흰 테두리/글로우 없이
-// 진한 색 글씨만으로도 잘 읽힘
+// 사진 속 밝은 하늘 자리(가운데보다 살짝 오른쪽)에 이름을 얹음 — 배경이 밝고 평평해서
+// 흰 테두리 없이 진한 색 글씨만으로도 잘 읽힘. "펼치는 중" 표시는 화면 맨 아래 가운데로 따로
+// 빼서 뒤에 반투명 블러 패널을 깔아 사진이 뭐가 나오든(나무껍질이든 하늘이든) 잘 읽히게 함
 function Loading() {
   return (
     <div
@@ -23,31 +23,40 @@ function Loading() {
       className="w-full min-h-screen relative"
     >
       <div
-        style={{ position: 'absolute', left: '44%', top: '70%', transform: 'translate(-50%, -50%)', width: '75%', maxWidth: '260px' }}
-        className="flex flex-col items-center"
+        style={{ position: 'absolute', left: '54%', top: '68%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}
       >
-        <img
-          src="/images/leaf-badge.png"
-          alt=""
-          style={{ width: '26px', height: '26px', objectFit: 'contain', marginBottom: '6px' }}
-        />
         <p
           style={{
             fontFamily: "'Cafe24Dongdong', 'Gowun Dodum', sans-serif",
             fontSize: '1.6rem',
             color: '#3F5942',
-            textAlign: 'center',
           }}
         >
           셀싹
         </p>
-        <p style={{ color: '#6B8067', fontSize: '0.75rem', textAlign: 'center' }}>: 기도 나무 성장기</p>
-        <div
-          style={{ width: '55%', maxWidth: '180px', height: '4px', borderRadius: '999px', background: '#D8DED2', overflow: 'hidden', marginTop: '16px' }}
-        >
+        <p style={{ color: '#6B8067', fontSize: '0.75rem' }}>: 기도 나무 성장기</p>
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          left: '50%',
+          bottom: '7%',
+          transform: 'translateX(-50%)',
+          width: '68%',
+          maxWidth: '240px',
+          padding: '14px 20px',
+          borderRadius: '18px',
+          background: 'rgba(255,255,255,0.32)',
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
+        }}
+        className="flex flex-col items-center gap-2"
+      >
+        <div style={{ width: '55%', maxWidth: '160px', height: '4px', borderRadius: '999px', background: '#D8DED2', overflow: 'hidden' }}>
           <div style={{ width: '40%', height: '100%', borderRadius: '999px', background: '#5C7A55' }} className="loading-bar-slide" />
         </div>
-        <p style={{ color: '#7C8B78', fontSize: '0.78rem', marginTop: '10px' }}>펼치는 중...</p>
+        <p style={{ color: '#5A5148', fontSize: '0.78rem' }}>펼치는 중...</p>
       </div>
     </div>
   );
