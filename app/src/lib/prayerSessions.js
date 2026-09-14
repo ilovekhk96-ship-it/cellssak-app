@@ -55,3 +55,17 @@ export function sumDurationsByDate(sessions) {
   });
   return map;
 }
+
+// 초 단위를 "N시간 N분 N초"로 — 기도쌓기 관련 시간 표시는 전부 이 형식으로 통일(분 단위로
+// 뭉개지 않고 초까지 보여달라는 요청 반영)
+export function formatDurationKorean(totalSeconds) {
+  const s = Math.max(0, Math.round(totalSeconds || 0));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  const parts = [];
+  if (h > 0) parts.push(`${h}시간`);
+  if (h > 0 || m > 0) parts.push(`${m}분`);
+  parts.push(`${sec}초`);
+  return parts.join(' ');
+}

@@ -21,6 +21,7 @@ import AddEntrySheet from './components/entry/AddEntrySheet';
 import ProfileMenu from './components/nav/ProfileMenu';
 import CellMenu from './components/nav/CellMenu';
 import TreeMoveButton from './components/nav/TreeMoveButton';
+import PrayerHeatmap from './components/prayer/PrayerHeatmap';
 
 export default function App({ user, onSignOut, churchId, cellId, isLeader, onBackHome }) {
   const [cellNameLoaded, setCellNameLoaded] = useState(false);
@@ -34,6 +35,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
   const [addOpen, setAddOpen] = useState(false);
   const [sheet, setSheet] = useState(null); // null | { editId, status }
   const [form, setForm] = useState({ prayerName: '', targetName: '', relationship: '', note: '' });
+  const [heatmapOpen, setHeatmapOpen] = useState(false);
 
   const listRef = useRef(null);
   const groupRefs = useRef({});
@@ -304,6 +306,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
             seedCount={seedCount}
             fruitCount={fruitCount}
             onOpenList={(k) => setOpenList(k)}
+            onOpenHeatmap={() => setHeatmapOpen(true)}
             treeLabel={cellName ? `${cellName}의 기도나무` : ''}
             goldenIndices={goldenIndices}
           />
@@ -353,6 +356,16 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
             destination={{ kind: 'cell', churchId, cellId }}
             onClose={() => setAddOpen(false)}
             onAdded={() => setToast('기도씨앗을 심었어요 🌱')}
+          />
+        )}
+
+        {heatmapOpen && (
+          <PrayerHeatmap
+            user={user}
+            activeCell={{ churchId, cellId }}
+            cellName={cellName}
+            mode="cell"
+            onClose={() => setHeatmapOpen(false)}
           />
         )}
       </div>

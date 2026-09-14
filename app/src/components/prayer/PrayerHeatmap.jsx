@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { todayStr } from '../../data/constants';
-import { listenRecentPrayerSessions, sumDurationsByDate } from '../../lib/prayerSessions';
+import { listenRecentPrayerSessions, sumDurationsByDate, formatDurationKorean } from '../../lib/prayerSessions';
 import { listenCellPrayerTimeDaily } from '../../lib/prayerData';
 
 const WEEKS = 12; // 12주(84일)치만 — 화면 폭에 맞춰 스크롤 없이 한눈에 보이는 정도
@@ -22,17 +22,16 @@ function shiftDateStr(dateStr, deltaDays) {
   return d.toISOString().slice(0, 10);
 }
 
-function formatMinutesLabel(seconds) {
-  const minutes = Math.round(seconds / 60);
-  if (minutes <= 0) return '기도 기록 없음';
-  return `${minutes}분`;
+function sumRange(byDate, dates) {
+  return dates.reduce((sum, d) => sum + (byDate[d] || 0), 0);
 }
 
 // 기도잔디 — 하루 총 기도시간(기도쌓기 세션 합)에 따라 색 농도가 달라지는 캘린더.
-// "나의 잔디"는 본인 기도쌓기 기록, "OO셀 잔디"는 셀원 전체의 그날 합계 시간만 보여줌 —
-// 누가 얼마나 했는지 개인별 breakdown은 절대 안 보이고 하루 총합 숫자 하나만 공유됨
-export default function PrayerHeatmap({ user, activeCell, cellName, onClose }) {
-  const [view, setView] = useState('mine'); // 'mine' | 'cell'
+// mode='personal'(내 나무 화면에서 열림): 본인 기록만, 비교 없음.
+// mode='cell'(셀 나무 화면에서 열림): 셀 전체 합계로 칠하고, 셀 합계 vs 내 기여를 항상 같이
+// 보여줌 — 다른 셀원 개인별 시간은 여전히 어디에도 없고, "셀 전체" 대 "나" 두 숫자만 비교함
+export default function PrayerHeatmap({ user, activeCell, cellName, mode = 'personal', onClose }) {
+  const isCellMode = mode === 'cell' && Boolean(activeCell);
   const [sessions, setSessions] = useState([]);
   const [cellDaily, setCellDaily] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
@@ -43,16 +42,16 @@ export default function PrayerHeatmap({ user, activeCell, cellName, onClose }) {
   }, [user.uid]);
 
   useEffect(() => {
-    if (!activeCell) {
+    if (!isCellMode) {
       setCellDaily({});
       return undefined;
     }
     const unsubscribe = listenCellPrayerTimeDaily(activeCell.churchId, activeCell.cellId, setCellDaily);
     return unsubscribe;
-  }, [activeCell?.churchId, activeCell?.cellId]);
+  }, [isCellMode, activeCell?.churchId, activeCell?.cellId]);
 
   const myByDate = useMemo(() => sumDurationsByDate(sessions), [sessions]);
-  const byDate = view === 'cell' ? cellDaily : myByDate;
+  const gridByDate = isCellMode ? cellDaily : myByDate;
 
   const today = todayStr();
   const dates = useMemo(
@@ -68,13 +67,10 @@ export default function PrayerHeatmap({ user, activeCell, cellName, onClose }) {
     weeks.push(paddedDates.slice(i, i + 7));
   }
 
-  const totalMinutesThisPeriod = Math.round(dates.reduce((sum, d) => sum + (byDate[d] || 0), 0) / 60);
-  const selectedSeconds = selectedDate ? byDate[selectedDate] || 0 : null;
-
-  const switchView = (next) => {
-    setView(next);
-    setSelectedDate(null);
-  };
+  const totalThisPeriod = sumRange(gridByDate, dates);
+  const myTotalThisPeriod = sumRange(myByDate, dates);
+  const selectedCellSeconds = selectedDate ? cellDaily[selectedDate] || 0 : 0;
+  const selectedMySeconds = selectedDate ? myByDate[selectedDate] || 0 : 0;
 
   const vars = {
     '--ink': '#4A3B3F',
@@ -84,13 +80,15 @@ export default function PrayerHeatmap({ user, activeCell, cellName, onClose }) {
     '--font-body': "'Gowun Dodum', sans-serif",
   };
 
+  const title = isCellMode ? `${cellName || '셀'} 잔디` : '기도잔디';
+
   return (
     <div
       style={{ ...vars, background: 'var(--paper)', fontFamily: 'var(--font-body)', color: 'var(--ink)' }}
       className="fixed inset-0 z-50 flex flex-col"
     >
       <div className="flex items-center justify-between px-4 pt-4 pb-2 shrink-0">
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}>기도잔디</span>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}>{title}</span>
         <button
           onClick={onClose}
           aria-label="닫기"
@@ -101,36 +99,23 @@ export default function PrayerHeatmap({ user, activeCell, cellName, onClose }) {
         </button>
       </div>
 
-      {activeCell && (
-        <div className="flex gap-2 px-4 pb-2 shrink-0">
-          <button
-            onClick={() => switchView('mine')}
-            style={{
-              background: view === 'mine' ? '#5C7A55' : '#F5F0E8',
-              color: view === 'mine' ? '#FFF8F0' : 'var(--ink-soft)',
-            }}
-            className="px-3.5 py-1.5 rounded-full text-xs"
-          >
-            나의 잔디
-          </button>
-          <button
-            onClick={() => switchView('cell')}
-            style={{
-              background: view === 'cell' ? '#5C7A55' : '#F5F0E8',
-              color: view === 'cell' ? '#FFF8F0' : 'var(--ink-soft)',
-            }}
-            className="px-3.5 py-1.5 rounded-full text-xs"
-          >
-            {cellName || '셀'} 잔디
-          </button>
-        </div>
-      )}
-
       <div className="flex-1 overflow-y-auto px-5 pb-8">
-        <p style={{ color: 'var(--ink-soft)', fontSize: '0.8rem' }} className="mb-4">
-          최근 {WEEKS}주 동안 {view === 'cell' ? `${cellName || '셀'} 전체가` : '내가'} 총 {totalMinutesThisPeriod}분
-          기도했어요
-        </p>
+        {isCellMode ? (
+          <div style={{ background: '#F5F0E8', borderRadius: '14px' }} className="px-4 py-3 mb-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span style={{ color: 'var(--ink-soft)', fontSize: '0.78rem' }}>최근 {WEEKS}주 · {cellName || '셀'} 전체</span>
+              <span style={{ fontSize: '0.82rem', fontWeight: 500 }}>{formatDurationKorean(totalThisPeriod)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span style={{ color: 'var(--ink-soft)', fontSize: '0.78rem' }}>그 중 나</span>
+              <span style={{ color: '#5C7A55', fontSize: '0.82rem', fontWeight: 500 }}>{formatDurationKorean(myTotalThisPeriod)}</span>
+            </div>
+          </div>
+        ) : (
+          <p style={{ color: 'var(--ink-soft)', fontSize: '0.8rem' }} className="mb-4">
+            최근 {WEEKS}주 동안 총 {formatDurationKorean(totalThisPeriod)} 기도했어요
+          </p>
+        )}
 
         <div className="flex gap-2">
           <div className="flex flex-col gap-1 shrink-0" style={{ paddingTop: '2px' }}>
@@ -158,7 +143,7 @@ export default function PrayerHeatmap({ user, activeCell, cellName, onClose }) {
                         width: '18px',
                         height: '18px',
                         borderRadius: '4px',
-                        background: colorForMinutes((byDate[date] || 0) / 60),
+                        background: colorForMinutes((gridByDate[date] || 0) / 60),
                         outline: selectedDate === date ? '1.5px solid var(--ink)' : 'none',
                         outlineOffset: '1px',
                       }}
@@ -172,15 +157,30 @@ export default function PrayerHeatmap({ user, activeCell, cellName, onClose }) {
           </div>
         </div>
 
-        <div
-          style={{ background: '#F5F0E8', borderRadius: '14px', minHeight: '44px' }}
-          className="mt-5 px-4 py-3 flex items-center justify-between"
-        >
-          <span style={{ fontSize: '0.85rem' }}>{selectedDate || '날짜를 눌러 확인해보세요'}</span>
-          {selectedDate && (
-            <span style={{ color: '#5C7A55', fontSize: '0.85rem', fontWeight: 500 }}>
-              {formatMinutesLabel(selectedSeconds)}
-            </span>
+        <div style={{ background: '#F5F0E8', borderRadius: '14px', minHeight: '44px' }} className="mt-5 px-4 py-3">
+          {!selectedDate ? (
+            <span style={{ fontSize: '0.85rem' }}>날짜를 눌러 확인해보세요</span>
+          ) : isCellMode ? (
+            <div className="flex flex-col gap-1.5">
+              <span style={{ fontSize: '0.85rem' }}>{selectedDate}</span>
+              <div className="flex items-center justify-between">
+                <span style={{ color: 'var(--ink-soft)', fontSize: '0.78rem' }}>{cellName || '셀'} 전체</span>
+                <span style={{ fontSize: '0.82rem', fontWeight: 500 }}>{formatDurationKorean(selectedCellSeconds)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span style={{ color: 'var(--ink-soft)', fontSize: '0.78rem' }}>그 중 나</span>
+                <span style={{ color: '#5C7A55', fontSize: '0.82rem', fontWeight: 500 }}>
+                  {formatDurationKorean(selectedMySeconds)}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <span style={{ fontSize: '0.85rem' }}>{selectedDate}</span>
+              <span style={{ color: '#5C7A55', fontSize: '0.85rem', fontWeight: 500 }}>
+                {formatDurationKorean(myByDate[selectedDate] || 0)}
+              </span>
+            </div>
           )}
         </div>
       </div>

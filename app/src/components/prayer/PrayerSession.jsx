@@ -3,7 +3,7 @@ import { X, Sprout, Users, HelpCircle } from 'lucide-react';
 import { STATUS, todayStr } from '../../data/constants';
 import { listenPersonalRequests } from '../../lib/personalPrayer';
 import { listenEntries, listenCellPrayerTimeDaily } from '../../lib/prayerData';
-import { savePrayerSession, listenRecentPrayerSessions } from '../../lib/prayerSessions';
+import { savePrayerSession, listenRecentPrayerSessions, formatDurationKorean } from '../../lib/prayerSessions';
 import { usePrayerTimer, formatHMS } from '../../hooks/usePrayerTimer';
 import { usePrayerMusic } from '../../hooks/usePrayerMusic';
 import PrayerCardViewer from './PrayerCardViewer';
@@ -176,11 +176,11 @@ export default function PrayerSession({ user, activeCell, cellName, onClose }) {
         {(todaySavedSeconds > 0 || cellTodaySeconds > 0) && (
           <div className="flex flex-col items-center gap-0.5">
             {todaySavedSeconds > 0 && (
-              <p style={{ color: '#5C7A55', fontSize: '0.75rem' }}>오늘 나의 기도시간 {Math.round(todaySavedSeconds / 60)}분</p>
+              <p style={{ color: '#5C7A55', fontSize: '0.75rem' }}>오늘 나의 기도시간 {formatDurationKorean(todaySavedSeconds)}</p>
             )}
             {activeCell && cellTodaySeconds > 0 && (
               <p style={{ color: 'var(--ink-soft)', fontSize: '0.7rem' }}>
-                오늘 {cellName || '셀'} 기도시간 {Math.round(cellTodaySeconds / 60)}분
+                오늘 {cellName || '셀'} 기도시간 {formatDurationKorean(cellTodaySeconds)}
               </p>
             )}
           </div>

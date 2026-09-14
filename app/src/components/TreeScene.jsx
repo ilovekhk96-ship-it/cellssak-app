@@ -1,5 +1,5 @@
 import { useId, useMemo, useRef, useState } from 'react';
-import { Sprout, Sparkles } from 'lucide-react';
+import { Sprout, Sparkles, Calendar } from 'lucide-react';
 import { STATUS } from '../data/constants';
 import { TRUNK, BRANCHES, FRUIT_SPOTS, getLeaf } from '../data/treeData';
 import Cloud from './Cloud';
@@ -75,7 +75,7 @@ function GrassRow({ blades, height, keyPrefix }) {
   ));
 }
 
-export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onOpenList, showActions = true, treeLabel, goldenIndices }) {
+export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onOpenList, onOpenHeatmap, showActions = true, treeLabel, goldenIndices }) {
   // 나무 그림자 블러 필터 id — 화면에 TreeScene이 동시에 여러 개 떠도(예: 추후 비교 화면)
   // id가 겹치지 않도록 컴포넌트 인스턴스마다 고유하게 생성
   const shadowBlurId = `tree-shadow-blur-${useId()}`;
@@ -410,6 +410,9 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
         <div style={{ position: 'absolute', left: '14px', bottom: '18px' }} className="flex flex-col items-center gap-2.5">
           <SceneIcon icon={Sprout} label="기도씨앗" count={seedCount} bg="#FFFDF9" fg={STATUS.seed.color} onClick={() => onOpenList('seed')} />
           <SceneIcon icon={Sparkles} label="믿음열매" count={fruitCount} bg="#FFFDF9" fg={STATUS.fruit.color} onClick={() => onOpenList('fruit')} />
+          {onOpenHeatmap && (
+            <SceneIcon icon={Calendar} label="기도잔디" bg="#FFFDF9" fg="#4A9FD8" onClick={onOpenHeatmap} />
+          )}
           <div style={{ marginTop: '6px' }}>
             <HeartBadge count={todayActiveCount} />
           </div>

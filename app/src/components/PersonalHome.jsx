@@ -13,7 +13,7 @@ import {
   logPersonalPrayerForToday,
 } from '../lib/personalPrayer';
 import { personalGoldenIndices } from '../lib/growth';
-import { listenRecentPrayerSessions, sumDurationsByDate } from '../lib/prayerSessions';
+import { listenRecentPrayerSessions, formatDurationKorean } from '../lib/prayerSessions';
 import TreeScene from './TreeScene';
 import SceneIcon from './SceneIcon';
 import ListModal from './ListModal';
@@ -117,11 +117,10 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
   // 나뭇잎 개수: 기도한 날짜 수를 그대로 누적 (셀 나무와 같은 원리 — 나는 한 명뿐이라 하루 최대 1장)
   const score = useMemo(() => Object.keys(dailyActivity).length, [dailyActivity]);
 
-  // 오늘 기도쌓기로 누적한 시간(분) — 기도쌓기 진입점 아래에 작게 보여줌
-  const todayPrayerMinutes = useMemo(() => {
+  // 오늘 기도쌓기로 누적한 시간(초) — 기도쌓기 진입점 아래에 작게 보여줌
+  const todayPrayerSeconds = useMemo(() => {
     const today = todayStr();
-    const seconds = prayerSessions.filter((s) => s.date === today).reduce((sum, s) => sum + (s.durationSeconds || 0), 0);
-    return Math.round(seconds / 60);
+    return prayerSessions.filter((s) => s.date === today).reduce((sum, s) => sum + (s.durationSeconds || 0), 0);
   }, [prayerSessions]);
   // TODO(임시 미리보기용 — 확인 끝나면 제거): 성장 단계를 순서대로 눌러보기 위한 오버라이드
   const [previewScore, setPreviewScore] = useState(null);
@@ -316,12 +315,12 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
             <SceneIcon icon={Calendar} label="기도잔디" bg="#FFFDF9" fg="#4A9FD8" onClick={() => setPrayerHeatmapOpen(true)} />
             <div className="flex flex-col items-center gap-1">
               <SceneIcon icon={Timer} label="기도쌓기" bg="#FFFDF9" fg="#C4456B" onClick={() => setPrayerSessionOpen(true)} />
-              {todayPrayerMinutes > 0 && (
+              {todayPrayerSeconds > 0 && (
                 <span
                   style={{ background: '#FFFDF9', color: '#5C7A55', fontSize: '9px', boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}
-                  className="px-2 py-0.5 rounded-full"
+                  className="px-2 py-0.5 rounded-full whitespace-nowrap"
                 >
-                  오늘 {todayPrayerMinutes}분
+                  오늘 {formatDurationKorean(todayPrayerSeconds)}
                 </span>
               )}
             </div>
@@ -379,7 +378,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
         )}
 
         {prayerHeatmapOpen && (
-          <PrayerHeatmap user={user} activeCell={activeCell} cellName={cellName} onClose={() => setPrayerHeatmapOpen(false)} />
+          <PrayerHeatmap user={user} mode="personal" onClose={() => setPrayerHeatmapOpen(false)} />
         )}
       </div>
     </div>
