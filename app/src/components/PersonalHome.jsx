@@ -21,6 +21,7 @@ import AddEntrySheet from './entry/AddEntrySheet';
 import ProfileMenu from './nav/ProfileMenu';
 import NotificationBell from './nav/NotificationBell';
 import TreeMoveButton from './nav/TreeMoveButton';
+import PrayerSession from './prayer/PrayerSession';
 
 const PAGE_BG = "url('/images/bg-field.jpg') center 72% / cover no-repeat";
 
@@ -33,6 +34,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
   const [addOpen, setAddOpen] = useState(false);
   const [sheet, setSheet] = useState(null); // null | { editId, status }
   const [form, setForm] = useState({ prayerName: '', targetName: '', relationship: '', note: '' });
+  const [prayerSessionOpen, setPrayerSessionOpen] = useState(false);
 
   const listRef = useRef(null);
   const groupRefs = useRef({});
@@ -296,7 +298,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
               onClick={() => setOpenList('fruit')}
             />
             <SceneIcon icon={Calendar} label="캘린더" bg="#FFFDF9" fg="#4A9FD8" onClick={() => setToast('준비 중이에요')} />
-            <SceneIcon icon={Timer} label="타이머" bg="#FFFDF9" fg="#C4456B" onClick={() => setToast('준비 중이에요')} />
+            <SceneIcon icon={Timer} label="기도쌓기" bg="#FFFDF9" fg="#C4456B" onClick={() => setPrayerSessionOpen(true)} />
           </div>
         </div>
 
@@ -344,6 +346,10 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
             onClose={() => setAddOpen(false)}
             onAdded={() => setToast('나의 기도나무에 심었어요 🌱')}
           />
+        )}
+
+        {prayerSessionOpen && (
+          <PrayerSession user={user} activeCell={activeCell} onClose={() => setPrayerSessionOpen(false)} />
         )}
       </div>
     </div>

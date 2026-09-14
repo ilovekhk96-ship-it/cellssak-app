@@ -63,6 +63,11 @@ service cloud.firestore {
       match /dailyActivity/{date} {
         allow read, write: if isSignedIn() && request.auth.uid == uid;
       }
+
+      // 기도쌓기 세션 기록(시작/종료 시각, 경과시간) — 본인만 읽고 쓸 수 있음
+      match /prayerSessions/{sessionId} {
+        allow read, write: if isSignedIn() && request.auth.uid == uid;
+      }
     }
 
     match /churches/{churchId} {
