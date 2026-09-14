@@ -13,6 +13,7 @@ import {
   logPersonalPrayerForToday,
 } from '../lib/personalPrayer';
 import { personalGoldenIndices } from '../lib/growth';
+import { listenRecentPrayerSessions, sumDurationsByDate } from '../lib/prayerSessions';
 import TreeScene from './TreeScene';
 import SceneIcon from './SceneIcon';
 import ListModal from './ListModal';
@@ -22,6 +23,7 @@ import ProfileMenu from './nav/ProfileMenu';
 import NotificationBell from './nav/NotificationBell';
 import TreeMoveButton from './nav/TreeMoveButton';
 import PrayerSession from './prayer/PrayerSession';
+import PrayerHeatmap from './prayer/PrayerHeatmap';
 
 const PAGE_BG = "url('/images/bg-field.jpg') center 72% / cover no-repeat";
 
@@ -35,6 +37,8 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
   const [sheet, setSheet] = useState(null); // null | { editId, status }
   const [form, setForm] = useState({ prayerName: '', targetName: '', relationship: '', note: '' });
   const [prayerSessionOpen, setPrayerSessionOpen] = useState(false);
+  const [prayerHeatmapOpen, setPrayerHeatmapOpen] = useState(false);
+  const [prayerSessions, setPrayerSessions] = useState([]);
 
   const listRef = useRef(null);
   const groupRefs = useRef({});
@@ -58,6 +62,11 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
 
   useEffect(() => {
     const unsubscribe = listenPersonalDailyActivity(user.uid, setDailyActivity);
+    return unsubscribe;
+  }, [user.uid]);
+
+  useEffect(() => {
+    const unsubscribe = listenRecentPrayerSessions(user.uid, setPrayerSessions);
     return unsubscribe;
   }, [user.uid]);
 
@@ -107,6 +116,13 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
 
   // 나뭇잎 개수: 기도한 날짜 수를 그대로 누적 (셀 나무와 같은 원리 — 나는 한 명뿐이라 하루 최대 1장)
   const score = useMemo(() => Object.keys(dailyActivity).length, [dailyActivity]);
+
+  // 오늘 기도쌓기로 누적한 시간(분) — 기도쌓기 진입점 아래에 작게 보여줌
+  const todayPrayerMinutes = useMemo(() => {
+    const today = todayStr();
+    const seconds = prayerSessions.filter((s) => s.date === today).reduce((sum, s) => sum + (s.durationSeconds || 0), 0);
+    return Math.round(seconds / 60);
+  }, [prayerSessions]);
   // TODO(임시 미리보기용 — 확인 끝나면 제거): 성장 단계를 순서대로 눌러보기 위한 오버라이드
   const [previewScore, setPreviewScore] = useState(null);
   const effectiveScore = previewScore ?? score;
@@ -297,8 +313,18 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
               fg={STATUS.fruit.color}
               onClick={() => setOpenList('fruit')}
             />
-            <SceneIcon icon={Calendar} label="캘린더" bg="#FFFDF9" fg="#4A9FD8" onClick={() => setToast('준비 중이에요')} />
-            <SceneIcon icon={Timer} label="기도쌓기" bg="#FFFDF9" fg="#C4456B" onClick={() => setPrayerSessionOpen(true)} />
+            <SceneIcon icon={Calendar} label="기도잔디" bg="#FFFDF9" fg="#4A9FD8" onClick={() => setPrayerHeatmapOpen(true)} />
+            <div className="flex flex-col items-center gap-1">
+              <SceneIcon icon={Timer} label="기도쌓기" bg="#FFFDF9" fg="#C4456B" onClick={() => setPrayerSessionOpen(true)} />
+              {todayPrayerMinutes > 0 && (
+                <span
+                  style={{ background: '#FFFDF9', color: '#5C7A55', fontSize: '9px', boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}
+                  className="px-2 py-0.5 rounded-full"
+                >
+                  오늘 {todayPrayerMinutes}분
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -351,6 +377,8 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
         {prayerSessionOpen && (
           <PrayerSession user={user} activeCell={activeCell} onClose={() => setPrayerSessionOpen(false)} />
         )}
+
+        {prayerHeatmapOpen && <PrayerHeatmap user={user} onClose={() => setPrayerHeatmapOpen(false)} />}
       </div>
     </div>
   );

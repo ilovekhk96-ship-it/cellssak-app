@@ -35,10 +35,21 @@ export async function savePrayerSession({ uid, activeCell, startedAt, endedAt, d
   return { saved: true };
 }
 
-// 최근 세션 목록(오늘 기도시간 등 합산용) — 넉넉히 최근 200건만 구독
+// 최근 세션 목록(오늘 기도시간, 기도잔디 등 합산용) — 넉넉히 최근 400건만 구독
 export function listenRecentPrayerSessions(uid, callback) {
-  const q = query(sessionsCol(uid), orderBy('date', 'desc'), limit(200));
+  const q = query(sessionsCol(uid), orderBy('date', 'desc'), limit(400));
   return onSnapshot(q, (snap) => {
     callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   });
+}
+
+// 세션 목록을 날짜별 총 경과초로 합산 — { 'YYYY-MM-DD': totalSeconds }. 기도잔디 색 농도,
+// "오늘 기도시간" 표시 등에 공통으로 씀
+export function sumDurationsByDate(sessions) {
+  const map = {};
+  sessions.forEach((s) => {
+    if (!s.date) return;
+    map[s.date] = (map[s.date] || 0) + (s.durationSeconds || 0);
+  });
+  return map;
 }

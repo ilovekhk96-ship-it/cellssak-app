@@ -3,7 +3,7 @@ import { X, Sprout, Users, HelpCircle } from 'lucide-react';
 import { STATUS, todayStr } from '../../data/constants';
 import { listenPersonalRequests } from '../../lib/personalPrayer';
 import { listenEntries } from '../../lib/prayerData';
-import { savePrayerSession } from '../../lib/prayerSessions';
+import { savePrayerSession, listenRecentPrayerSessions } from '../../lib/prayerSessions';
 import { usePrayerTimer, formatHMS } from '../../hooks/usePrayerTimer';
 import { usePrayerMusic } from '../../hooks/usePrayerMusic';
 import PrayerCardViewer from './PrayerCardViewer';
@@ -41,6 +41,7 @@ export default function PrayerSession({ user, activeCell, onClose }) {
   const [activeBookmark, setActiveBookmark] = useState(null); // null | 'mine' | 'intercession' | 'guide'
   const [myRequests, setMyRequests] = useState([]);
   const [cellEntries, setCellEntries] = useState([]);
+  const [todaySavedSeconds, setTodaySavedSeconds] = useState(0);
   const [ending, setEnding] = useState(false);
   const [dndHintSeen, setDndHintSeen] = useState(() => {
     try {
@@ -63,6 +64,17 @@ export default function PrayerSession({ user, activeCell, onClose }) {
     const unsubscribe = listenEntries(activeCell.churchId, activeCell.cellId, setCellEntries);
     return unsubscribe;
   }, [activeCell?.churchId, activeCell?.cellId]);
+
+  // 오늘 이미 저장된(=종료된) 기도쌓기 시간 — 지금 진행 중인 타이머와는 별개로, "오늘 지금까지
+  // 얼마나 쌓았는지" 감을 보여주기 위한 용도. 현재 세션이 끝나 저장되면 실시간으로 반영됨
+  useEffect(() => {
+    const unsubscribe = listenRecentPrayerSessions(user.uid, (sessions) => {
+      const today = todayStr();
+      const seconds = sessions.filter((s) => s.date === today).reduce((sum, s) => sum + (s.durationSeconds || 0), 0);
+      setTodaySavedSeconds(seconds);
+    });
+    return unsubscribe;
+  }, [user.uid]);
 
   const myCards = useMemo(() => myRequests.map(toCard), [myRequests]);
 
@@ -148,6 +160,9 @@ export default function PrayerSession({ user, activeCell, onClose }) {
 
       <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 min-h-0">
         <p style={{ color: 'var(--ink-soft)', fontSize: '0.85rem' }}>기도쌓기</p>
+        {todaySavedSeconds > 0 && (
+          <p style={{ color: '#5C7A55', fontSize: '0.75rem' }}>오늘 나의 기도시간 {Math.round(todaySavedSeconds / 60)}분</p>
+        )}
         <p
           style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '2.6rem', fontVariantNumeric: 'tabular-nums' }}
         >
