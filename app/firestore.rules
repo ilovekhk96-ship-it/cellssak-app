@@ -122,6 +122,12 @@ service cloud.firestore {
           allow read, write: if isMember(churchId, cellId) || isSuperAdmin();
         }
 
+        // 셀 전체 기도쌓기 시간 합계(날짜별 총 초) — 개인별 시간은 절대 안 들어가고 합계 숫자만
+        // 있어서 dailyPrayers와 같은 수준으로 셀원 누구나 읽고 늘릴 수 있게 허용
+        match /prayerTimeDaily/{date} {
+          allow read, write: if isMember(churchId, cellId) || isSuperAdmin();
+        }
+
         // 알림에 쓰는 활동 기록(믿음열매 전환 등) — 셀원이면 누구나 읽고 남길 수 있음, 수정/삭제 없음
         match /activity/{activityId} {
           allow read, create: if isMember(churchId, cellId) || isSuperAdmin();

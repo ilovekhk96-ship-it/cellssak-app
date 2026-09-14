@@ -375,10 +375,12 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
         )}
 
         {prayerSessionOpen && (
-          <PrayerSession user={user} activeCell={activeCell} onClose={() => setPrayerSessionOpen(false)} />
+          <PrayerSession user={user} activeCell={activeCell} cellName={cellName} onClose={() => setPrayerSessionOpen(false)} />
         )}
 
-        {prayerHeatmapOpen && <PrayerHeatmap user={user} onClose={() => setPrayerHeatmapOpen(false)} />}
+        {prayerHeatmapOpen && (
+          <PrayerHeatmap user={user} activeCell={activeCell} cellName={cellName} onClose={() => setPrayerHeatmapOpen(false)} />
+        )}
       </div>
     </div>
   );

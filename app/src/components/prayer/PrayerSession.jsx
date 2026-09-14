@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { X, Sprout, Users, HelpCircle } from 'lucide-react';
 import { STATUS, todayStr } from '../../data/constants';
 import { listenPersonalRequests } from '../../lib/personalPrayer';
-import { listenEntries } from '../../lib/prayerData';
+import { listenEntries, listenCellPrayerTimeDaily } from '../../lib/prayerData';
 import { savePrayerSession, listenRecentPrayerSessions } from '../../lib/prayerSessions';
 import { usePrayerTimer, formatHMS } from '../../hooks/usePrayerTimer';
 import { usePrayerMusic } from '../../hooks/usePrayerMusic';
@@ -35,13 +35,14 @@ function toCard(entry) {
 // 3)책갈피(나의기도/중보기도/가이드) 4)음악 5)기타이고, 평소엔 타이머만 보이다가 책갈피를
 // 눌렀을 때만 해당 콘텐츠가 아래에서 올라온다. 타이머/음악/책갈피 상태는 서로 완전히 분리돼
 // 있어서 하나를 조작해도 다른 것에 영향을 주지 않는다.
-export default function PrayerSession({ user, activeCell, onClose }) {
+export default function PrayerSession({ user, activeCell, cellName, onClose }) {
   const timer = usePrayerTimer();
   const music = usePrayerMusic();
   const [activeBookmark, setActiveBookmark] = useState(null); // null | 'mine' | 'intercession' | 'guide'
   const [myRequests, setMyRequests] = useState([]);
   const [cellEntries, setCellEntries] = useState([]);
   const [todaySavedSeconds, setTodaySavedSeconds] = useState(0);
+  const [cellTodaySeconds, setCellTodaySeconds] = useState(0);
   const [ending, setEnding] = useState(false);
   const [dndHintSeen, setDndHintSeen] = useState(() => {
     try {
@@ -75,6 +76,18 @@ export default function PrayerSession({ user, activeCell, onClose }) {
     });
     return unsubscribe;
   }, [user.uid]);
+
+  // 셀 전체 오늘 기도시간 합계 — 개인별 breakdown 없이 합계 숫자만 구독
+  useEffect(() => {
+    if (!activeCell) {
+      setCellTodaySeconds(0);
+      return undefined;
+    }
+    const unsubscribe = listenCellPrayerTimeDaily(activeCell.churchId, activeCell.cellId, (map) => {
+      setCellTodaySeconds(map[todayStr()] || 0);
+    });
+    return unsubscribe;
+  }, [activeCell?.churchId, activeCell?.cellId]);
 
   const myCards = useMemo(() => myRequests.map(toCard), [myRequests]);
 
@@ -160,8 +173,17 @@ export default function PrayerSession({ user, activeCell, onClose }) {
 
       <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 min-h-0">
         <p style={{ color: 'var(--ink-soft)', fontSize: '0.85rem' }}>기도쌓기</p>
-        {todaySavedSeconds > 0 && (
-          <p style={{ color: '#5C7A55', fontSize: '0.75rem' }}>오늘 나의 기도시간 {Math.round(todaySavedSeconds / 60)}분</p>
+        {(todaySavedSeconds > 0 || cellTodaySeconds > 0) && (
+          <div className="flex flex-col items-center gap-0.5">
+            {todaySavedSeconds > 0 && (
+              <p style={{ color: '#5C7A55', fontSize: '0.75rem' }}>오늘 나의 기도시간 {Math.round(todaySavedSeconds / 60)}분</p>
+            )}
+            {activeCell && cellTodaySeconds > 0 && (
+              <p style={{ color: 'var(--ink-soft)', fontSize: '0.7rem' }}>
+                오늘 {cellName || '셀'} 기도시간 {Math.round(cellTodaySeconds / 60)}분
+              </p>
+            )}
+          </div>
         )}
         <p
           style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '2.6rem', fontVariantNumeric: 'tabular-nums' }}

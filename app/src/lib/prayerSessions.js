@@ -1,7 +1,7 @@
 import { collection, doc, setDoc, onSnapshot, query, orderBy, limit, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import { logPersonalPrayerForToday } from './personalPrayer';
-import { logPrayerForToday } from './prayerData';
+import { logPrayerForToday, incrementCellPrayerTime } from './prayerData';
 
 // 기도쌓기(스톱워치) 세션 기록 — 나무 성장 근거(dailyActivity)와는 별개 컬렉션.
 // dailyActivity는 "그날 기도했는지"만 알면 되지만, 오늘/일별/주간 기도시간이나 기도잔디
@@ -30,6 +30,8 @@ export async function savePrayerSession({ uid, activeCell, startedAt, endedAt, d
   await logPersonalPrayerForToday(uid, date);
   if (activeCell) {
     await logPrayerForToday(activeCell.churchId, activeCell.cellId, date, uid);
+    // 개인별 시간은 셀에 전혀 남기지 않고, 그날 셀 전체 합계에만 이번 세션 시간을 더함
+    await incrementCellPrayerTime(activeCell.churchId, activeCell.cellId, date, durationSeconds);
   }
 
   return { saved: true };

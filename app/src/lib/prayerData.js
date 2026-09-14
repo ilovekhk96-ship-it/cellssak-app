@@ -28,6 +28,10 @@ function activityCol(churchId, cellId) {
   return collection(db, 'churches', churchId, 'cells', cellId, 'activity');
 }
 
+function prayerTimeDailyCol(churchId, cellId) {
+  return collection(db, 'churches', churchId, 'cells', cellId, 'prayerTimeDaily');
+}
+
 // 셀의 기도 대상자 목록을 실시간으로 구독 — 셀원 누구든 추가/기도/열매전환하면 모두에게 즉시 반영됨
 export function listenEntries(churchId, cellId, callback) {
   const q = query(entriesCol(churchId, cellId), orderBy('createdAt'));
@@ -137,6 +141,25 @@ export function listenCellActivity(churchId, cellId, callback) {
   const q = query(activityCol(churchId, cellId), orderBy('createdAt', 'desc'), limit(20));
   return onSnapshot(q, (snap) => {
     callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  });
+}
+
+// 셀 전체 기도쌓기 시간 합계(기도잔디 셀 히트맵용) — 누가 몇 분 했는지는 전혀 남기지 않고
+// 그날 총 초만 원자적으로 늘림(increment). 개인별 기도시간을 셀원끼리 공유할지는 아직
+// 정해지지 않아서, 지금은 이 합계 숫자 하나만 셀에 공유하기로 함
+export async function incrementCellPrayerTime(churchId, cellId, date, seconds) {
+  const ref = doc(prayerTimeDailyCol(churchId, cellId), date);
+  await setDoc(ref, { totalSeconds: increment(Math.round(seconds)) }, { merge: true });
+}
+
+// 날짜별 셀 전체 기도시간(초) 실시간 구독 — { 'YYYY-MM-DD': totalSeconds }
+export function listenCellPrayerTimeDaily(churchId, cellId, callback) {
+  return onSnapshot(prayerTimeDailyCol(churchId, cellId), (snap) => {
+    const map = {};
+    snap.forEach((d) => {
+      map[d.id] = d.data().totalSeconds || 0;
+    });
+    callback(map);
   });
 }
 

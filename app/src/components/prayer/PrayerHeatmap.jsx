@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { todayStr } from '../../data/constants';
 import { listenRecentPrayerSessions, sumDurationsByDate } from '../../lib/prayerSessions';
+import { listenCellPrayerTimeDaily } from '../../lib/prayerData';
 
 const WEEKS = 12; // 12주(84일)치만 — 화면 폭에 맞춰 스크롤 없이 한눈에 보이는 정도
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -27,11 +28,13 @@ function formatMinutesLabel(seconds) {
   return `${minutes}분`;
 }
 
-// 기도잔디 — 하루 총 기도시간(기도쌓기 세션 합)에 따라 색 농도가 달라지는 개인 캘린더.
-// 지금은 본인 데이터만 보여줌(셀원 전체를 모아 보여주는 히트맵은 개인 기도시간을 셀에
-// 공유할지 여부를 먼저 정해야 해서 별도로 다룸)
-export default function PrayerHeatmap({ user, onClose }) {
+// 기도잔디 — 하루 총 기도시간(기도쌓기 세션 합)에 따라 색 농도가 달라지는 캘린더.
+// "나의 잔디"는 본인 기도쌓기 기록, "OO셀 잔디"는 셀원 전체의 그날 합계 시간만 보여줌 —
+// 누가 얼마나 했는지 개인별 breakdown은 절대 안 보이고 하루 총합 숫자 하나만 공유됨
+export default function PrayerHeatmap({ user, activeCell, cellName, onClose }) {
+  const [view, setView] = useState('mine'); // 'mine' | 'cell'
   const [sessions, setSessions] = useState([]);
+  const [cellDaily, setCellDaily] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
 
   useEffect(() => {
@@ -39,7 +42,17 @@ export default function PrayerHeatmap({ user, onClose }) {
     return unsubscribe;
   }, [user.uid]);
 
-  const byDate = useMemo(() => sumDurationsByDate(sessions), [sessions]);
+  useEffect(() => {
+    if (!activeCell) {
+      setCellDaily({});
+      return undefined;
+    }
+    const unsubscribe = listenCellPrayerTimeDaily(activeCell.churchId, activeCell.cellId, setCellDaily);
+    return unsubscribe;
+  }, [activeCell?.churchId, activeCell?.cellId]);
+
+  const myByDate = useMemo(() => sumDurationsByDate(sessions), [sessions]);
+  const byDate = view === 'cell' ? cellDaily : myByDate;
 
   const today = todayStr();
   const dates = useMemo(
@@ -57,6 +70,11 @@ export default function PrayerHeatmap({ user, onClose }) {
 
   const totalMinutesThisPeriod = Math.round(dates.reduce((sum, d) => sum + (byDate[d] || 0), 0) / 60);
   const selectedSeconds = selectedDate ? byDate[selectedDate] || 0 : null;
+
+  const switchView = (next) => {
+    setView(next);
+    setSelectedDate(null);
+  };
 
   const vars = {
     '--ink': '#4A3B3F',
@@ -83,9 +101,35 @@ export default function PrayerHeatmap({ user, onClose }) {
         </button>
       </div>
 
+      {activeCell && (
+        <div className="flex gap-2 px-4 pb-2 shrink-0">
+          <button
+            onClick={() => switchView('mine')}
+            style={{
+              background: view === 'mine' ? '#5C7A55' : '#F5F0E8',
+              color: view === 'mine' ? '#FFF8F0' : 'var(--ink-soft)',
+            }}
+            className="px-3.5 py-1.5 rounded-full text-xs"
+          >
+            나의 잔디
+          </button>
+          <button
+            onClick={() => switchView('cell')}
+            style={{
+              background: view === 'cell' ? '#5C7A55' : '#F5F0E8',
+              color: view === 'cell' ? '#FFF8F0' : 'var(--ink-soft)',
+            }}
+            className="px-3.5 py-1.5 rounded-full text-xs"
+          >
+            {cellName || '셀'} 잔디
+          </button>
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto px-5 pb-8">
         <p style={{ color: 'var(--ink-soft)', fontSize: '0.8rem' }} className="mb-4">
-          최근 {WEEKS}주 동안 총 {totalMinutesThisPeriod}분 기도했어요
+          최근 {WEEKS}주 동안 {view === 'cell' ? `${cellName || '셀'} 전체가` : '내가'} 총 {totalMinutesThisPeriod}분
+          기도했어요
         </p>
 
         <div className="flex gap-2">
