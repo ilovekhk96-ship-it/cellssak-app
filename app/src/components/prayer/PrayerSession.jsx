@@ -144,14 +144,22 @@ export default function PrayerSession({ user, activeCell, cellName, onClose }) {
 
   return (
     <div
-      style={{
-        ...vars,
-        background: 'linear-gradient(180deg, #FFF8F0 0%, #F3F0E5 100%)',
-        fontFamily: 'var(--font-body)',
-        color: 'var(--ink)',
-      }}
-      className="fixed inset-0 z-50 flex flex-col"
+      style={{ ...vars, maxWidth: '384px', margin: '0 auto' }}
+      className="fixed inset-0 flex items-center justify-center z-50 px-4"
     >
+      {/* 기도 중에는 뒷배경을 눌러서 실수로 닫히면 안 되니(타이머가 진행 중일 수 있음)
+          클릭해도 닫히지 않는 순수 배경 딤 처리만 함 — 닫으려면 위쪽 X를 눌러야 함 */}
+      <div style={{ background: '#00000040' }} className="absolute inset-0" />
+      <div
+        style={{
+          background: 'linear-gradient(180deg, #FFF8F0 0%, #F3F0E5 100%)',
+          fontFamily: 'var(--font-body)',
+          color: 'var(--ink)',
+          height: '82vh',
+          maxHeight: '640px',
+        }}
+        className="relative w-full rounded-3xl shadow-xl flex flex-col overflow-hidden"
+      >
       <div className="flex items-center justify-between px-4 pt-4 shrink-0">
         <button
           onClick={handleEnd}
@@ -257,7 +265,7 @@ export default function PrayerSession({ user, activeCell, cellName, onClose }) {
       </div>
 
       <div
-        style={{ position: 'fixed', right: 0, top: '50%', transform: 'translateY(-50%)' }}
+        style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}
         className="flex flex-col gap-2 z-10"
       >
         {BOOKMARKS.map((b) => {
@@ -307,6 +315,7 @@ export default function PrayerSession({ user, activeCell, cellName, onClose }) {
           {activePanel.key === 'guide' && <PrayerGuidePanel />}
         </div>
       )}
+      </div>
     </div>
   );
 }

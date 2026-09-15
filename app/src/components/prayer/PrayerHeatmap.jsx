@@ -94,104 +94,110 @@ export default function PrayerHeatmap({ user, activeCell, cellName, mode = 'pers
 
   return (
     <div
-      style={{ ...vars, background: 'var(--paper)', fontFamily: 'var(--font-body)', color: 'var(--ink)' }}
-      className="fixed inset-0 z-50 flex flex-col"
+      style={{ ...vars, maxWidth: '384px', margin: '0 auto' }}
+      className="fixed inset-0 flex items-center justify-center z-50 px-4"
     >
-      <div className="flex items-center justify-between px-4 pt-4 pb-2 shrink-0">
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}>{title}</span>
-        <button
-          onClick={onClose}
-          aria-label="닫기"
-          style={{ background: '#F5F0E8', color: 'var(--ink)' }}
-          className="w-9 h-9 rounded-full flex items-center justify-center active:scale-90 transition-transform"
-        >
-          <X size={16} />
-        </button>
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-5 pb-8">
-        {isCellMode ? (
-          <div style={{ background: '#F5F0E8', borderRadius: '14px' }} className="px-4 py-3 mb-4 flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <span style={{ color: 'var(--ink-soft)', fontSize: '0.78rem' }}>최근 1년 · {cellName || '셀'} 전체</span>
-              <span style={{ fontSize: '0.82rem', fontWeight: 500 }}>{formatDurationKorean(totalThisPeriod)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span style={{ color: 'var(--ink-soft)', fontSize: '0.78rem' }}>그 중 나</span>
-              <span style={{ color: '#5C7A55', fontSize: '0.82rem', fontWeight: 500 }}>{formatDurationKorean(myTotalThisPeriod)}</span>
-            </div>
-          </div>
-        ) : (
-          <p style={{ color: 'var(--ink-soft)', fontSize: '0.8rem' }} className="mb-4">
-            최근 1년 동안 총 {formatDurationKorean(totalThisPeriod)} 기도했어요
-          </p>
-        )}
-
-        <div className="flex gap-1.5">
-          <div className="flex flex-col gap-1 shrink-0" style={{ paddingTop: '2px' }}>
-            {DAY_LABELS.map((label, i) => (
-              <div
-                key={label}
-                style={{ width: `${CELL}px`, height: `${CELL}px`, fontSize: '8px', color: 'var(--ink-soft)' }}
-                className="flex items-center justify-center"
-              >
-                {i % 2 === 1 ? label : ''}
-              </div>
-            ))}
-          </div>
-
-          <div ref={gridScrollRef} className="flex gap-1 overflow-x-auto">
-            {weeks.map((week, wi) => (
-              <div key={wi} className="flex flex-col gap-1">
-                {week.map((date, di) =>
-                  date ? (
-                    <button
-                      key={date}
-                      onClick={() => setSelectedDate(date)}
-                      aria-label={date}
-                      style={{
-                        width: `${CELL}px`,
-                        height: `${CELL}px`,
-                        borderRadius: '3px',
-                        background: colorForMinutes((gridByDate[date] || 0) / 60),
-                        outline: selectedDate === date ? '1.5px solid var(--ink)' : 'none',
-                        outlineOffset: '1px',
-                      }}
-                    />
-                  ) : (
-                    <div key={`empty-${di}`} style={{ width: `${CELL}px`, height: `${CELL}px` }} />
-                  )
-                )}
-              </div>
-            ))}
-          </div>
+      <div style={{ background: '#00000040' }} className="absolute inset-0" onClick={onClose} />
+      <div
+        style={{ background: 'var(--paper)', fontFamily: 'var(--font-body)', color: 'var(--ink)', height: '82vh', maxHeight: '640px' }}
+        className="relative w-full rounded-3xl shadow-xl flex flex-col overflow-hidden"
+      >
+        <div className="flex items-center justify-between px-4 pt-4 pb-2 shrink-0">
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}>{title}</span>
+          <button
+            onClick={onClose}
+            aria-label="닫기"
+            style={{ background: '#F5F0E8', color: 'var(--ink)' }}
+            className="w-9 h-9 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+          >
+            <X size={16} />
+          </button>
         </div>
 
-        <div style={{ background: '#F5F0E8', borderRadius: '14px', minHeight: '44px' }} className="mt-5 px-4 py-3">
-          {!selectedDate ? (
-            <span style={{ fontSize: '0.85rem' }}>날짜를 눌러 확인해보세요</span>
-          ) : isCellMode ? (
-            <div className="flex flex-col gap-1.5">
-              <span style={{ fontSize: '0.85rem' }}>{selectedDate}</span>
+        <div className="flex-1 overflow-y-auto px-5 pb-8">
+          {isCellMode ? (
+            <div style={{ background: '#F5F0E8', borderRadius: '14px' }} className="px-4 py-3 mb-4 flex flex-col gap-1">
               <div className="flex items-center justify-between">
-                <span style={{ color: 'var(--ink-soft)', fontSize: '0.78rem' }}>{cellName || '셀'} 전체</span>
-                <span style={{ fontSize: '0.82rem', fontWeight: 500 }}>{formatDurationKorean(selectedCellSeconds)}</span>
+                <span style={{ color: 'var(--ink-soft)', fontSize: '0.78rem' }}>최근 1년 · {cellName || '셀'} 전체</span>
+                <span style={{ fontSize: '0.82rem', fontWeight: 500 }}>{formatDurationKorean(totalThisPeriod)}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span style={{ color: 'var(--ink-soft)', fontSize: '0.78rem' }}>그 중 나</span>
-                <span style={{ color: '#5C7A55', fontSize: '0.82rem', fontWeight: 500 }}>
-                  {formatDurationKorean(selectedMySeconds)}
-                </span>
+                <span style={{ color: '#5C7A55', fontSize: '0.82rem', fontWeight: 500 }}>{formatDurationKorean(myTotalThisPeriod)}</span>
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-between">
-              <span style={{ fontSize: '0.85rem' }}>{selectedDate}</span>
-              <span style={{ color: '#5C7A55', fontSize: '0.85rem', fontWeight: 500 }}>
-                {formatDurationKorean(myByDate[selectedDate] || 0)}
-              </span>
-            </div>
+            <p style={{ color: 'var(--ink-soft)', fontSize: '0.8rem' }} className="mb-4">
+              최근 1년 동안 총 {formatDurationKorean(totalThisPeriod)} 기도했어요
+            </p>
           )}
+
+          <div className="flex gap-1.5">
+            <div className="flex flex-col gap-1 shrink-0" style={{ paddingTop: '2px' }}>
+              {DAY_LABELS.map((label, i) => (
+                <div
+                  key={label}
+                  style={{ width: `${CELL}px`, height: `${CELL}px`, fontSize: '8px', color: 'var(--ink-soft)' }}
+                  className="flex items-center justify-center"
+                >
+                  {i % 2 === 1 ? label : ''}
+                </div>
+              ))}
+            </div>
+
+            <div ref={gridScrollRef} className="flex gap-1 overflow-x-auto">
+              {weeks.map((week, wi) => (
+                <div key={wi} className="flex flex-col gap-1">
+                  {week.map((date, di) =>
+                    date ? (
+                      <button
+                        key={date}
+                        onClick={() => setSelectedDate(date)}
+                        aria-label={date}
+                        style={{
+                          width: `${CELL}px`,
+                          height: `${CELL}px`,
+                          borderRadius: '3px',
+                          background: colorForMinutes((gridByDate[date] || 0) / 60),
+                          outline: selectedDate === date ? '1.5px solid var(--ink)' : 'none',
+                          outlineOffset: '1px',
+                        }}
+                      />
+                    ) : (
+                      <div key={`empty-${di}`} style={{ width: `${CELL}px`, height: `${CELL}px` }} />
+                    )
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ background: '#F5F0E8', borderRadius: '14px', minHeight: '44px' }} className="mt-5 px-4 py-3">
+            {!selectedDate ? (
+              <span style={{ fontSize: '0.85rem' }}>날짜를 눌러 확인해보세요</span>
+            ) : isCellMode ? (
+              <div className="flex flex-col gap-1.5">
+                <span style={{ fontSize: '0.85rem' }}>{selectedDate}</span>
+                <div className="flex items-center justify-between">
+                  <span style={{ color: 'var(--ink-soft)', fontSize: '0.78rem' }}>{cellName || '셀'} 전체</span>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 500 }}>{formatDurationKorean(selectedCellSeconds)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span style={{ color: 'var(--ink-soft)', fontSize: '0.78rem' }}>그 중 나</span>
+                  <span style={{ color: '#5C7A55', fontSize: '0.82rem', fontWeight: 500 }}>
+                    {formatDurationKorean(selectedMySeconds)}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span style={{ fontSize: '0.85rem' }}>{selectedDate}</span>
+                <span style={{ color: '#5C7A55', fontSize: '0.85rem', fontWeight: 500 }}>
+                  {formatDurationKorean(myByDate[selectedDate] || 0)}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
