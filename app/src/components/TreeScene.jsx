@@ -36,10 +36,13 @@ function leafWaveDelay(x) {
 
 // 실사 잎 사진 2종을 잎마다 번갈아 사용 — 벡터 색상 대신 사진이라 golden은 필터로 색을 입힘.
 // 두 사진이 줄기 위치가 서로 달라서(leaf-1은 줄기가 아래, leaf-2는 줄기가 위) 흔들리는
-// 축(origin)도 사진마다 따로 지정 — 안 그러면 줄기 반대쪽(잎 끝)을 축으로 흔들려 보임
+// 축(origin)도 사진마다 따로 지정 — 안 그러면 줄기 반대쪽(잎 끝)을 축으로 흔들려 보임.
+// anchorX/anchorY는 origin과 같은 지점(줄기)을 가리키는 0~1 비율 — 이 지점이 가지 좌표(0,0)에
+// 오도록 이미지를 그려서, 줄기가 진짜로 가지에 붙어있는 것처럼 보이게 함(전엔 이미지 중심을
+// 가지 좌표에 맞춰서 줄기가 가지에서 붕 떠 보였음)
 const LEAF_IMAGES = [
-  { src: '/images/leaf-1.png', origin: '50% 96%' },
-  { src: '/images/leaf-2.png', origin: '48% 6%' },
+  { src: '/images/leaf-1.png', origin: '50% 96%', anchorX: 0.5, anchorY: 0.96 },
+  { src: '/images/leaf-2.png', origin: '48% 6%', anchorX: 0.48, anchorY: 0.06 },
 ];
 // 후광(글로우)은 없이, 초록이랑 안 부딪히면서도 또렷하게 보이는 진한 황금빛 노랑 —
 // hue-rotate를 순수 노랑 쪽(주황보다 위)으로 두고 채도를 다시 올려서 색이 흐려 보이지 않게 함
@@ -282,6 +285,14 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
             <filter id={shadowBlurId} x="-60%" y="-150%" width="220%" height="400%">
               <feGaussianBlur stdDeviation="3.5" />
             </filter>
+            {/* 캐노피 위쪽에서 은은하게 퍼지는 햇빛 — 배경 사진의 광원(왼쪽 위)과 맞춰서
+                살짝 왼쪽으로 치우친 중심에서 바깥으로 갈수록 옅어짐. screen 블렌드라
+                잎 색을 가리지 않고 그 위에 빛만 얹히는 느낌 */}
+            <radialGradient id={`${shadowBlurId}-sun`} cx="42%" cy="6%" r="62%">
+              <stop offset="0%" stopColor="#FFF6D8" stopOpacity="0.5" />
+              <stop offset="45%" stopColor="#FFF6D8" stopOpacity="0.2" />
+              <stop offset="100%" stopColor="#FFF6D8" stopOpacity="0" />
+            </radialGradient>
           </defs>
           <g transform={`rotate(10 ${GROUND_ANCHOR.x} ${GROUND_ANCHOR.y})`} filter={`url(#${shadowBlurId})`}>
             <ellipse cx={GROUND_ANCHOR.x + 60} cy={GROUND_ANCHOR.y + 2} rx={100} ry={11} fill="#1F3D22" opacity="0.17" />
@@ -300,6 +311,8 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
                 const i = item.i;
                 const w = 17 * l.scale;
                 const h = 17 * l.scale;
+                const ax = l.variant.anchorX ?? 0.5;
+                const ay = l.variant.anchorY ?? 0.5;
                 return (
                   // 바깥 g: 가지에 붙는 자리·방향을 고정(속성 transform). 안쪽 g: 그 자리에 붙은
                   // 채로 잎사귀 끝만 바람에 부채꼴로 흔들리도록 CSS 애니메이션(leaf-fan)을 따로 줌
@@ -316,7 +329,7 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
                         filter: l.isGolden ? GOLD_LEAF_FILTER : undefined,
                       }}
                     >
-                      <image href={l.variant.src} x={-w / 2} y={-h / 2} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
+                      <image href={l.variant.src} x={-w * ax} y={-h * ay} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
                     </g>
                   </g>
                 );
@@ -338,6 +351,16 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
                 />
               );
             })}
+
+            {/* 잎들 위에 얹는 햇빛 워시 — pointerEvents 꺼서 터치/클릭 방해 안 하게 함 */}
+            <ellipse
+              cx={100}
+              cy={15}
+              rx={150}
+              ry={140}
+              fill={`url(#${shadowBlurId}-sun)`}
+              style={{ mixBlendMode: 'screen', pointerEvents: 'none' }}
+            />
           </g>
 
           {/* 앞줄 잔디 — 나무 그림 다음(=앞)에 그려서 밑동을 살짝 덮되, 키를 낮게 둬서
