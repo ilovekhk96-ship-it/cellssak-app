@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { X } from 'lucide-react';
 import { todayStr } from '../../data/constants';
 import { listenRecentPrayerSessions, sumDurationsByDate, formatDurationKorean } from '../../lib/prayerSessions';
 import { listenCellPrayerTimeDaily } from '../../lib/prayerData';
 
-const WEEKS = 12; // 12주(84일)치만 — 화면 폭에 맞춰 스크롤 없이 한눈에 보이는 정도
+const WEEKS = 53; // 깃허브 잔디처럼 최근 1년치 — 화면보다 넓어서 가로 스크롤로 봄
+const CELL = 12; // 칸 크기(px) — 1년치가 들어가야 해서 예전(18px)보다 작게
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
 // 분에 따라 색 농도만 다른 세이지 그린 — 기도쌓기 화면의 진행바 색(#5C7A55)과 같은 계열
@@ -35,6 +36,15 @@ export default function PrayerHeatmap({ user, activeCell, cellName, mode = 'pers
   const [sessions, setSessions] = useState([]);
   const [cellDaily, setCellDaily] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
+  const gridScrollRef = useRef(null);
+
+  // 열자마자 최신 주(오늘)가 보이도록 가로 스크롤을 오른쪽 끝으로 — 깃허브 잔디처럼
+  // 왼쪽이 과거, 오른쪽이 오늘이라 기본으로 과거부터 보이면 정작 오늘은 스크롤해야 보임
+  useEffect(() => {
+    if (gridScrollRef.current) {
+      gridScrollRef.current.scrollLeft = gridScrollRef.current.scrollWidth;
+    }
+  }, []);
 
   useEffect(() => {
     const unsubscribe = listenRecentPrayerSessions(user.uid, setSessions);
@@ -103,7 +113,7 @@ export default function PrayerHeatmap({ user, activeCell, cellName, mode = 'pers
         {isCellMode ? (
           <div style={{ background: '#F5F0E8', borderRadius: '14px' }} className="px-4 py-3 mb-4 flex flex-col gap-1">
             <div className="flex items-center justify-between">
-              <span style={{ color: 'var(--ink-soft)', fontSize: '0.78rem' }}>최근 {WEEKS}주 · {cellName || '셀'} 전체</span>
+              <span style={{ color: 'var(--ink-soft)', fontSize: '0.78rem' }}>최근 1년 · {cellName || '셀'} 전체</span>
               <span style={{ fontSize: '0.82rem', fontWeight: 500 }}>{formatDurationKorean(totalThisPeriod)}</span>
             </div>
             <div className="flex items-center justify-between">
@@ -113,24 +123,24 @@ export default function PrayerHeatmap({ user, activeCell, cellName, mode = 'pers
           </div>
         ) : (
           <p style={{ color: 'var(--ink-soft)', fontSize: '0.8rem' }} className="mb-4">
-            최근 {WEEKS}주 동안 총 {formatDurationKorean(totalThisPeriod)} 기도했어요
+            최근 1년 동안 총 {formatDurationKorean(totalThisPeriod)} 기도했어요
           </p>
         )}
 
-        <div className="flex gap-2">
+        <div className="flex gap-1.5">
           <div className="flex flex-col gap-1 shrink-0" style={{ paddingTop: '2px' }}>
-            {DAY_LABELS.map((label) => (
+            {DAY_LABELS.map((label, i) => (
               <div
                 key={label}
-                style={{ width: '18px', height: '18px', fontSize: '9px', color: 'var(--ink-soft)' }}
+                style={{ width: `${CELL}px`, height: `${CELL}px`, fontSize: '8px', color: 'var(--ink-soft)' }}
                 className="flex items-center justify-center"
               >
-                {label}
+                {i % 2 === 1 ? label : ''}
               </div>
             ))}
           </div>
 
-          <div className="flex gap-1 overflow-x-auto">
+          <div ref={gridScrollRef} className="flex gap-1 overflow-x-auto">
             {weeks.map((week, wi) => (
               <div key={wi} className="flex flex-col gap-1">
                 {week.map((date, di) =>
@@ -140,16 +150,16 @@ export default function PrayerHeatmap({ user, activeCell, cellName, mode = 'pers
                       onClick={() => setSelectedDate(date)}
                       aria-label={date}
                       style={{
-                        width: '18px',
-                        height: '18px',
-                        borderRadius: '4px',
+                        width: `${CELL}px`,
+                        height: `${CELL}px`,
+                        borderRadius: '3px',
                         background: colorForMinutes((gridByDate[date] || 0) / 60),
                         outline: selectedDate === date ? '1.5px solid var(--ink)' : 'none',
                         outlineOffset: '1px',
                       }}
                     />
                   ) : (
-                    <div key={`empty-${di}`} style={{ width: '18px', height: '18px' }} />
+                    <div key={`empty-${di}`} style={{ width: `${CELL}px`, height: `${CELL}px` }} />
                   )
                 )}
               </div>
