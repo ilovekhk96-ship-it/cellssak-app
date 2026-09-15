@@ -352,14 +352,16 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
               );
             })}
 
-            {/* 잎들 위에 얹는 햇빛 워시 — pointerEvents 꺼서 터치/클릭 방해 안 하게 함 */}
+            {/* 잎들 위에 얹는 햇빛 워시 — pointerEvents 꺼서 터치/클릭 방해 안 하게 함.
+                mix-blend-mode는 타원인데도 네모난 박스 아티팩트로 렌더링되는 브라우저가 있어서
+                빼고, 대신 그라데이션 자체의 투명도만으로 은은하게 겹치게 함 */}
             <ellipse
               cx={100}
               cy={15}
               rx={150}
               ry={140}
               fill={`url(#${shadowBlurId}-sun)`}
-              style={{ mixBlendMode: 'screen', pointerEvents: 'none' }}
+              style={{ pointerEvents: 'none' }}
             />
           </g>
 
