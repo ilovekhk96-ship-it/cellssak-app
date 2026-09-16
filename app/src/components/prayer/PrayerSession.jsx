@@ -176,6 +176,8 @@ export default function PrayerSession({ user, activeCell, cellName, onClose }) {
           volume={music.volume}
           changeVolume={music.changeVolume}
           hasTracks={music.hasTracks}
+          currentTrack={music.currentTrack}
+          nextTrack={music.nextTrack}
         />
       </div>
 

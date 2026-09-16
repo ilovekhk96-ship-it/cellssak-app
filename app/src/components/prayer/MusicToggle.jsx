@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Music, Music2 } from 'lucide-react';
+import { Music, Music2, SkipForward } from 'lucide-react';
 
 // 화면 중앙을 차지하는 큰 플레이어가 아니라, 작은 음표 아이콘 하나 + 눌렀을 때만 나오는
 // 작은 팝오버. 타이머보다 시각적으로 절대 강조되면 안 된다는 요구사항 때문에 일부러 이렇게 작게 둠.
-export default function MusicToggle({ isOn, toggle, volume, changeVolume, hasTracks }) {
+export default function MusicToggle({ isOn, toggle, volume, changeVolume, hasTracks, currentTrack, nextTrack }) {
   const [panelOpen, setPanelOpen] = useState(false);
   const Icon = isOn ? Music2 : Music;
 
@@ -34,16 +34,33 @@ export default function MusicToggle({ isOn, toggle, volume, changeVolume, hasTra
           </button>
 
           {hasTracks ? (
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.05"
-              value={volume}
-              onChange={(e) => changeVolume(Number(e.target.value))}
-              style={{ accentColor: '#5C7A55' }}
-              aria-label="음악 볼륨"
-            />
+            <>
+              {currentTrack && (
+                <div className="flex items-center justify-between gap-2">
+                  <span style={{ color: 'var(--ink-soft)', fontSize: '0.72rem' }} className="truncate">
+                    {currentTrack.title}
+                  </span>
+                  <button
+                    onClick={nextTrack}
+                    aria-label="다음 곡"
+                    style={{ color: 'var(--ink-soft)' }}
+                    className="shrink-0 active:scale-90 transition-transform"
+                  >
+                    <SkipForward size={13} />
+                  </button>
+                </div>
+              )}
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={volume}
+                onChange={(e) => changeVolume(Number(e.target.value))}
+                style={{ accentColor: '#5C7A55' }}
+                aria-label="음악 볼륨"
+              />
+            </>
           ) : (
             <p style={{ color: 'var(--ink-soft)', fontSize: '0.7rem', lineHeight: 1.5 }}>
               아직 준비된 곡이 없어요. 곧 채워질 예정이에요.

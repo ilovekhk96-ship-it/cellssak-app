@@ -17,7 +17,7 @@ function readSavedVolume() {
 // 음악을 껐다 켜도 타이머는 영향을 받지 않는다.
 export function usePrayerMusic() {
   const [isOn, setIsOn] = useState(false);
-  const [trackIndex] = useState(0);
+  const [trackIndex, setTrackIndex] = useState(0);
   const [volume, setVolume] = useState(readSavedVolume);
   const audioRef = useRef(null);
 
@@ -27,7 +27,10 @@ export function usePrayerMusic() {
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
-      audioRef.current.loop = true; // 지금은 곡이 하나뿐이라도 자연스럽게 반복되도록
+      // 곡 하나만 반복하지 않고 끝나면 다음 곡으로 자연스럽게 넘어가도록
+      audioRef.current.addEventListener('ended', () => {
+        setTrackIndex((i) => (i + 1) % Math.max(PRAYER_TRACKS.length, 1));
+      });
     }
     audioRef.current.volume = volume;
   }, [volume]);
@@ -44,6 +47,11 @@ export function usePrayerMusic() {
       audio.pause();
     }
   }, [isOn, currentTrack]);
+
+  // 다음 곡으로 직접 넘기기 — 재생 중이면 그 자리에서 바로 다음 곡이 이어서 나옴
+  const nextTrack = useCallback(() => {
+    setTrackIndex((i) => (i + 1) % Math.max(PRAYER_TRACKS.length, 1));
+  }, []);
 
   // 기도쌓기 화면을 나가면(언마운트) 음악도 확실히 정지
   useEffect(() => {
@@ -63,5 +71,5 @@ export function usePrayerMusic() {
     }
   }, []);
 
-  return { isOn, toggle, volume, changeVolume, currentTrack, hasTracks };
+  return { isOn, toggle, volume, changeVolume, currentTrack, hasTracks, nextTrack };
 }
