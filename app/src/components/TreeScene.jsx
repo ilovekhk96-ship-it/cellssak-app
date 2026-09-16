@@ -2,6 +2,7 @@ import { useId, useMemo, useRef, useState } from 'react';
 import { Sprout, Sparkles, Calendar } from 'lucide-react';
 import { STATUS } from '../data/constants';
 import { TRUNK, BRANCHES, FRUIT_SPOTS, getLeaf } from '../data/treeData';
+import { DECORATIONS, DECORATION_SLOTS } from '../data/decorations';
 import Cloud from './Cloud';
 import ThoughtBubble from './ThoughtBubble';
 import SceneIcon from './SceneIcon';
@@ -78,7 +79,19 @@ function GrassRow({ blades, height, keyPrefix }) {
   ));
 }
 
-export default function TreeScene({ score, daysCount, todayActiveCount, seedCount, fruitCount, onOpenList, onOpenHeatmap, showActions = true, treeLabel, goldenIndices }) {
+export default function TreeScene({
+  score,
+  daysCount,
+  todayActiveCount,
+  seedCount,
+  fruitCount,
+  onOpenList,
+  onOpenHeatmap,
+  showActions = true,
+  treeLabel,
+  goldenIndices,
+  equippedDecorations,
+}) {
   // 나무 그림자 블러 필터 id — 화면에 TreeScene이 동시에 여러 개 떠도(예: 추후 비교 화면)
   // id가 겹치지 않도록 컴포넌트 인스턴스마다 고유하게 생성
   const shadowBlurId = `tree-shadow-blur-${useId()}`;
@@ -109,6 +122,16 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
     return arr;
   }, [score, goldenIndices]);
   const visibleFruits = FRUIT_SPOTS.slice(0, fruitCount);
+
+  // 장착한 장식품을 슬롯 좌표에 매칭 — 이미지 없이 이모지로 자리만 표시(구조 완성 후 실제
+  // 이미지로 교체 예정). 나무 성장과 무관하게 항상 같은 자리에 붙어있음
+  const decorationItems = (equippedDecorations || [])
+    .map((id) => {
+      const deco = DECORATIONS.find((d) => d.id === id);
+      const slot = deco && DECORATION_SLOTS.find((s) => s.id === deco.slot);
+      return deco && slot ? { deco, slot } : null;
+    })
+    .filter(Boolean);
 
   // 잎이랑 열매를 "자란 순서" 하나로 합쳐서, 열매가 맺힌 뒤에 자란 잎은 열매보다 나중에
   // (그림상 위에) 그려지게 함 — 몇 번째 잎일 때 이 열매가 맺혔는지 정확한 기록은 없어서,
@@ -363,6 +386,20 @@ export default function TreeScene({ score, daysCount, todayActiveCount, seedCoun
               fill={`url(#${shadowBlurId}-sun)`}
               style={{ pointerEvents: 'none' }}
             />
+
+            {decorationItems.map(({ deco, slot }) => (
+              <text
+                key={deco.id}
+                x={slot.x}
+                y={slot.y}
+                textAnchor="middle"
+                dominantBaseline="hanging"
+                fontSize="20"
+                style={{ pointerEvents: 'none' }}
+              >
+                {deco.emoji}
+              </text>
+            ))}
           </g>
 
           {/* 앞줄 잔디 — 나무 그림 다음(=앞)에 그려서 밑동을 살짝 덮되, 키를 낮게 둬서

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Calendar, Timer } from 'lucide-react';
+import { Calendar, Timer, Gift } from 'lucide-react';
 import { STATUS, VERSES, FULL_INDEX, getIndexLabel, todayStr } from '../data/constants';
 import { listenCell } from '../lib/church';
 import { shareRequestToCell, logPrayerForToday } from '../lib/prayerData';
@@ -23,6 +23,9 @@ import NotificationBell from './nav/NotificationBell';
 import TreeMoveButton from './nav/TreeMoveButton';
 import PrayerSession from './prayer/PrayerSession';
 import PrayerHeatmap from './prayer/PrayerHeatmap';
+import DecorationPicker from './decorations/DecorationPicker';
+import { listenEquippedDecorations, setEquippedDecorations } from '../lib/decorations';
+import { DECORATIONS, findSlot } from '../data/decorations';
 
 const PAGE_BG = "url('/images/bg-field.jpg') center 72% / cover no-repeat";
 
@@ -37,6 +40,8 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
   const [form, setForm] = useState({ prayerName: '', targetName: '', relationship: '', note: '' });
   const [prayerSessionOpen, setPrayerSessionOpen] = useState(false);
   const [prayerHeatmapOpen, setPrayerHeatmapOpen] = useState(false);
+  const [decorationPickerOpen, setDecorationPickerOpen] = useState(false);
+  const [equippedDecorations, setEquippedDecorationsState] = useState([]);
 
   const listRef = useRef(null);
   const groupRefs = useRef({});
@@ -60,6 +65,11 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
 
   useEffect(() => {
     const unsubscribe = listenPersonalDailyActivity(user.uid, setDailyActivity);
+    return unsubscribe;
+  }, [user.uid]);
+
+  useEffect(() => {
+    const unsubscribe = listenEquippedDecorations(user.uid, setEquippedDecorationsState);
     return unsubscribe;
   }, [user.uid]);
 
@@ -211,6 +221,29 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
     }
   };
 
+  // 장식 장착/해제 — 같은 슬롯(자리)을 쓰는 다른 장식이 이미 있으면 그건 빼고 새 걸로
+  // 교체, 이미 장착한 걸 다시 누르면 벗김
+  const toggleDecoration = async (deco) => {
+    const slot = findSlot(deco.slot);
+    const already = equippedDecorations.includes(deco.id);
+    let next;
+    if (already) {
+      next = equippedDecorations.filter((id) => id !== deco.id);
+    } else {
+      next = equippedDecorations.filter((id) => {
+        const other = DECORATIONS.find((d) => d.id === id);
+        return !other || other.slot !== slot?.id;
+      });
+      next = [...next, deco.id];
+    }
+    setEquippedDecorationsState(next); // 낙관적으로 먼저 반영해서 바로 화면에 보이게
+    try {
+      await setEquippedDecorations(user.uid, next);
+    } catch (e) {
+      setToast('저장에 실패했어요.');
+    }
+  };
+
   const moveLine = activeCell
     ? cellName
       ? { top: cellName, bottom: '나무' }
@@ -258,6 +291,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
             showActions={false}
             treeLabel={`${user.displayName}의 기도나무`}
             goldenIndices={goldenIndices}
+            equippedDecorations={equippedDecorations}
           />
 
           <div style={{ position: 'absolute', left: '14px', bottom: '18px' }} className="flex flex-col items-center gap-2.5">
@@ -279,6 +313,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
             />
             <SceneIcon icon={Calendar} label="기도잔디" bg="#FFFDF9" fg="#4A9FD8" onClick={() => setPrayerHeatmapOpen(true)} />
             <SceneIcon icon={Timer} label="기도쌓기" bg="#FFFDF9" fg="#C4456B" onClick={() => setPrayerSessionOpen(true)} />
+            <SceneIcon icon={Gift} label="나무 장식" bg="#FFFDF9" fg="#B87FC9" onClick={() => setDecorationPickerOpen(true)} />
           </div>
         </div>
 
@@ -334,6 +369,14 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
 
         {prayerHeatmapOpen && (
           <PrayerHeatmap user={user} mode="personal" onClose={() => setPrayerHeatmapOpen(false)} />
+        )}
+
+        {decorationPickerOpen && (
+          <DecorationPicker
+            equippedIds={equippedDecorations}
+            onToggle={toggleDecoration}
+            onClose={() => setDecorationPickerOpen(false)}
+          />
         )}
       </div>
     </div>
