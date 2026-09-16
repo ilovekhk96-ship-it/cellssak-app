@@ -56,6 +56,45 @@ export function sumDurationsByDate(sessions) {
   return map;
 }
 
+// 구독된 세션 전체(최근 400건)의 총 경과초 — 나이키 런처럼 중간에 끊기든 여러 번 나눠서
+// 하든 상관없이 계속 쌓이는 "총 누적 기도시간"
+export function sumAllDurations(sessions) {
+  return sessions.reduce((sum, s) => sum + (s.durationSeconds || 0), 0);
+}
+
+function shiftDateStr(dateStr, deltaDays) {
+  const d = new Date(`${dateStr}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + deltaDays);
+  return d.toISOString().slice(0, 10);
+}
+
+// 날짜별 합계 맵으로 "연속 기록"을 계산 — 하루라도 기도 안 한 날이 끼면 끊김.
+// current: 오늘(또는 어제까지, 아직 오늘 기록이 없을 때)부터 거슬러 올라간 연속 일수
+// longest: 지금까지 있었던 연속 기록 중 가장 긴 것
+export function computeStreaks(byDate, todayDateStr) {
+  const activeDates = Object.keys(byDate)
+    .filter((d) => (byDate[d] || 0) > 0)
+    .sort();
+  if (activeDates.length === 0) return { current: 0, longest: 0 };
+
+  let longest = 1;
+  let run = 1;
+  for (let i = 1; i < activeDates.length; i++) {
+    run = shiftDateStr(activeDates[i - 1], 1) === activeDates[i] ? run + 1 : 1;
+    longest = Math.max(longest, run);
+  }
+
+  const activeSet = new Set(activeDates);
+  let cursor = activeSet.has(todayDateStr) ? todayDateStr : shiftDateStr(todayDateStr, -1);
+  let current = 0;
+  while (activeSet.has(cursor)) {
+    current += 1;
+    cursor = shiftDateStr(cursor, -1);
+  }
+
+  return { current, longest };
+}
+
 // 초 단위를 "N시간 N분 N초"로 — 기도쌓기 관련 시간 표시는 전부 이 형식으로 통일(분 단위로
 // 뭉개지 않고 초까지 보여달라는 요청 반영)
 export function formatDurationKorean(totalSeconds) {

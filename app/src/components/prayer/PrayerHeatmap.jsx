@@ -1,7 +1,13 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { X } from 'lucide-react';
 import { todayStr } from '../../data/constants';
-import { listenRecentPrayerSessions, sumDurationsByDate, formatDurationKorean } from '../../lib/prayerSessions';
+import {
+  listenRecentPrayerSessions,
+  sumDurationsByDate,
+  sumAllDurations,
+  computeStreaks,
+  formatDurationKorean,
+} from '../../lib/prayerSessions';
 import { listenCellPrayerTimeDaily } from '../../lib/prayerData';
 
 const WEEKS = 53; // 깃허브 잔디처럼 최근 1년치 — 화면보다 넓어서 가로 스크롤로 봄
@@ -81,6 +87,11 @@ export default function PrayerHeatmap({ user, activeCell, cellName, mode = 'pers
   const myTotalThisPeriod = sumRange(myByDate, dates);
   const selectedCellSeconds = selectedDate ? cellDaily[selectedDate] || 0 : 0;
   const selectedMySeconds = selectedDate ? myByDate[selectedDate] || 0 : 0;
+
+  // 나이키 런처럼 중간에 끊기든 여러 세션으로 나눠서 하든 상관없이 계속 쌓이는 "총 누적"과
+  // 연속 기록 — 나의 습관 얘기라 개인 잔디에서만 보여줌(셀 잔디는 셀 비교가 목적이라 안 넣음)
+  const allTimeTotal = useMemo(() => sumAllDurations(sessions), [sessions]);
+  const streaks = useMemo(() => computeStreaks(myByDate, today), [myByDate, today]);
 
   const vars = {
     '--ink': '#4A3B3F',
@@ -171,6 +182,23 @@ export default function PrayerHeatmap({ user, activeCell, cellName, mode = 'pers
               ))}
             </div>
           </div>
+
+          {!isCellMode && (
+            <div className="grid grid-cols-3 gap-2 mt-4">
+              <div style={{ background: '#F5F0E8', borderRadius: '14px' }} className="px-2 py-3 flex flex-col items-center gap-0.5">
+                <span style={{ fontSize: '1.1rem' }}>🔥{streaks.current}</span>
+                <span style={{ color: 'var(--ink-soft)', fontSize: '0.68rem' }}>연속 기록</span>
+              </div>
+              <div style={{ background: '#F5F0E8', borderRadius: '14px' }} className="px-2 py-3 flex flex-col items-center gap-0.5">
+                <span style={{ fontSize: '1.1rem' }}>{streaks.longest}일</span>
+                <span style={{ color: 'var(--ink-soft)', fontSize: '0.68rem' }}>최장 기록</span>
+              </div>
+              <div style={{ background: '#F5F0E8', borderRadius: '14px' }} className="px-2 py-3 flex flex-col items-center justify-center gap-0.5">
+                <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{formatDurationKorean(allTimeTotal)}</span>
+                <span style={{ color: 'var(--ink-soft)', fontSize: '0.68rem' }}>총 누적</span>
+              </div>
+            </div>
+          )}
 
           <div style={{ background: '#F5F0E8', borderRadius: '14px', minHeight: '44px' }} className="mt-5 px-4 py-3">
             {!selectedDate ? (
