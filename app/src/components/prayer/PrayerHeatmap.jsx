@@ -92,6 +92,12 @@ export default function PrayerHeatmap({ user, activeCell, cellName, mode = 'pers
   // 연속 기록 — 나의 습관 얘기라 개인 잔디에서만 보여줌(셀 잔디는 셀 비교가 목적이라 안 넣음)
   const allTimeTotal = useMemo(() => sumAllDurations(sessions), [sessions]);
   const streaks = useMemo(() => computeStreaks(myByDate, today), [myByDate, today]);
+  // 셀 잔디 쪽 총 누적은 cellDaily(구독 범위 제한 없이 전체 날짜) 합계 — 그래프가 보여주는
+  // "최근 1년"보다 더 예전 기록까지 다 포함한 진짜 누적
+  const cellAllTimeTotal = useMemo(
+    () => Object.values(cellDaily).reduce((sum, seconds) => sum + (seconds || 0), 0),
+    [cellDaily]
+  );
 
   const vars = {
     '--ink': '#4A3B3F',
@@ -183,7 +189,12 @@ export default function PrayerHeatmap({ user, activeCell, cellName, mode = 'pers
             </div>
           </div>
 
-          {!isCellMode && (
+          {isCellMode ? (
+            <div style={{ background: '#F5F0E8', borderRadius: '14px' }} className="mt-4 px-4 py-3 flex items-center justify-between">
+              <span style={{ color: 'var(--ink-soft)', fontSize: '0.78rem' }}>{cellName || '셀'} 총 누적</span>
+              <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{formatDurationKorean(cellAllTimeTotal)}</span>
+            </div>
+          ) : (
             <div className="grid grid-cols-3 gap-2 mt-4">
               <div style={{ background: '#F5F0E8', borderRadius: '14px' }} className="px-2 py-3 flex flex-col items-center gap-0.5">
                 <span style={{ fontSize: '1.1rem' }}>🔥{streaks.current}</span>
