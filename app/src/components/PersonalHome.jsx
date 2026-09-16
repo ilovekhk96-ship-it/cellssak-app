@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Calendar, Timer, Gift } from 'lucide-react';
+import { Calendar, Timer, Store } from 'lucide-react';
 import { STATUS, VERSES, FULL_INDEX, getIndexLabel, todayStr } from '../data/constants';
 import { listenCell } from '../lib/church';
 import { shareRequestToCell, logPrayerForToday } from '../lib/prayerData';
@@ -120,7 +120,15 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
   // 나뭇잎 개수: 기도한 날짜 수를 그대로 누적 (셀 나무와 같은 원리 — 나는 한 명뿐이라 하루 최대 1장)
   const score = useMemo(() => Object.keys(dailyActivity).length, [dailyActivity]);
 
-  const goldenIndices = useMemo(() => personalGoldenIndices(score), [score]);
+  // TODO(임시 미리보기용 — 장식 이미지 크기/배치 비교 끝나면 제거): 잎/열매 개수를 직접
+  // 눌러서 바꿔보며 비교하기 위한 오버라이드. previewFruit는 null이면 score 기반 자동 계산,
+  // 숫자를 누르면 그 값으로 고정(잎 개수랑 별개로 열매 개수만 따로 늘려볼 수 있게)
+  const [previewScore, setPreviewScore] = useState(null);
+  const [previewFruit, setPreviewFruit] = useState(null);
+  const effectiveScore = previewScore ?? score;
+  const effectiveFruitCount = previewFruit ?? (previewScore ? Math.round(previewScore / 30) : fruitCount);
+
+  const goldenIndices = useMemo(() => personalGoldenIndices(effectiveScore), [effectiveScore]);
 
   // 처음 기도한 날부터 오늘까지, 한국 기준 날짜가 지난 일수 (셀 나무의 daysCount와 동일한 계산)
   const daysCount = useMemo(() => {
@@ -276,18 +284,76 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
         <div style={{ position: 'relative', zIndex: 1 }} className="flex items-center justify-between gap-2 px-4 pt-3 shrink-0">
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem' }}>셀싹</span>
           <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setDecorationPickerOpen(true)}
+              aria-label="나무 장식 상점"
+              style={{ background: '#FFFDF9', color: '#B87FC9', width: '30px', height: '30px' }}
+              className="flex items-center justify-center rounded-full shadow-sm shrink-0"
+            >
+              <Store size={14} />
+            </button>
             <ProfileMenu user={user} activeCell={activeCell} onSignOut={onSignOut} />
             <NotificationBell activeCell={activeCell} myUid={user.uid} prayedToday={Boolean(dailyActivity[todayStr()])} score={score} />
           </div>
         </div>
 
+        {/* TODO(임시 미리보기용 — 장식 이미지 크기/배치 정할 때만 쓰고 끝나면 제거):
+            잎 개수 프리셋 + 열매 개수 직접 조절 */}
+        <div
+          style={{ position: 'fixed', top: '52px', left: '8px', zIndex: 50, maxWidth: '190px' }}
+          className="flex flex-col gap-1"
+        >
+          <div className="flex flex-wrap gap-1">
+            {[7, 30, 100, 300, 1000, 3000].map((n) => (
+              <button
+                key={n}
+                onClick={() => setPreviewScore(n)}
+                style={{
+                  background: previewScore === n ? '#6FA66B' : '#FFFDF9',
+                  color: previewScore === n ? '#fff' : '#4A3B3F',
+                  fontSize: '10px',
+                  padding: '3px 6px',
+                  borderRadius: '8px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                }}
+              >
+                잎{n}
+              </button>
+            ))}
+            <button
+              onClick={() => {
+                setPreviewScore(null);
+                setPreviewFruit(null);
+              }}
+              style={{ background: '#FFFDF9', color: '#C4456B', fontSize: '10px', padding: '3px 6px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}
+            >
+              원래대로
+            </button>
+          </div>
+          <div className="flex items-center gap-1" style={{ background: '#FFFDF9', borderRadius: '8px', padding: '2px 4px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)', width: 'fit-content' }}>
+            <button
+              onClick={() => setPreviewFruit((f) => Math.max(0, (f ?? effectiveFruitCount) - 1))}
+              style={{ fontSize: '12px', padding: '0 6px', color: '#4A3B3F' }}
+            >
+              −
+            </button>
+            <span style={{ fontSize: '10px', color: '#4A3B3F', minWidth: '54px', textAlign: 'center' }}>열매 {effectiveFruitCount}</span>
+            <button
+              onClick={() => setPreviewFruit((f) => (f ?? effectiveFruitCount) + 1)}
+              style={{ fontSize: '12px', padding: '0 6px', color: '#4A3B3F' }}
+            >
+              +
+            </button>
+          </div>
+        </div>
+
         <div style={{ flex: 1, position: 'relative' }} className="flex flex-col">
           <TreeScene
-            score={score}
+            score={effectiveScore}
             daysCount={daysCount}
             todayActiveCount={0}
             seedCount={seedCount}
-            fruitCount={fruitCount}
+            fruitCount={effectiveFruitCount}
             showActions={false}
             treeLabel={`${user.displayName}의 기도나무`}
             goldenIndices={goldenIndices}
@@ -313,7 +379,6 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
             />
             <SceneIcon icon={Calendar} label="기도잔디" bg="#FFFDF9" fg="#4A9FD8" onClick={() => setPrayerHeatmapOpen(true)} />
             <SceneIcon icon={Timer} label="기도쌓기" bg="#FFFDF9" fg="#C4456B" onClick={() => setPrayerSessionOpen(true)} />
-            <SceneIcon icon={Gift} label="나무 장식" bg="#FFFDF9" fg="#B87FC9" onClick={() => setDecorationPickerOpen(true)} />
           </div>
         </div>
 
