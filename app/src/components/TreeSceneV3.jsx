@@ -261,15 +261,12 @@ export default function TreeSceneV3({
               if (item.type === 'leaf') {
                 const l = item.leaf;
                 const i = item.i;
-                const w = 13 * l.scale;
-                const h = 13 * l.scale;
+                const w = 8 * l.scale;
+                const h = 8 * l.scale;
                 return (
                   <g key={`l${i}`} transform={`translate(${l.x} ${l.y}) rotate(${l.rot})`}>
                     <g
-                      className="leaf-fan"
                       style={{
-                        transformOrigin: '50% 50%',
-                        animationDelay: `${-(leafWaveDelay(l.x) + (i % 7) * 0.03)}s`,
                         filter: l.isGolden ? `${GOLD_LEAF_FILTER} ${LEAF_SHADOW}` : LEAF_SHADOW,
                       }}
                     >
