@@ -263,14 +263,12 @@ export default function TreeSceneV3({
                 const i = item.i;
                 const w = 8 * l.scale;
                 const h = 8 * l.scale;
+                const ax = l.variant.anchorX ?? 0.5;
+                const ay = l.variant.anchorY ?? 0.5;
                 return (
                   <g key={`l${i}`} transform={`translate(${l.x} ${l.y}) rotate(${l.rot})`}>
-                    <g
-                      style={{
-                        filter: l.isGolden ? `${GOLD_LEAF_FILTER} ${LEAF_SHADOW}` : LEAF_SHADOW,
-                      }}
-                    >
-                      <image href={l.variant.src} x={-w / 2} y={-h / 2} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
+                    <g style={l.isGolden ? { filter: GOLD_LEAF_FILTER } : undefined}>
+                      <image href={l.variant.src} x={-w * ax} y={-h * ay} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
                     </g>
                   </g>
                 );

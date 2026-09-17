@@ -453,28 +453,31 @@ export const LEAF_ANCHORS_V3 = shuffledAnchors(BRANCH_ANCHORS_V3);
 
 // 사용자가 보내준 낱장 잎사귀 시트에서 잘라낸 21종 — 알파 채널 연결요소 분석으로 자동으로
 // 오려냄. 종류가 많아서 2종을 번갈아 쓰던 v2보다 훨씬 다양하게 보임.
+// 잎마다 줄기(가지에 붙는 자리)가 사진 안에서 어디인지 알파 채널에서 나무색(갈색) 픽셀을
+// 찾아 자동으로 추정한 좌표(0~1 비율, anchorX/anchorY) — 이 자리가 가지 앵커(0,0)에
+// 오도록 그려서 잎의 중심이 아니라 진짜 "꼭지"가 가지에 붙어있는 것처럼 보이게 함
 export const LEAF_IMAGES_V3 = [
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-01.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-02.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-03.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-04.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-05.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-06.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-07.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-08.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-09.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-10.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-11.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-12.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-13.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-14.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-15.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-16.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-17.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-18.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-19.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-20.png' },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-21.png' },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-01.png', anchorX: 0.403, anchorY: 0.27 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-02.png', anchorX: 0.275, anchorY: 0.98 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-03.png', anchorX: 0.981, anchorY: 0.759 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-04.png', anchorX: 0.024, anchorY: 0.919 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-05.png', anchorX: 0.845, anchorY: 0.785 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-06.png', anchorX: 0.77, anchorY: 0.048 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-07.png', anchorX: 0.984, anchorY: 0.658 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-08.png', anchorX: 0.953, anchorY: 0.034 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-09.png', anchorX: 0.016, anchorY: 0.041 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-10.png', anchorX: 0.122, anchorY: 0.016 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-11.png', anchorX: 0.012, anchorY: 0.767 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-12.png', anchorX: 0.145, anchorY: 0.433 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-13.png', anchorX: 0.965, anchorY: 0.057 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-14.png', anchorX: 0.829, anchorY: 0.672 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-15.png', anchorX: 0.039, anchorY: 0.968 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-16.png', anchorX: 0.964, anchorY: 0.972 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-17.png', anchorX: 0.705, anchorY: 0.587 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-18.png', anchorX: 0.786, anchorY: 0.574 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-19.png', anchorX: 0.05, anchorY: 0.025 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-20.png', anchorX: 0.027, anchorY: 0.627 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-21.png', anchorX: 0.096, anchorY: 0.978 },
 ];
 
 export function getLeafV3(index) {
@@ -491,7 +494,9 @@ export function getLeafV3(index) {
     jitterAngle = anchorAngleRad + (rand() - 0.5) * Math.PI * 0.9;
     radius = 1 + Math.min(ring * 0.3, 4) + rand() * 0.9;
   }
-  const rot = rand() * 360;
+  // 잎 꼭지가 가지 바깥쪽(anchor.angle 방향)을 향하도록 회전 — 순수 랜덤이면 꼭지가 붙어있어도
+  // 잎이 엉뚱한 방향(가지 쪽으로 되돌아 향하는 등)을 볼 수 있어서 부자연스러워 보임
+  const rot = anchor.angle + 90 + (rand() - 0.5) * 50;
   return {
     x: anchor.x + Math.cos(jitterAngle) * radius,
     y: anchor.y + Math.sin(jitterAngle) * radius * 0.85,
