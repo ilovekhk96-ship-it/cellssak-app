@@ -201,10 +201,6 @@ export default function TreeScene({
   // 스르륵 돌아옴. 자동으로 계산되는 위 viewBox/scale과는 별개로 잠깐 얹는 값
   const [userZoom, setUserZoom] = useState(1);
   const [interacting, setInteracting] = useState(false);
-  // interacting이 꺼진 뒤에도 배율이 1로 스르륵 돌아오는 0.25s 트랜지션이 끝날 때까지는
-  // overflow를 계속 열어둬야 축소되는 중간 과정에서 나무가 잘려 보이지 않음
-  const [settling, setSettling] = useState(false);
-  const settleTimer = useRef(null);
   const pointers = useRef(new Map());
   const pinchStart = useRef(null);
   const wheelIdleTimer = useRef(null);
@@ -214,9 +210,6 @@ export default function TreeScene({
   const snapBack = () => {
     setInteracting(false);
     setUserZoom(1);
-    setSettling(true);
-    if (settleTimer.current) clearTimeout(settleTimer.current);
-    settleTimer.current = setTimeout(() => setSettling(false), 320);
   };
 
   const handlePointerDown = (e) => {
@@ -287,7 +280,10 @@ export default function TreeScene({
 
       <div
         className="flex-1 flex items-center justify-center w-full px-4"
-        style={{ marginTop: '4px', position: 'relative', overflow: interacting || settling ? 'visible' : 'hidden', touchAction: 'pan-y' }}
+        // overflow를 평소엔 hidden, 확대/스르륵 복귀 중일 때만 visible로 바꿔줬었는데, 나무가
+        // 클수록(잎이 많을수록) viewBox 높이가 이 영역보다 커져서 평소에도(줌 안 했을 때도)
+        // 나무 위아래가 그냥 잘려 보이는 문제가 있었음 — 그래서 항상 visible로 둠
+        style={{ marginTop: '4px', position: 'relative', overflow: 'visible', touchAction: 'pan-y' }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={endPointer}
@@ -302,6 +298,9 @@ export default function TreeScene({
             height: 'auto',
             transform: `scale(${userZoom})`,
             transition: interacting ? 'none' : 'transform 0.25s ease',
+            // 확대/축소 중에 잎(그림자 필터가 걸린 요소들)이 깜빡이거나 사라졌다 생기는 문제 —
+            // 브라우저가 매 프레임 새로 그리지 않고 이 요소를 미리 별도 레이어로 잡아두게 힌트를 줌
+            willChange: 'transform',
           }}
         >
           {/* 나무 발치에서 오른쪽으로 길게 뻗어나가는 그림자 — 트렁크 쪽은 진하고 좁게,
@@ -311,14 +310,6 @@ export default function TreeScene({
             <filter id={shadowBlurId} x="-60%" y="-150%" width="220%" height="400%">
               <feGaussianBlur stdDeviation="3.5" />
             </filter>
-            {/* 캐노피 위쪽에서 은은하게 퍼지는 햇빛 — 배경 사진의 광원(왼쪽 위)과 맞춰서
-                살짝 왼쪽으로 치우친 중심에서 바깥으로 갈수록 옅어짐. screen 블렌드라
-                잎 색을 가리지 않고 그 위에 빛만 얹히는 느낌 */}
-            <radialGradient id={`${shadowBlurId}-sun`} cx="42%" cy="6%" r="62%">
-              <stop offset="0%" stopColor="#FFF6D8" stopOpacity="0.5" />
-              <stop offset="45%" stopColor="#FFF6D8" stopOpacity="0.2" />
-              <stop offset="100%" stopColor="#FFF6D8" stopOpacity="0" />
-            </radialGradient>
           </defs>
           <g transform={`rotate(10 ${GROUND_ANCHOR.x} ${GROUND_ANCHOR.y})`} filter={`url(#${shadowBlurId})`}>
             <ellipse cx={GROUND_ANCHOR.x + 60} cy={GROUND_ANCHOR.y + 2} rx={100} ry={11} fill="#1F3D22" opacity="0.17" />
@@ -379,18 +370,6 @@ export default function TreeScene({
                 />
               );
             })}
-
-            {/* 잎들 위에 얹는 햇빛 워시 — pointerEvents 꺼서 터치/클릭 방해 안 하게 함.
-                mix-blend-mode는 타원인데도 네모난 박스 아티팩트로 렌더링되는 브라우저가 있어서
-                빼고, 대신 그라데이션 자체의 투명도만으로 은은하게 겹치게 함 */}
-            <ellipse
-              cx={100}
-              cy={15}
-              rx={150}
-              ry={140}
-              fill={`url(#${shadowBlurId}-sun)`}
-              style={{ pointerEvents: 'none' }}
-            />
 
             {decorationItems.map(({ deco, slot }) => (
               <text
