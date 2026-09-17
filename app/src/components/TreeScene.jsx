@@ -48,6 +48,9 @@ const LEAF_IMAGES = [
 // 후광(글로우)은 없이, 초록이랑 안 부딪히면서도 또렷하게 보이는 진한 황금빛 노랑 —
 // hue-rotate를 순수 노랑 쪽(주황보다 위)으로 두고 채도를 다시 올려서 색이 흐려 보이지 않게 함
 const GOLD_LEAF_FILTER = 'sepia(1) hue-rotate(16deg) saturate(9) brightness(1.4)';
+// 잎마다 살짝 아래로 지는 그림자 — 배경 사진의 빛이 왼쪽 위에서 오니 그림자는 오른쪽 아래로.
+// 아주 작게(블러 1px대)만 줘서 잎이 많이 겹쳐도 서로 뭉개져 지저분해지지 않게 함
+const LEAF_SHADOW = 'drop-shadow(0.6px 1px 0.6px rgba(30,40,20,0.35))';
 
 // 나무 발치뿐 아니라 기본 화면 폭(0~240) 전체에 촘촘히 깔아서 사방이 잔디로 덮인
 // 느낌을 줌 — 폭을 너무 늘리면 viewBox가 넓어져 나무가 상대적으로 작아 보이므로,
@@ -349,7 +352,9 @@ export default function TreeScene({
                       style={{
                         transformOrigin: l.variant.origin,
                         animationDelay: `${-(leafWaveDelay(l.x) + (i % 7) * 0.03)}s`,
-                        filter: l.isGolden ? GOLD_LEAF_FILTER : undefined,
+                        // 잎이 다 납작하게 붙어있으면 빛을 안 받는 스티커처럼 보여서, 아주 살짝
+                        // 아래쪽으로 그림자를 줘서 잎끼리 겹쳐도 입체감/결이 느껴지게 함
+                        filter: l.isGolden ? `${GOLD_LEAF_FILTER} ${LEAF_SHADOW}` : LEAF_SHADOW,
                       }}
                     >
                       <image href={l.variant.src} x={-w * ax} y={-h * ay} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
