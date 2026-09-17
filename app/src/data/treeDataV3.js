@@ -1383,17 +1383,17 @@ export function getLeafV3(index) {
   let radius;
   if (ring === 0) {
     jitterAngle = rand() * Math.PI * 2;
-    radius = 2 + rand() * 1.8;
+    radius = 1 + rand() * 1;
   } else {
     jitterAngle = anchorAngleRad + (rand() - 0.5) * Math.PI * 0.9;
-    radius = 4 + Math.min(ring * 0.9, 14) + rand() * 2.4;
+    radius = 1.5 + Math.min(ring * 0.4, 6) + rand() * 1.2;
   }
   const rot = rand() * 360;
   return {
     x: anchor.x + Math.cos(jitterAngle) * radius,
     y: anchor.y + Math.sin(jitterAngle) * radius * 0.85,
     rot,
-    scale: 0.85 + rand() * 0.5,
+    scale: 0.6 + rand() * 0.35,
     variant: LEAF_IMAGES_V3[index % LEAF_IMAGES_V3.length],
   };
 }

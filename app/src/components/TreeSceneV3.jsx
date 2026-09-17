@@ -261,8 +261,8 @@ export default function TreeSceneV3({
               if (item.type === 'leaf') {
                 const l = item.leaf;
                 const i = item.i;
-                const w = 22 * l.scale;
-                const h = 22 * l.scale;
+                const w = 13 * l.scale;
+                const h = 13 * l.scale;
                 return (
                   <g key={`l${i}`} transform={`translate(${l.x} ${l.y}) rotate(${l.rot})`}>
                     <g
