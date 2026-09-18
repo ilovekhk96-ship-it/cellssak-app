@@ -478,7 +478,7 @@ export const LEAF_IMAGES_V3 = [
   { src: '/images/v3-new/leaf-cutouts/leaf-b-15.png', anchorX: 0.039, anchorY: 0.968, stemAngle: -39.5 },
   { src: '/images/v3-new/leaf-cutouts/leaf-b-16.png', anchorX: 0.964, anchorY: 0.972, stemAngle: -137.9 },
   { src: '/images/v3-new/leaf-cutouts/leaf-b-17.png', anchorX: 0.705, anchorY: 0.587, stemAngle: -163.1 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-18.png', anchorX: 0.497, anchorY: 0.377, stemAngle: 92.1 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-18.png', anchorX: 0.575, anchorY: 0.506, stemAngle: -161.3 },
   { src: '/images/v3-new/leaf-cutouts/leaf-b-19.png', anchorX: 0.601, anchorY: 0.98, stemAngle: -96.3 },
   { src: '/images/v3-new/leaf-cutouts/leaf-b-20.png', anchorX: 0.027, anchorY: 0.627, stemAngle: -14.9 },
   { src: '/images/v3-new/leaf-cutouts/leaf-b-21.png', anchorX: 0.096, anchorY: 0.978, stemAngle: -63.3 },
