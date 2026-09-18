@@ -455,29 +455,33 @@ export const LEAF_ANCHORS_V3 = shuffledAnchors(BRANCH_ANCHORS_V3);
 // 오려냄. 종류가 많아서 2종을 번갈아 쓰던 v2보다 훨씬 다양하게 보임.
 // 잎마다 줄기(가지에 붙는 자리)가 사진 안에서 어디인지 알파 채널에서 나무색(갈색) 픽셀을
 // 찾아 자동으로 추정한 좌표(0~1 비율, anchorX/anchorY) — 이 자리가 가지 앵커(0,0)에
-// 오도록 그려서 잎의 중심이 아니라 진짜 "꼭지"가 가지에 붙어있는 것처럼 보이게 함
+// 오도록 그려서 잎의 중심이 아니라 진짜 "꼭지"가 가지에 붙어있는 것처럼 보이게 함.
+// stemAngle: 사진 안에서 꼭지→잎몸 중심이 향하는 방향(도) — 사진마다 잎이 놓인 방향이
+// 다 달라서, 이 값만큼 미리 반대로 돌려줘야 모든 잎이 같은 기준으로 정렬되어 가지 바깥쪽을
+// 향하게 회전시킬 수 있음. 이게 없으면 잎마다 제각각 다른 방향을 보다가 "뒤집혀 보이는"
+// 문제가 생김
 export const LEAF_IMAGES_V3 = [
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-01.png', anchorX: 0.431, anchorY: 0.338 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-02.png', anchorX: 0.275, anchorY: 0.98 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-03.png', anchorX: 0.981, anchorY: 0.759 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-04.png', anchorX: 0.024, anchorY: 0.919 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-05.png', anchorX: 0.845, anchorY: 0.785 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-06.png', anchorX: 0.158, anchorY: 0.97 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-07.png', anchorX: 0.83, anchorY: 0.748 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-08.png', anchorX: 0.054, anchorY: 0.957 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-09.png', anchorX: 0.016, anchorY: 0.041 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-10.png', anchorX: 0.122, anchorY: 0.016 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-11.png', anchorX: 0.012, anchorY: 0.767 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-12.png', anchorX: 0.775, anchorY: 0.726 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-13.png', anchorX: 0.156, anchorY: 0.976 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-14.png', anchorX: 0.829, anchorY: 0.672 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-15.png', anchorX: 0.039, anchorY: 0.968 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-16.png', anchorX: 0.964, anchorY: 0.972 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-17.png', anchorX: 0.705, anchorY: 0.587 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-18.png', anchorX: 0.497, anchorY: 0.377 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-19.png', anchorX: 0.601, anchorY: 0.98 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-20.png', anchorX: 0.027, anchorY: 0.627 },
-  { src: '/images/v3-new/leaf-cutouts/leaf-b-21.png', anchorX: 0.096, anchorY: 0.978 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-01.png', anchorX: 0.499, anchorY: 0.46, stemAngle: 55.1 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-02.png', anchorX: 0.275, anchorY: 0.98, stemAngle: -75.3 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-03.png', anchorX: 0.981, anchorY: 0.759, stemAngle: -145.0 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-04.png', anchorX: 0.024, anchorY: 0.919, stemAngle: -50.3 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-05.png', anchorX: 0.845, anchorY: 0.785, stemAngle: -132.3 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-06.png', anchorX: 0.158, anchorY: 0.97, stemAngle: -62.9 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-07.png', anchorX: 0.83, anchorY: 0.748, stemAngle: -149.5 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-08.png', anchorX: 0.054, anchorY: 0.957, stemAngle: -44.2 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-09.png', anchorX: 0.016, anchorY: 0.041, stemAngle: 39.6 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-10.png', anchorX: 0.122, anchorY: 0.016, stemAngle: 60.7 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-11.png', anchorX: 0.012, anchorY: 0.767, stemAngle: -15.0 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-12.png', anchorX: 0.775, anchorY: 0.726, stemAngle: -142.7 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-13.png', anchorX: 0.156, anchorY: 0.976, stemAngle: -63.7 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-14.png', anchorX: 0.829, anchorY: 0.672, stemAngle: -134.0 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-15.png', anchorX: 0.039, anchorY: 0.968, stemAngle: -39.5 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-16.png', anchorX: 0.964, anchorY: 0.972, stemAngle: -137.9 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-17.png', anchorX: 0.705, anchorY: 0.587, stemAngle: -163.1 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-18.png', anchorX: 0.497, anchorY: 0.377, stemAngle: 92.1 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-19.png', anchorX: 0.601, anchorY: 0.98, stemAngle: -96.3 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-20.png', anchorX: 0.027, anchorY: 0.627, stemAngle: -14.9 },
+  { src: '/images/v3-new/leaf-cutouts/leaf-b-21.png', anchorX: 0.096, anchorY: 0.978, stemAngle: -63.3 },
 ];
 
 export function getLeafV3(index) {
@@ -494,15 +498,18 @@ export function getLeafV3(index) {
     jitterAngle = anchorAngleRad + (rand() - 0.5) * Math.PI * 0.9;
     radius = 1 + Math.min(ring * 0.3, 4) + rand() * 0.9;
   }
-  // 잎 꼭지가 가지 바깥쪽(anchor.angle 방향)을 향하도록 회전 — 순수 랜덤이면 꼭지가 붙어있어도
-  // 잎이 엉뚱한 방향(가지 쪽으로 되돌아 향하는 등)을 볼 수 있어서 부자연스러워 보임
-  const rot = anchor.angle + 90 + (rand() - 0.5) * 50;
+  const variant = LEAF_IMAGES_V3[index % LEAF_IMAGES_V3.length];
+  // 잎 꼭지가 가지 바깥쪽(anchor.angle 방향)을 향하도록 회전 — 사진마다 원래 잎이 놓인
+  // 방향(stemAngle)이 달라서, 목표 방향에서 stemAngle만큼 빼줘야 사진마다 제각각이던
+  // 방향이 전부 같은 기준으로 맞춰짐. 순수 랜덤이면 꼭지가 붙어있어도 잎이 엉뚱한
+  // 방향(가지 쪽으로 되돌아 향하는 등)을 볼 수 있어서 부자연스러워 보임
+  const rot = anchor.angle + 90 - variant.stemAngle + (rand() - 0.5) * 50;
   return {
     x: anchor.x + Math.cos(jitterAngle) * radius,
     y: anchor.y + Math.sin(jitterAngle) * radius * 0.85,
     rot,
     scale: 0.55 + rand() * 0.3,
-    variant: LEAF_IMAGES_V3[index % LEAF_IMAGES_V3.length],
+    variant,
   };
 }
 
