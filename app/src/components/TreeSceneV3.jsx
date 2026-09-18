@@ -120,7 +120,7 @@ export default function TreeSceneV3({
     consider(TREE_V3_IMAGE.x, TREE_V3_IMAGE.y);
     consider(TREE_V3_IMAGE.x + TREE_V3_IMAGE.width, TREE_V3_IMAGE.y + TREE_V3_IMAGE.height);
     leafPaths.forEach((l) => consider(l.x, l.y, 10));
-    visibleFruits.forEach((f) => consider(f.x, f.y, 6));
+    visibleFruits.forEach((f) => consider(f.x, f.y + 7, 7));
 
     const ax = GROUND_ANCHOR.x;
     const ay = GROUND_ANCHOR.y;
@@ -277,12 +277,16 @@ export default function TreeSceneV3({
               const k = item.k;
               const fw = 12;
               const fh = 14;
+              // 포도 사진은 꼭지가 이미지 중앙이 아니라 맨 위쪽에 있어서(잎과 마찬가지),
+              // 이미지 중심을 가지 자리에 맞추면 꼭지가 가지 밖으로 붕 뜨고 열매 덩어리가
+              // 가지 위아래로 반씩 걸쳐서 "매달려있다"는 느낌이 안 났음 — 꼭지(이미지 맨
+              // 위, 가로 중앙)를 가지 자리에 맞춰서 실제로 가지에서 아래로 드리운 것처럼 보이게 함
               return (
                 <image
                   key={`f${k}`}
                   href={k % 2 === 0 ? '/images/grape-1.png' : '/images/grape-2.png'}
                   x={f.x - fw / 2}
-                  y={f.y - fh / 2}
+                  y={f.y}
                   width={fw}
                   height={fh}
                   preserveAspectRatio="xMidYMid meet"
