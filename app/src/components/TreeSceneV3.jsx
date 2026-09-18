@@ -78,6 +78,8 @@ export default function TreeSceneV3({
       arr.push({
         x: leaf.x,
         y: leaf.y,
+        branchX: leaf.branchX,
+        branchY: leaf.branchY,
         rot: leaf.rot,
         scale: leaf.scale,
         variant: leaf.variant,
@@ -266,9 +268,23 @@ export default function TreeSceneV3({
                 const ax = l.variant.anchorX ?? 0.5;
                 const ay = l.variant.anchorY ?? 0.5;
                 return (
-                  <g key={`l${i}`} transform={`translate(${l.x} ${l.y}) rotate(${l.rot})`}>
-                    <g style={l.isGolden ? { filter: GOLD_LEAF_FILTER } : undefined}>
-                      <image href={l.variant.src} x={-w * ax} y={-h * ay} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
+                  <g key={`l${i}`}>
+                    {/* 가지 자리(branchX,branchY)에서 잎이 실제로 자란 자리(l.x,l.y)까지 잎자루처럼
+                        가는 선을 그어서, 잔가지가 잎 뭉치에 가려 잘 안 보여도 "가지에 붙어있다"는
+                        느낌이 나게 함 — 이게 없으면 잎이 허공에 떠있는 스티커처럼 보임 */}
+                    <line
+                      x1={l.branchX}
+                      y1={l.branchY}
+                      x2={l.x}
+                      y2={l.y}
+                      stroke="#5B4630"
+                      strokeWidth={0.4}
+                      strokeLinecap="round"
+                    />
+                    <g transform={`translate(${l.x} ${l.y}) rotate(${l.rot})`}>
+                      <g style={l.isGolden ? { filter: GOLD_LEAF_FILTER } : undefined}>
+                        <image href={l.variant.src} x={-w * ax} y={-h * ay} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
+                      </g>
                     </g>
                   </g>
                 );
@@ -278,16 +294,20 @@ export default function TreeSceneV3({
               const fw = 12;
               const fh = 14;
               return (
-                <image
-                  key={`f${k}`}
-                  href={k % 2 === 0 ? '/images/grape-1.png' : '/images/grape-2.png'}
-                  x={f.x - fw / 2}
-                  y={f.y - fh / 2}
-                  width={fw}
-                  height={fh}
-                  preserveAspectRatio="xMidYMid meet"
-                  style={{ filter: 'brightness(1.55) saturate(0.7) contrast(0.92)' }}
-                />
+                <g key={`f${k}`}>
+                  {/* 열매는 가지 자리에 바로 얹혀서 짧은 꼭지 줄기가 없으면 붕 떠 보임 —
+                      송이 위쪽에 짧은 줄기를 그려서 가지에서 드리워진 것처럼 보이게 함 */}
+                  <line x1={f.x} y1={f.y - fh / 2 - 3} x2={f.x} y2={f.y - fh / 2 + 1} stroke="#5B4630" strokeWidth={0.5} strokeLinecap="round" />
+                  <image
+                    href={k % 2 === 0 ? '/images/grape-1.png' : '/images/grape-2.png'}
+                    x={f.x - fw / 2}
+                    y={f.y - fh / 2}
+                    width={fw}
+                    height={fh}
+                    preserveAspectRatio="xMidYMid meet"
+                    style={{ filter: 'brightness(1.55) saturate(0.7) contrast(0.92)' }}
+                  />
+                </g>
               );
             })}
 
