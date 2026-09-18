@@ -507,8 +507,6 @@ export function getLeafV3(index) {
   return {
     x: anchor.x + Math.cos(jitterAngle) * radius,
     y: anchor.y + Math.sin(jitterAngle) * radius * 0.85,
-    branchX: anchor.x,
-    branchY: anchor.y,
     rot,
     scale: 0.55 + rand() * 0.3,
     variant,
