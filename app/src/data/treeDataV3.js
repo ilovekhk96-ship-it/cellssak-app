@@ -36,7 +36,7 @@ const TREE_PHOTO_OFFSET_X = 120 - 657 * TREE_PHOTO_SCALE;
 const TREE_PHOTO_OFFSET_Y = 232 - 1243 * TREE_PHOTO_SCALE;
 
 export const TREE_V3_IMAGE = {
-  src: '/images/v3-new/tree-bare-cutout-v3.png',
+  src: '/images/v3-new/tree-bare-cutout-v4.png',
   x: TREE_PHOTO_OFFSET_X,
   y: TREE_PHOTO_OFFSET_Y,
   width: TREE_PHOTO_W * TREE_PHOTO_SCALE,
