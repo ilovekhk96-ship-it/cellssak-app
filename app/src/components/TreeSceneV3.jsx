@@ -82,6 +82,7 @@ export default function TreeSceneV3({
         scale: leaf.scale,
         variant: leaf.variant,
         isGolden,
+        behind: leaf.behind,
       });
     }
     return arr;
@@ -96,13 +97,22 @@ export default function TreeSceneV3({
     })
     .filter(Boolean);
 
-  const growthItems = useMemo(() => {
-    const items = leafPaths.map((l, i) => ({ type: 'leaf', order: i, leaf: l, i }));
+  // 중간 굵기 가지에 자란 잎/열매는 나무 사진 "뒤"에 그려서 가지 옆으로 살짝 보이게 하고,
+  // 얇은 잔가지에 자란 것만 "앞"에 그림 — 굵은 가지 위에 스티커처럼 얹혀 보이던 문제를
+  // 줄이면서 잎 앵커 수를 훨씬 늘려서(잔가지만 쓸 때보다) 더 풍성해 보이게 함
+  const { itemsBehind, itemsFront } = useMemo(() => {
+    const all = leafPaths.map((l, i) => ({ type: 'leaf', order: i, leaf: l, i }));
     visibleFruits.forEach((f, k) => {
-      items.push({ type: 'fruit', order: ((k + 1) / (fruitCount + 1)) * score, fruit: f, k });
+      all.push({ type: 'fruit', order: ((k + 1) / (fruitCount + 1)) * score, fruit: f, k });
     });
-    items.sort((a, b) => a.order - b.order);
-    return items;
+    all.sort((a, b) => a.order - b.order);
+    const behind = [];
+    const front = [];
+    for (const item of all) {
+      const isBehind = item.type === 'leaf' ? item.leaf.behind : item.fruit.behind;
+      (isBehind ? behind : front).push(item);
+    }
+    return { itemsBehind: behind, itemsFront: front };
   }, [leafPaths, visibleFruits, fruitCount, score]);
 
   const dayPct = Math.max(0, Math.min(100, Math.round((daysCount / 30) * 100)));
@@ -143,6 +153,44 @@ export default function TreeSceneV3({
   }, [scale, leafPaths, visibleFruits, treeLabel]);
 
   const treeTransform = `translate(${GROUND_ANCHOR.x} ${GROUND_ANCHOR.y}) scale(${scale}) translate(${-GROUND_ANCHOR.x} ${-GROUND_ANCHOR.y})`;
+
+  function renderGrowthItem(item) {
+    if (item.type === 'leaf') {
+      const l = item.leaf;
+      const i = item.i;
+      const w = 11 * l.scale;
+      const h = 11 * l.scale;
+      const ax = l.variant.anchorX ?? 0.5;
+      const ay = l.variant.anchorY ?? 0.5;
+      return (
+        <g key={`l${i}`} transform={`translate(${l.x} ${l.y}) rotate(${l.rot})`}>
+          <g style={l.isGolden ? { filter: GOLD_LEAF_FILTER } : undefined}>
+            <image href={l.variant.src} x={-w * ax} y={-h * ay} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
+          </g>
+        </g>
+      );
+    }
+    const f = item.fruit;
+    const k = item.k;
+    const fw = 12;
+    const fh = 14;
+    // 포도 사진은 꼭지가 이미지 중앙이 아니라 맨 위쪽에 있어서(잎과 마찬가지),
+    // 이미지 중심을 가지 자리에 맞추면 꼭지가 가지 밖으로 붕 뜨고 열매 덩어리가
+    // 가지 위아래로 반씩 걸쳐서 "매달려있다"는 느낌이 안 났음 — 꼭지(이미지 맨
+    // 위, 가로 중앙)를 가지 자리에 맞춰서 실제로 가지에서 아래로 드리운 것처럼 보이게 함
+    return (
+      <image
+        key={`f${k}`}
+        href={k % 2 === 0 ? '/images/grape-1.png' : '/images/grape-2.png'}
+        x={f.x - fw / 2}
+        y={f.y}
+        width={fw}
+        height={fh}
+        preserveAspectRatio="xMidYMid meet"
+        style={{ filter: 'brightness(1.55) saturate(0.7) contrast(0.92)' }}
+      />
+    );
+  }
 
   const [userZoom, setUserZoom] = useState(1);
   const [interacting, setInteracting] = useState(false);
@@ -248,6 +296,8 @@ export default function TreeSceneV3({
           <GrassRow blades={GRASS_BACK} height={30} keyPrefix="gb" />
 
           <g transform={treeTransform} style={{ transition: 'transform 0.8s ease' }}>
+            {itemsBehind.map(renderGrowthItem)}
+
             <image
               href={TREE_V3_IMAGE.src}
               x={TREE_V3_IMAGE.x}
@@ -257,43 +307,7 @@ export default function TreeSceneV3({
               preserveAspectRatio="xMidYMax meet"
             />
 
-            {growthItems.map((item) => {
-              if (item.type === 'leaf') {
-                const l = item.leaf;
-                const i = item.i;
-                const w = 8 * l.scale;
-                const h = 8 * l.scale;
-                const ax = l.variant.anchorX ?? 0.5;
-                const ay = l.variant.anchorY ?? 0.5;
-                return (
-                  <g key={`l${i}`} transform={`translate(${l.x} ${l.y}) rotate(${l.rot})`}>
-                    <g style={l.isGolden ? { filter: GOLD_LEAF_FILTER } : undefined}>
-                      <image href={l.variant.src} x={-w * ax} y={-h * ay} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
-                    </g>
-                  </g>
-                );
-              }
-              const f = item.fruit;
-              const k = item.k;
-              const fw = 12;
-              const fh = 14;
-              // 포도 사진은 꼭지가 이미지 중앙이 아니라 맨 위쪽에 있어서(잎과 마찬가지),
-              // 이미지 중심을 가지 자리에 맞추면 꼭지가 가지 밖으로 붕 뜨고 열매 덩어리가
-              // 가지 위아래로 반씩 걸쳐서 "매달려있다"는 느낌이 안 났음 — 꼭지(이미지 맨
-              // 위, 가로 중앙)를 가지 자리에 맞춰서 실제로 가지에서 아래로 드리운 것처럼 보이게 함
-              return (
-                <image
-                  key={`f${k}`}
-                  href={k % 2 === 0 ? '/images/grape-1.png' : '/images/grape-2.png'}
-                  x={f.x - fw / 2}
-                  y={f.y}
-                  width={fw}
-                  height={fh}
-                  preserveAspectRatio="xMidYMid meet"
-                  style={{ filter: 'brightness(1.55) saturate(0.7) contrast(0.92)' }}
-                />
-              );
-            })}
+            {itemsFront.map(renderGrowthItem)}
 
             {decorationItems.map(({ deco, slot }) => (
               <text
