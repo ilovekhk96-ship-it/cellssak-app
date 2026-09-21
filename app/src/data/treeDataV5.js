@@ -23,6 +23,24 @@ function shuffledAnchors(list) {
   return arr;
 }
 
+// 잔가지(thin/앞) 앵커가 중간 굵기(medium/뒤) 앵커보다 훨씬 적어서(약 1:28) 그냥 합쳐서
+// 섞으면 실제 점수만큼 자랄 때 잔가지 쪽이 한참 뒤에나 채워져서 가지 끝부분이 휑해
+// 보임 — medium THIN_RATIO개마다 thin 하나씩 끼워 넣어서(짧은 쪽은 돌려씀) 나무가
+// 자라는 동안 잔가지 앞쪽도 항상 고르게 같이 채워지도록 함
+function interleaveByTier(thin, medium) {
+  const thinShuffled = shuffledAnchors(thin);
+  const medShuffled = shuffledAnchors(medium);
+  const THIN_RATIO = 4;
+  const result = [];
+  for (let i = 0; i < medShuffled.length; i++) {
+    result.push(medShuffled[i]);
+    if (i % THIN_RATIO === THIN_RATIO - 1) {
+      result.push(thinShuffled[Math.floor(i / THIN_RATIO) % thinShuffled.length]);
+    }
+  }
+  return result;
+}
+
 // tree-bare-pixel.png 원본 픽셀 크기와, 그 사진을 SVG 로컬 좌표(GROUND_ANCHOR=(120,232)
 // 기준)에 배치하는 스케일/오프셋. 트렁크 밑동 픽셀(668,1245)을 GROUND_ANCHOR에 맞춤.
 const TREE_PHOTO_W = 1254;
@@ -8118,7 +8136,10 @@ const BRANCH_ANCHORS_V5 = (() => {
   return arr;
 })();
 
-export const LEAF_ANCHORS_V5 = shuffledAnchors(BRANCH_ANCHORS_V5);
+export const LEAF_ANCHORS_V5 = interleaveByTier(
+  BRANCH_ANCHORS_V5.filter((a) => !a.behind),
+  BRANCH_ANCHORS_V5.filter((a) => a.behind)
+);
 
 // 사용자가 보내준 픽셀아트 잎 시트에서 잘라낸 21종 — 각 잎 이미지마다
 // 줄기 위치(anchorX/anchorY)와 그 잎 사진 자체의 줄기->잎몸 방향(stemAngle)을 감지해둬서,
