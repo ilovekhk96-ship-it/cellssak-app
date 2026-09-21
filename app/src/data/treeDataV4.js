@@ -1505,7 +1505,9 @@ export function getLeafV4(index) {
     radius = 1 + Math.min(ring * 0.3, 4) + rand() * 0.9;
   }
   const variant = LEAF_IMAGES_V4[index % LEAF_IMAGES_V4.length];
-  const rot = (rand() - 0.5) * 60;
+  // 복셀 그림은 고정된 카메라 각도로 빛/그림자가 이미 그려져 있어서, 랜덤하게 돌리면
+  // 그 방향이 어긋나 보여 어색해짐 — 실사 잎(v3)과 달리 회전을 주지 않고 원래 방향 그대로 둠
+  const rot = 0;
   return {
     x: anchor.x + Math.cos(jitterAngle) * radius,
     y: anchor.y + Math.sin(jitterAngle) * radius * 0.85,
