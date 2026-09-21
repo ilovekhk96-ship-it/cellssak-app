@@ -30,6 +30,7 @@ import { listenEquippedDecorations, setEquippedDecorations } from '../lib/decora
 import { DECORATIONS, findSlot } from '../data/decorations';
 
 const PAGE_BG = "url('/images/bg-field.jpg') center 72% / cover no-repeat";
+const PAGE_BG_V4 = "url('/images/v4-minecraft/bg-field-voxel.png') center 72% / cover no-repeat";
 
 export default function PersonalHome({ user, activeCell, pendingRequest, onOpenCellFlow, onSignOut }) {
   const [cellName, setCellName] = useState('');
@@ -279,7 +280,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
     <div
       style={{
         ...vars,
-        background: PAGE_BG,
+        background: showTreeV4 ? PAGE_BG_V4 : PAGE_BG,
         fontFamily: 'var(--font-body)',
         color: 'var(--ink)',
         overflowX: 'hidden',
