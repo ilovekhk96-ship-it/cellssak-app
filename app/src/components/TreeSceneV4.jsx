@@ -120,6 +120,8 @@ export default function TreeSceneV4({
     consider(TREE_V4_IMAGE.x + TREE_V4_IMAGE.width, TREE_V4_IMAGE.y + TREE_V4_IMAGE.height);
     leafPaths.forEach((l) => consider(l.x, l.y, 40));
     visibleFruits.forEach((f) => consider(f.x, f.y + 18, 19));
+    consider(-14, GROUND_ANCHOR.y, 0);
+    consider(250, GROUND_ANCHOR.y, 0);
 
     const ax = GROUND_ANCHOR.x;
     const ay = GROUND_ANCHOR.y;
@@ -135,8 +137,6 @@ export default function TreeSceneV4({
       vy1 = Math.max(vy1, y);
     });
     if (treeLabel) vy1 = Math.max(vy1, ay + (LABEL_Y - ay) * scale + 12);
-    vx0 = Math.min(vx0, -14);
-    vx1 = Math.max(vx1, 250);
     const pad = 6;
     return `${vx0 - pad} ${vy0 - pad} ${vx1 - vx0 + pad * 2} ${vy1 - vy0 + pad * 2}`;
   }, [scale, leafPaths, visibleFruits, treeLabel]);
@@ -293,9 +293,9 @@ export default function TreeSceneV4({
             </g>
           </g>
 
-          <GrassRow blades={GRASS_BACK} height={44} keyPrefix="gb" />
-
           <g transform={treeTransform} style={{ transition: 'transform 0.8s ease' }}>
+            <GrassRow blades={GRASS_BACK} height={44} keyPrefix="gb" />
+
             {itemsBehind.map(renderGrowthItem)}
 
             <image
@@ -324,9 +324,9 @@ export default function TreeSceneV4({
             ))}
           </g>
 
-          <GrassRow blades={GRASS_FRONT} height={38} keyPrefix="gf" />
-
           <g transform={treeTransform}>
+            <GrassRow blades={GRASS_FRONT} height={38} keyPrefix="gf" />
+
             {treeLabel && (
               <text
                 x={GROUND_ANCHOR.x}

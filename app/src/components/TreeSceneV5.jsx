@@ -131,6 +131,8 @@ export default function TreeSceneV5({
     consider(TREE_V5_IMAGE.x + TREE_V5_IMAGE.width, TREE_V5_IMAGE.y + TREE_V5_IMAGE.height);
     leafPaths.forEach((l) => consider(l.x, l.y, 17));
     visibleFruits.forEach((f) => consider(f.x, f.y + 9, 9));
+    consider(-14, GROUND_ANCHOR.y, 0);
+    consider(250, GROUND_ANCHOR.y, 0);
 
     const ax = GROUND_ANCHOR.x;
     const ay = GROUND_ANCHOR.y;
@@ -146,8 +148,6 @@ export default function TreeSceneV5({
       vy1 = Math.max(vy1, y);
     });
     if (treeLabel) vy1 = Math.max(vy1, ay + (LABEL_Y - ay) * scale + 16);
-    vx0 = Math.min(vx0, -14);
-    vx1 = Math.max(vx1, 250);
     const pad = 6;
     return `${vx0 - pad} ${vy0 - pad} ${vx1 - vx0 + pad * 2} ${vy1 - vy0 + pad * 2}`;
   }, [scale, leafPaths, visibleFruits, treeLabel]);
@@ -316,10 +316,10 @@ export default function TreeSceneV5({
                 {deco.emoji}
               </text>
             ))}
-          </g>
 
-          <GrassRow blades={GRASS_BACK} height={30} keyPrefix="gb" />
-          <GrassRow blades={GRASS_FRONT} height={26} keyPrefix="gf" />
+            <GrassRow blades={GRASS_BACK} height={30} keyPrefix="gb" />
+            <GrassRow blades={GRASS_FRONT} height={26} keyPrefix="gf" />
+          </g>
 
           <g transform={treeTransform}>
             {treeLabel && (

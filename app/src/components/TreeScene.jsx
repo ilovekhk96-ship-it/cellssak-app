@@ -170,6 +170,11 @@ export default function TreeScene({
     });
     leafPaths.forEach((l) => consider(l.x, l.y, 10));
     visibleFruits.forEach((f) => consider(f.x, f.y, 8));
+    // 잔디도 나무와 같은 확대 그룹 안에서 같이 커지므로, 잔디가 깔리는 가로 범위(-14~250)도
+    // 다른 요소들과 함께 scale로 같이 늘어나도록 여기서 고려해둠(기존엔 고정 좌표라 여기 안 넣고
+    // 최종 viewBox에 그대로 더했었음)
+    consider(-14, GROUND_ANCHOR.y, 0);
+    consider(250, GROUND_ANCHOR.y, 0);
 
     const ax = GROUND_ANCHOR.x;
     const ay = GROUND_ANCHOR.y;
@@ -186,10 +191,6 @@ export default function TreeScene({
     });
     // 이름표는 확대 그룹 밖(고정 좌표)에 그려지므로, 나무가 작을 때도 잘리지 않도록 별도로 확보
     if (treeLabel) vy1 = Math.max(vy1, ay + (LABEL_Y - ay) * scale + 12);
-    // 잔디도 확대 그룹 밖(고정 좌표, -14~250 범위)이라 나무가 작을 때도 잘리지 않게 확보 —
-    // 기본 프레임(0~240)보다 살짝만 넓혀서 나무가 상대적으로 작아 보이지 않게 함
-    vx0 = Math.min(vx0, -14);
-    vx1 = Math.max(vx1, 250);
     const pad = 6;
     return `${vx0 - pad} ${vy0 - pad} ${vx1 - vx0 + pad * 2} ${vy1 - vy0 + pad * 2}`;
   }, [scale, leafPaths, visibleFruits, treeLabel]);
@@ -318,10 +319,12 @@ export default function TreeScene({
             </g>
           </g>
 
-          {/* 뒷줄 잔디 — 나무 그림보다 먼저 그려서 줄기·가지에 자연스럽게 가려짐 */}
-          <GrassRow blades={GRASS_BACK} height={30} keyPrefix="gb" />
-
           <g transform={treeTransform} style={{ transition: 'transform 0.8s ease' }}>
+            {/* 뒷줄 잔디 — 나무 그림보다 먼저 그려서 줄기·가지에 자연스럽게 가려짐. 나무와
+                같은 확대 그룹 안에 둬서, 나무가 자랄수록 viewBox가 넓어져도 화면에 보이는
+                크기가 나무와 같은 비율로 유지되어 점점 작아 보이지 않게 함 */}
+            <GrassRow blades={GRASS_BACK} height={30} keyPrefix="gb" />
+
             <image href="/images/tree.png" x={-5} y={-3} width={250} height={235} preserveAspectRatio="xMidYMax meet" />
 
             {growthItems.map((item) => {
@@ -388,11 +391,11 @@ export default function TreeScene({
             ))}
           </g>
 
-          {/* 앞줄 잔디 — 나무 그림 다음(=앞)에 그려서 밑동을 살짝 덮되, 키를 낮게 둬서
-              나무 자체는 가리지 않음 */}
-          <GrassRow blades={GRASS_FRONT} height={26} keyPrefix="gf" />
-
           <g transform={treeTransform}>
+            {/* 앞줄 잔디 — 나무 그림 다음(=앞)에 그려서 밑동을 살짝 덮되, 키를 낮게 둬서
+                나무 자체는 가리지 않음 */}
+            <GrassRow blades={GRASS_FRONT} height={26} keyPrefix="gf" />
+
             {treeLabel && (
               <text
                 x={GROUND_ANCHOR.x}
