@@ -16,6 +16,7 @@ import { personalGoldenIndices } from '../lib/growth';
 import TreeScene from './TreeScene';
 import TreeSceneV3 from './TreeSceneV3';
 import TreeSceneV4 from './TreeSceneV4';
+import TreeSceneV5 from './TreeSceneV5';
 import SceneIcon from './SceneIcon';
 import ListModal from './ListModal';
 import EntrySheet from './EntrySheet';
@@ -31,6 +32,7 @@ import { DECORATIONS, findSlot } from '../data/decorations';
 
 const PAGE_BG = "url('/images/bg-field.jpg') center 72% / cover no-repeat";
 const PAGE_BG_V4 = "url('/images/v4-minecraft/bg-field-voxel.png') center 72% / cover no-repeat";
+const PAGE_BG_V5 = "url('/images/v5-pixel/bg-field-pixel.png') center 72% / cover no-repeat";
 
 export default function PersonalHome({ user, activeCell, pendingRequest, onOpenCellFlow, onSignOut }) {
   const [cellName, setCellName] = useState('');
@@ -132,6 +134,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
   // 만든 실험용 TreeSceneV3를 켜고 끄면서 기존 나무와 비교해보기 위한 토글
   const [showTreeV3, setShowTreeV3] = useState(false);
   const [showTreeV4, setShowTreeV4] = useState(false);
+  const [showTreeV5, setShowTreeV5] = useState(false);
   const effectiveScore = previewScore ?? score;
   const effectiveFruitCount = previewFruit ?? (previewScore ? Math.round(previewScore / 30) : fruitCount);
 
@@ -280,7 +283,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
     <div
       style={{
         ...vars,
-        background: showTreeV4 ? PAGE_BG_V4 : PAGE_BG,
+        background: showTreeV4 ? PAGE_BG_V4 : showTreeV5 ? PAGE_BG_V5 : PAGE_BG,
         fontFamily: 'var(--font-body)',
         color: 'var(--ink)',
         overflowX: 'hidden',
@@ -337,7 +340,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
               원래대로
             </button>
             <button
-              onClick={() => { setShowTreeV3((v) => !v); setShowTreeV4(false); }}
+              onClick={() => { setShowTreeV3((v) => !v); setShowTreeV4(false); setShowTreeV5(false); }}
               style={{
                 background: showTreeV3 ? '#B87FC9' : '#FFFDF9',
                 color: showTreeV3 ? '#fff' : '#4A3B3F',
@@ -350,7 +353,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
               {showTreeV3 ? '버전3 보는중' : '버전3 보기'}
             </button>
             <button
-              onClick={() => { setShowTreeV4((v) => !v); setShowTreeV3(false); }}
+              onClick={() => { setShowTreeV4((v) => !v); setShowTreeV3(false); setShowTreeV5(false); }}
               style={{
                 background: showTreeV4 ? '#4A9FD8' : '#FFFDF9',
                 color: showTreeV4 ? '#fff' : '#4A3B3F',
@@ -361,6 +364,19 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
               }}
             >
               {showTreeV4 ? '버전4(마크) 보는중' : '버전4(마크) 보기'}
+            </button>
+            <button
+              onClick={() => { setShowTreeV5((v) => !v); setShowTreeV3(false); setShowTreeV4(false); }}
+              style={{
+                background: showTreeV5 ? '#E0A23D' : '#FFFDF9',
+                color: showTreeV5 ? '#fff' : '#4A3B3F',
+                fontSize: '10px',
+                padding: '3px 6px',
+                borderRadius: '8px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+              }}
+            >
+              {showTreeV5 ? '버전5(픽셀) 보는중' : '버전5(픽셀) 보기'}
             </button>
           </div>
           <div className="flex items-center gap-1" style={{ background: '#FFFDF9', borderRadius: '8px', padding: '2px 4px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)', width: 'fit-content' }}>
@@ -395,6 +411,18 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
             />
           ) : showTreeV4 ? (
             <TreeSceneV4
+              score={effectiveScore}
+              daysCount={daysCount}
+              todayActiveCount={0}
+              seedCount={seedCount}
+              fruitCount={effectiveFruitCount}
+              showActions={false}
+              treeLabel={`${user.displayName}의 기도나무`}
+              goldenIndices={goldenIndices}
+              equippedDecorations={equippedDecorations}
+            />
+          ) : showTreeV5 ? (
+            <TreeSceneV5
               score={effectiveScore}
               daysCount={daysCount}
               todayActiveCount={0}
