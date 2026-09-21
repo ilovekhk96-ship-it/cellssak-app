@@ -343,7 +343,8 @@ export default function TreeSceneV5({
             style={{
               color: 'var(--ink)',
               fontFamily: 'var(--font-display)',
-              textShadow: '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff',
+              WebkitTextStroke: '3px #fff',
+              paintOrder: 'stroke fill',
             }}
             className="text-xs font-bold text-center mb-1"
           >
