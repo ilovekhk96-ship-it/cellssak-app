@@ -1,6 +1,9 @@
 export default function TreeMoveButton({ onClick, lineTop, lineBottom }) {
   return (
-    <div className="fixed inset-0 pointer-events-none" style={{ maxWidth: '384px', margin: '0 auto', zIndex: 5 }}>
+    <div
+      className="fixed inset-0 pointer-events-none"
+      style={{ maxWidth: '384px', margin: '0 auto', zIndex: 5, transform: 'translateZ(0)', WebkitTransform: 'translateZ(0)' }}
+    >
       <div className="absolute bottom-6 right-4 pointer-events-auto">
         <button onClick={onClick} style={{ width: '70px', height: '70px', position: 'relative' }} aria-label="기도나무 이동">
           {/* 흰 원판 대신, 글씨에 쓰는 것과 같은 방식(흰색을 여러 방향으로 겹쳐서 테두리처럼
