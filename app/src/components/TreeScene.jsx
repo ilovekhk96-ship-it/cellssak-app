@@ -185,7 +185,7 @@ export default function TreeScene({
       vy1 = Math.max(vy1, y);
     });
     // 이름표는 확대 그룹 밖(고정 좌표)에 그려지므로, 나무가 작을 때도 잘리지 않도록 별도로 확보
-    if (treeLabel) vy1 = Math.max(vy1, LABEL_Y + 6);
+    if (treeLabel) vy1 = Math.max(vy1, ay + (LABEL_Y - ay) * scale + 12);
     // 잔디도 확대 그룹 밖(고정 좌표, -14~250 범위)이라 나무가 작을 때도 잘리지 않게 확보 —
     // 기본 프레임(0~240)보다 살짝만 넓혀서 나무가 상대적으로 작아 보이지 않게 함
     vx0 = Math.min(vx0, -14);
@@ -390,22 +390,24 @@ export default function TreeScene({
               나무 자체는 가리지 않음 */}
           <GrassRow blades={GRASS_FRONT} height={26} keyPrefix="gf" />
 
-          {treeLabel && (
-            <text
-              x={GROUND_ANCHOR.x}
-              y={LABEL_Y}
-              textAnchor="middle"
-              fontSize="9"
-              fill="#4A3B3F"
-              stroke="#FFFFFF"
-              strokeWidth="2.5"
-              strokeLinejoin="round"
-              paintOrder="stroke fill"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              {treeLabel}
-            </text>
-          )}
+          <g transform={treeTransform}>
+            {treeLabel && (
+              <text
+                x={GROUND_ANCHOR.x}
+                y={LABEL_Y}
+                textAnchor="middle"
+                fontSize="9"
+                fill="#4A3B3F"
+                stroke="#FFFFFF"
+                strokeWidth="2.5"
+                strokeLinejoin="round"
+                paintOrder="stroke fill"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
+                {treeLabel}
+              </text>
+            )}
+          </g>
         </svg>
       </div>
 
@@ -415,9 +417,8 @@ export default function TreeScene({
             style={{
               color: 'var(--ink)',
               fontFamily: 'var(--font-display)',
-              // 5px 블러 글로우가 작은 글씨에서 번져 보여서 "깨진" 것처럼 보였음 —
-              // 블러 없이 또렷한 1px 테두리만 남김 (버튼 글씨와 같은 방식)
-              textShadow: '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff',
+              WebkitTextStroke: '3px #fff',
+              paintOrder: 'stroke fill',
             }}
             className="text-xs font-bold text-center mb-1"
           >

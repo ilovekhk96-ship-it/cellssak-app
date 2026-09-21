@@ -145,7 +145,7 @@ export default function TreeSceneV3({
       vx1 = Math.max(vx1, x);
       vy1 = Math.max(vy1, y);
     });
-    if (treeLabel) vy1 = Math.max(vy1, LABEL_Y + 6);
+    if (treeLabel) vy1 = Math.max(vy1, ay + (LABEL_Y - ay) * scale + 12);
     vx0 = Math.min(vx0, -14);
     vx1 = Math.max(vx1, 250);
     const pad = 6;
@@ -326,22 +326,24 @@ export default function TreeSceneV3({
 
           <GrassRow blades={GRASS_FRONT} height={26} keyPrefix="gf" />
 
-          {treeLabel && (
-            <text
-              x={GROUND_ANCHOR.x}
-              y={LABEL_Y}
-              textAnchor="middle"
-              fontSize="9"
-              fill="#4A3B3F"
-              stroke="#FFFFFF"
-              strokeWidth="2.5"
-              strokeLinejoin="round"
-              paintOrder="stroke fill"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              {treeLabel}
-            </text>
-          )}
+          <g transform={treeTransform}>
+            {treeLabel && (
+              <text
+                x={GROUND_ANCHOR.x}
+                y={LABEL_Y}
+                textAnchor="middle"
+                fontSize="9"
+                fill="#4A3B3F"
+                stroke="#FFFFFF"
+                strokeWidth="2.5"
+                strokeLinejoin="round"
+                paintOrder="stroke fill"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
+                {treeLabel}
+              </text>
+            )}
+          </g>
         </svg>
       </div>
 
@@ -351,7 +353,8 @@ export default function TreeSceneV3({
             style={{
               color: 'var(--ink)',
               fontFamily: 'var(--font-display)',
-              textShadow: '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff',
+              WebkitTextStroke: '3px #fff',
+              paintOrder: 'stroke fill',
             }}
             className="text-xs font-bold text-center mb-1"
           >

@@ -317,12 +317,11 @@ export default function TreeSceneV5({
 
             <GrassRow blades={GRASS_BACK} height={30} keyPrefix="gb" />
             <GrassRow blades={GRASS_FRONT} height={26} keyPrefix="gf" />
-          </g>
 
-          {treeLabel && (
+            {treeLabel && (
             <text
               x={GROUND_ANCHOR.x}
-              y={GROUND_ANCHOR.y + (LABEL_Y - GROUND_ANCHOR.y) * scale}
+              y={LABEL_Y}
               textAnchor="middle"
               fontSize="9"
               fill="#4A3B3F"
@@ -334,7 +333,8 @@ export default function TreeSceneV5({
             >
               {treeLabel}
             </text>
-          )}
+            )}
+          </g>
         </svg>
       </div>
 

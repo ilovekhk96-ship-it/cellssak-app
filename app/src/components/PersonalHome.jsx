@@ -290,7 +290,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
       }}
       className="w-full min-h-screen"
     >
-      <div className="max-w-sm mx-auto min-h-screen relative flex flex-col">
+      <div className="max-w-sm mx-auto relative flex flex-col">
         <div style={{ position: 'relative', zIndex: 1 }} className="flex items-center justify-between gap-2 px-4 pt-3 shrink-0">
           <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem' }}>셀싹</span>
           <div className="flex items-center gap-2 shrink-0">
