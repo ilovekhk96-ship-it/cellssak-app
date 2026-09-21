@@ -1460,7 +1460,10 @@ const BRANCH_ANCHORS_V4 = (() => {
     const px = BRANCH_PIXELS_V4[i];
     const py = BRANCH_PIXELS_V4[i + 1];
     const angle = BRANCH_PIXELS_V4[i + 2];
-    const behind = BRANCH_PIXELS_V4[i + 3] === 1;
+    // 복셀(마인크래프트) 스타일은 실사와 달리 잎이 가지를 감싸는 덩어리로 보이는 게
+    // 자연스러워서, 실사 버전(v3)처럼 두꺼운 가지 뒤에 잎을 숨기지 않고 전부 앞에 그림 —
+    // "뒤"로 보내면 가지만 보이고 잎이 부족해 보인다는 피드백을 받아 수정
+    const behind = false;
     const svg = photoToSvg(px, py);
     arr.push({ x: svg.x, y: svg.y, angle, behind });
   }
