@@ -116,7 +116,7 @@ export default function TreeSceneV4({
     };
     consider(TREE_V4_IMAGE.x, TREE_V4_IMAGE.y);
     consider(TREE_V4_IMAGE.x + TREE_V4_IMAGE.width, TREE_V4_IMAGE.y + TREE_V4_IMAGE.height);
-    leafPaths.forEach((l) => consider(l.x, l.y, 20));
+    leafPaths.forEach((l) => consider(l.x, l.y, 32));
     visibleFruits.forEach((f) => consider(f.x, f.y + 8, 8));
 
     const ax = GROUND_ANCHOR.x;
@@ -149,7 +149,7 @@ export default function TreeSceneV4({
       // 크기를 맞춰야 뭉개지거나 늘어나 보이지 않음
       const nativeW = l.variant.w ?? 1;
       const nativeH = l.variant.h ?? 1;
-      const target = 26 * l.scale;
+      const target = 42 * l.scale;
       const longSide = Math.max(nativeW, nativeH);
       const w = (nativeW / longSide) * target;
       const h = (nativeH / longSide) * target;
