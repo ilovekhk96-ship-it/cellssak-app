@@ -279,7 +279,7 @@ export default function TreeScene({
       <ThoughtBubble />
 
       <div
-        className="flex-1 flex items-center justify-center w-full px-4"
+        className="flex-1 flex items-start justify-center w-full px-4"
         // overflow를 평소엔 hidden, 확대/스르륵 복귀 중일 때만 visible로 바꿔줬었는데, 나무가
         // 클수록(잎이 많을수록) viewBox 높이가 이 영역보다 커져서 평소에도(줌 안 했을 때도)
         // 나무 위아래가 그냥 잘려 보이는 문제가 있었음 — 그래서 항상 visible로 둠

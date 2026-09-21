@@ -264,7 +264,7 @@ export default function TreeSceneV3({
       <ThoughtBubble />
 
       <div
-        className="flex-1 flex items-center justify-center w-full px-4"
+        className="flex-1 flex items-start justify-center w-full px-4"
         style={{ marginTop: '4px', position: 'relative', overflow: 'visible', touchAction: 'pan-y' }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
