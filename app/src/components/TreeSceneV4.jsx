@@ -116,7 +116,7 @@ export default function TreeSceneV4({
     };
     consider(TREE_V4_IMAGE.x, TREE_V4_IMAGE.y);
     consider(TREE_V4_IMAGE.x + TREE_V4_IMAGE.width, TREE_V4_IMAGE.y + TREE_V4_IMAGE.height);
-    leafPaths.forEach((l) => consider(l.x, l.y, 10));
+    leafPaths.forEach((l) => consider(l.x, l.y, 20));
     visibleFruits.forEach((f) => consider(f.x, f.y + 8, 8));
 
     const ax = GROUND_ANCHOR.x;
