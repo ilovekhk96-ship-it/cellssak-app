@@ -2004,12 +2004,14 @@ export function getLeafV4(index) {
   const anchorAngleRad = (anchor.angle * Math.PI) / 180;
   let jitterAngle;
   let radius;
+  // 잎 블록이 커진 만큼(15→26) 자리를 덜 흩뿌려서 "덩어리째 뭉개짐" 대신 블록 하나하나가
+  // 가지 자리에 또렷하게 얹힌 것처럼 보이게 함 — 사용자가 "듬성듬성 붙은 느낌"을 선호함
   if (ring === 0) {
     jitterAngle = rand() * Math.PI * 2;
-    radius = 0.8 + rand() * 0.8;
+    radius = 0.4 + rand() * 0.5;
   } else {
     jitterAngle = anchorAngleRad + (rand() - 0.5) * Math.PI * 0.9;
-    radius = 1 + Math.min(ring * 0.3, 4) + rand() * 0.9;
+    radius = 0.6 + Math.min(ring * 0.18, 2.4) + rand() * 0.5;
   }
   const variant = LEAF_IMAGES_V4[index % LEAF_IMAGES_V4.length];
   // 복셀 그림은 고정된 카메라 각도로 빛/그림자가 이미 그려져 있어서 회전을 주지 않음

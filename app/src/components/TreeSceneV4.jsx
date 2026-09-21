@@ -21,6 +21,8 @@ function growthScale(score) {
 const MIN_USER_ZOOM = 0.6;
 const MAX_USER_ZOOM = 4;
 
+const GOLD_LEAF_FILTER = 'sepia(1) hue-rotate(16deg) saturate(9) brightness(1.4)';
+
 function makeGrassBlades(count, seed) {
   return Array.from({ length: count }, (_, i) => ({
     x: Math.round(-8 + (i / (count - 1)) * 256 + (((i * 47 + seed) % 13) - 6)),
@@ -147,7 +149,7 @@ export default function TreeSceneV4({
       // 크기를 맞춰야 뭉개지거나 늘어나 보이지 않음
       const nativeW = l.variant.w ?? 1;
       const nativeH = l.variant.h ?? 1;
-      const target = 15 * l.scale;
+      const target = 26 * l.scale;
       const longSide = Math.max(nativeW, nativeH);
       const w = (nativeW / longSide) * target;
       const h = (nativeH / longSide) * target;
@@ -155,7 +157,15 @@ export default function TreeSceneV4({
       const ay = l.variant.anchorY ?? 0.5;
       return (
         <g key={`l${i}`} transform={`translate(${l.x} ${l.y}) rotate(${l.rot})`}>
-          <image href={l.variant.src} x={-w * ax} y={-h * ay} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
+          <image
+            href={l.variant.src}
+            x={-w * ax}
+            y={-h * ay}
+            width={w}
+            height={h}
+            preserveAspectRatio="xMidYMid meet"
+            style={l.isGolden ? { filter: GOLD_LEAF_FILTER } : undefined}
+          />
         </g>
       );
     }
