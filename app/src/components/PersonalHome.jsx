@@ -310,7 +310,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
         {/* TODO(임시 미리보기용 — 장식 이미지 크기/배치 정할 때만 쓰고 끝나면 제거):
             잎 개수 프리셋 + 열매 개수 직접 조절 */}
         <div
-          style={{ position: 'fixed', top: '52px', left: '8px', zIndex: 50, maxWidth: '190px' }}
+          style={{ maxWidth: '190px', margin: '4px 0 0 8px' }}
           className="flex flex-col gap-1"
         >
           <div className="flex flex-wrap gap-1">
