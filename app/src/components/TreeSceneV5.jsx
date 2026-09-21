@@ -44,8 +44,8 @@ function makeGrassBlades(count, seed) {
     delay: -(((i * 41 + seed) % 320) / 100),
   }));
 }
-const GRASS_FRONT = makeGrassBlades(20, 0);
-const GRASS_BACK = makeGrassBlades(14, 5);
+const GRASS_FRONT = makeGrassBlades(12, 0);
+const GRASS_BACK = makeGrassBlades(8, 5);
 
 function GrassRow({ blades, height, keyPrefix }) {
   return blades.map((g, i) => (
@@ -144,7 +144,7 @@ export default function TreeSceneV5({
       vx1 = Math.max(vx1, x);
       vy1 = Math.max(vy1, y);
     });
-    if (treeLabel) vy1 = Math.max(vy1, ay + (LABEL_Y - ay) * scale + 12);
+    if (treeLabel) vy1 = Math.max(vy1, ay + (LABEL_Y - ay) * scale + 16);
     vx0 = Math.min(vx0, -14);
     vx1 = Math.max(vx1, 250);
     const pad = 6;
@@ -287,8 +287,6 @@ export default function TreeSceneV5({
           </g>
 
           <g transform={treeTransform} style={{ transition: 'transform 0.8s ease' }}>
-            <GrassRow blades={GRASS_BACK} height={30} keyPrefix="gb" />
-
             {itemsBehind.map(renderGrowthItem)}
 
             <image
@@ -316,25 +314,26 @@ export default function TreeSceneV5({
               </text>
             ))}
 
+            <GrassRow blades={GRASS_BACK} height={30} keyPrefix="gb" />
             <GrassRow blades={GRASS_FRONT} height={26} keyPrefix="gf" />
-
-            {treeLabel && (
-              <text
-                x={GROUND_ANCHOR.x}
-                y={LABEL_Y}
-                textAnchor="middle"
-                fontSize="9"
-                fill="#4A3B3F"
-                stroke="#FFFFFF"
-                strokeWidth="2.5"
-                strokeLinejoin="round"
-                paintOrder="stroke fill"
-                style={{ fontFamily: 'var(--font-display)' }}
-              >
-                {treeLabel}
-              </text>
-            )}
           </g>
+
+          {treeLabel && (
+            <text
+              x={GROUND_ANCHOR.x}
+              y={GROUND_ANCHOR.y + (LABEL_Y - GROUND_ANCHOR.y) * scale}
+              textAnchor="middle"
+              fontSize="9"
+              fill="#4A3B3F"
+              stroke="#FFFFFF"
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+              paintOrder="stroke fill"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
+              {treeLabel}
+            </text>
+          )}
         </svg>
       </div>
 
