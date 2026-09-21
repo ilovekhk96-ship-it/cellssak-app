@@ -38,7 +38,7 @@ const CLOUD_IMAGES_V5 = [
 
 function makeGrassBlades(count, seed) {
   return Array.from({ length: count }, (_, i) => ({
-    x: Math.round(-8 + (i / (count - 1)) * 256 + (((i * 47 + seed) % 13) - 6)),
+    x: Math.round(45 + (i / (count - 1)) * 150 + (((i * 47 + seed) % 13) - 6)),
     y: ((i * 53 + seed) % 7) - 3,
     w: 11 + ((i * 29 + seed) % 11),
     flip: (i * 7 + seed) % 3 !== 0,
