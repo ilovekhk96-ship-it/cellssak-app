@@ -168,8 +168,8 @@ export default function TreeScene({
       consider(b.x1, b.y1);
       consider(b.x2, b.y2);
     });
-    leafPaths.forEach((l) => consider(l.x, l.y, 6));
-    visibleFruits.forEach((f) => consider(f.x, f.y, 6));
+    leafPaths.forEach((l) => consider(l.x, l.y, 10));
+    visibleFruits.forEach((f) => consider(f.x, f.y, 8));
 
     const ax = GROUND_ANCHOR.x;
     const ay = GROUND_ANCHOR.y;

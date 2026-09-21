@@ -103,7 +103,7 @@ export default function TreeSceneV5({
   const { itemsBehind, itemsFront } = useMemo(() => {
     const all = leafPaths.map((l, i) => ({ type: 'leaf', order: i, leaf: l, i }));
     visibleFruits.forEach((f, k) => {
-      all.push({ type: 'fruit', order: ((k + 1) / (fruitCount + 1)) * score, fruit: f, k });
+      all.push({ type: 'fruit', order: score + k, fruit: f, k });
     });
     all.sort((a, b) => a.order - b.order);
     const behind = [];
