@@ -311,10 +311,10 @@ export default function TreeScene({
               <feGaussianBlur stdDeviation="3.5" />
             </filter>
           </defs>
-          <g transform={`rotate(10 ${GROUND_ANCHOR.x} ${GROUND_ANCHOR.y})`}>
+          <g>
             <g filter={`url(#${shadowBlurId})`}>
-              <ellipse cx={GROUND_ANCHOR.x + 60} cy={GROUND_ANCHOR.y + 2} rx={100} ry={11} fill="#1F3D22" opacity="0.17" />
-              <ellipse cx={GROUND_ANCHOR.x + 18} cy={GROUND_ANCHOR.y + 1} rx={46} ry={9} fill="#17301A" opacity="0.28" />
+              <ellipse cx={GROUND_ANCHOR.x} cy={GROUND_ANCHOR.y + 5} rx={72} ry={11} fill="#1F3D22" opacity="0.2" />
+              <ellipse cx={GROUND_ANCHOR.x} cy={GROUND_ANCHOR.y + 4} rx={38} ry={8} fill="#17301A" opacity="0.32" />
             </g>
           </g>
 
