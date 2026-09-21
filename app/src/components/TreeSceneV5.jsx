@@ -51,7 +51,7 @@ function GrassRow({ blades, height, keyPrefix }) {
   return blades.map((g, i) => (
     <g key={`${keyPrefix}${i}`} transform={`translate(${g.x} ${GROUND_ANCHOR.y + 4 + g.y}) scale(${g.flip ? -1 : 1},1)`}>
       <g className="sway-grass" style={{ animationDelay: `${g.delay}s` }}>
-        <image href="/images/grass-1.png" x={-g.w / 2} y={-height} width={g.w} height={height} preserveAspectRatio="xMidYMax meet" />
+        <image href="/images/v5-pixel/grass-pixel.png" x={-g.w / 2} y={-height} width={g.w} height={height} preserveAspectRatio="xMidYMax meet" />
       </g>
     </g>
   ));
