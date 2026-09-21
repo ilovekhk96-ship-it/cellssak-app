@@ -27,7 +27,7 @@ function makeGrassBlades(count, seed) {
   return Array.from({ length: count }, (_, i) => ({
     x: Math.round(-8 + (i / (count - 1)) * 256 + (((i * 47 + seed) % 13) - 6)),
     y: ((i * 53 + seed) % 7) - 3,
-    w: 11 + ((i * 29 + seed) % 11),
+    w: 16 + ((i * 29 + seed) % 16),
     flip: (i * 7 + seed) % 3 !== 0,
     delay: -(((i * 41 + seed) % 320) / 100),
   }));
@@ -291,7 +291,7 @@ export default function TreeSceneV4({
             <ellipse cx={GROUND_ANCHOR.x + 18} cy={GROUND_ANCHOR.y + 1} rx={46} ry={9} fill="#17301A" opacity="0.28" />
           </g>
 
-          <GrassRow blades={GRASS_BACK} height={30} keyPrefix="gb" />
+          <GrassRow blades={GRASS_BACK} height={44} keyPrefix="gb" />
 
           <g transform={treeTransform} style={{ transition: 'transform 0.8s ease' }}>
             {itemsBehind.map(renderGrowthItem)}
@@ -322,7 +322,7 @@ export default function TreeSceneV4({
             ))}
           </g>
 
-          <GrassRow blades={GRASS_FRONT} height={26} keyPrefix="gf" />
+          <GrassRow blades={GRASS_FRONT} height={38} keyPrefix="gf" />
 
           {treeLabel && (
             <text
