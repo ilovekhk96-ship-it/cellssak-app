@@ -8156,13 +8156,13 @@ export function getLeafV5(index) {
   let radius;
   if (ring === 0) {
     jitterAngle = rand() * Math.PI * 2;
-    radius = 0.6 + rand() * 0.7;
+    radius = 0.8 + rand() * 0.8;
   } else {
     jitterAngle = anchorAngleRad + (rand() - 0.5) * Math.PI * 0.9;
-    radius = 0.9 + Math.min(ring * 0.25, 3.6) + rand() * 0.7;
+    radius = 1 + Math.min(ring * 0.3, 4) + rand() * 0.9;
   }
   const variant = LEAF_IMAGES_V5[index % LEAF_IMAGES_V5.length];
-  const jitterRot = (rand() - 0.5) * 26;
+  const jitterRot = (rand() - 0.5) * 50;
   const rot = anchor.angle + 90 - (variant.stemAngle * 180) / Math.PI + jitterRot;
   return {
     x: anchor.x + Math.cos(jitterAngle) * radius,
@@ -8170,8 +8170,8 @@ export function getLeafV5(index) {
     rot,
     scale: 0.55 + rand() * 0.3,
     variant,
-    behind: false,
+    behind: anchor.behind,
   };
 }
 
-export const FRUIT_SPOTS_V5 = LEAF_ANCHORS_V5.filter((_, i) => i % 6 === 0).map((a) => ({ x: a.x, y: a.y, behind: false }));
+export const FRUIT_SPOTS_V5 = LEAF_ANCHORS_V5.filter((_, i) => i % 6 === 0).map((a) => ({ x: a.x, y: a.y, behind: a.behind }));

@@ -128,7 +128,7 @@ export default function TreeSceneV5({
     };
     consider(TREE_V5_IMAGE.x, TREE_V5_IMAGE.y);
     consider(TREE_V5_IMAGE.x + TREE_V5_IMAGE.width, TREE_V5_IMAGE.y + TREE_V5_IMAGE.height);
-    leafPaths.forEach((l) => consider(l.x, l.y, 10));
+    leafPaths.forEach((l) => consider(l.x, l.y, 13));
     visibleFruits.forEach((f) => consider(f.x, f.y + 9, 9));
 
     const ax = GROUND_ANCHOR.x;
@@ -157,8 +157,8 @@ export default function TreeSceneV5({
     if (item.type === 'leaf') {
       const l = item.leaf;
       const i = item.i;
-      const w = 12 * l.scale;
-      const h = 12 * l.scale;
+      const w = 15 * l.scale;
+      const h = 15 * l.scale;
       const ax = l.variant.anchorX ?? 0.5;
       const ay = l.variant.anchorY ?? 0.5;
       return (
