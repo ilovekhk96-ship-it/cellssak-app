@@ -117,7 +117,7 @@ export default function TreeSceneV4({
     consider(TREE_V4_IMAGE.x, TREE_V4_IMAGE.y);
     consider(TREE_V4_IMAGE.x + TREE_V4_IMAGE.width, TREE_V4_IMAGE.y + TREE_V4_IMAGE.height);
     leafPaths.forEach((l) => consider(l.x, l.y, 40));
-    visibleFruits.forEach((f) => consider(f.x, f.y + 12, 13));
+    visibleFruits.forEach((f) => consider(f.x, f.y + 18, 19));
 
     const ax = GROUND_ANCHOR.x;
     const ay = GROUND_ANCHOR.y;
@@ -171,8 +171,8 @@ export default function TreeSceneV4({
     }
     const f = item.fruit;
     const k = item.k;
-    const fw = 21;
-    const fh = 22;
+    const fw = 32;
+    const fh = 34;
     // 포도(복셀) 사진도 꼭지가 이미지 맨 위쪽에 있어서, 꼭지를 가지 자리에 맞춰
     // 실제로 가지에서 아래로 드리운 것처럼 보이게 함
     return (
