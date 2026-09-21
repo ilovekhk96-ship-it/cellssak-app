@@ -33,11 +33,14 @@ function makeGrassBlades(count, seed) {
 const GRASS_FRONT = makeGrassBlades(34, 0);
 const GRASS_BACK = makeGrassBlades(24, 5);
 
-// 복셀 잔디 낱장 이미지가 아직 없어서, 실사 잔디 이미지를 그대로 쓰면 스타일이 어긋나
-// 배경 사진(이미 복셀 잔디가 깔려있음)만으로 충분하도록 GrassRow 자체를 안 그림 —
-// 복셀 잔디 이미지 받으면 v3처럼 바로 되살릴 예정
-function GrassRow() {
-  return null;
+function GrassRow({ blades, height, keyPrefix }) {
+  return blades.map((g, i) => (
+    <g key={`${keyPrefix}${i}`} transform={`translate(${g.x} ${GROUND_ANCHOR.y + 4 + g.y}) scale(${g.flip ? -1 : 1},1)`}>
+      <g className="sway-grass" style={{ animationDelay: `${g.delay}s` }}>
+        <image href="/images/v4-minecraft/grass-voxel.png" x={-g.w / 2} y={-height} width={g.w} height={height} preserveAspectRatio="xMidYMax meet" />
+      </g>
+    </g>
+  ));
 }
 
 export default function TreeSceneV4({
@@ -229,13 +232,13 @@ export default function TreeSceneV4({
       className="flex flex-col"
     >
       <div style={{ top: '-8%', width: '56%', zIndex: 0, animationDuration: '340s' }} className="drift-cloud">
-        <Cloud />
+        <Cloud src="/images/v4-minecraft/cloud-voxel-b-1.png" />
       </div>
       <div style={{ top: '17%', width: '44%', zIndex: 0, animationDuration: '400s', animationDelay: '-220s' }} className="drift-cloud">
-        <Cloud flip />
+        <Cloud src="/images/v4-minecraft/cloud-voxel-b-2.png" flip />
       </div>
       <div style={{ top: '38%', width: '26%', zIndex: 0, animationDuration: '370s', animationDelay: '-300s' }} className="drift-cloud">
-        <Cloud />
+        <Cloud src="/images/v4-minecraft/cloud-voxel-b-3.png" />
       </div>
 
       <ThoughtBubble />
