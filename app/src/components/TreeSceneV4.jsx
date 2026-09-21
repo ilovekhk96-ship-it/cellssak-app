@@ -143,8 +143,14 @@ export default function TreeSceneV4({
     if (item.type === 'leaf') {
       const l = item.leaf;
       const i = item.i;
-      const w = 13 * l.scale;
-      const h = 13 * l.scale;
+      // 잎 블록 덩어리마다 원본 가로세로 비율이 달라서(정사각형 아님), 긴 쪽 기준으로
+      // 크기를 맞춰야 뭉개지거나 늘어나 보이지 않음
+      const nativeW = l.variant.w ?? 1;
+      const nativeH = l.variant.h ?? 1;
+      const target = 15 * l.scale;
+      const longSide = Math.max(nativeW, nativeH);
+      const w = (nativeW / longSide) * target;
+      const h = (nativeH / longSide) * target;
       const ax = l.variant.anchorX ?? 0.5;
       const ay = l.variant.anchorY ?? 0.5;
       return (
