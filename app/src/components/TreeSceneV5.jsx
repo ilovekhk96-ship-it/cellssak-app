@@ -23,6 +23,7 @@ const MIN_USER_ZOOM = 0.6;
 const MAX_USER_ZOOM = 4;
 
 const GOLD_LEAF_FILTER = 'sepia(1) hue-rotate(16deg) saturate(9) brightness(1.4)';
+const LEAF_TONE_FILTER = 'saturate(0.7) brightness(0.87) hue-rotate(-8deg)';
 
 const GRAPE_VARIANTS = [
   { src: '/images/v5-pixel/grape-a-pixel.png', ax: 0.4983, ay: 0.0138, w: 16, h: 19 },
@@ -163,7 +164,7 @@ export default function TreeSceneV5({
       const ay = l.variant.anchorY ?? 0.5;
       return (
         <g key={`l${i}`} transform={`translate(${l.x} ${l.y}) rotate(${l.rot})`}>
-          <g style={l.isGolden ? { filter: GOLD_LEAF_FILTER } : undefined}>
+          <g style={{ filter: l.isGolden ? GOLD_LEAF_FILTER : LEAF_TONE_FILTER }}>
             <image href={l.variant.src} x={-w * ax} y={-h * ay} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
           </g>
         </g>
