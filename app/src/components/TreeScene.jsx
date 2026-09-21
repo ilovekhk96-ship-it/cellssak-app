@@ -307,13 +307,15 @@ export default function TreeScene({
               오른쪽으로 갈수록 흐리고 넓게 퍼지는 두 겹 + 블러. 배경 사진의 햇빛이 왼쪽
               위에서 오므로 그림자는 반대편(오른쪽)으로 눕듯이 길게 뻗어나감 */}
           <defs>
-            <filter id={shadowBlurId} x="-60%" y="-150%" width="220%" height="400%">
+            <filter id={shadowBlurId} x="-60%" y="-150%" width="220%" height="400%" colorInterpolationFilters="sRGB">
               <feGaussianBlur stdDeviation="3.5" />
             </filter>
           </defs>
-          <g transform={`rotate(10 ${GROUND_ANCHOR.x} ${GROUND_ANCHOR.y})`} filter={`url(#${shadowBlurId})`}>
-            <ellipse cx={GROUND_ANCHOR.x + 60} cy={GROUND_ANCHOR.y + 2} rx={100} ry={11} fill="#1F3D22" opacity="0.17" />
-            <ellipse cx={GROUND_ANCHOR.x + 18} cy={GROUND_ANCHOR.y + 1} rx={46} ry={9} fill="#17301A" opacity="0.28" />
+          <g transform={`rotate(10 ${GROUND_ANCHOR.x} ${GROUND_ANCHOR.y})`}>
+            <g filter={`url(#${shadowBlurId})`}>
+              <ellipse cx={GROUND_ANCHOR.x + 60} cy={GROUND_ANCHOR.y + 2} rx={100} ry={11} fill="#1F3D22" opacity="0.17" />
+              <ellipse cx={GROUND_ANCHOR.x + 18} cy={GROUND_ANCHOR.y + 1} rx={46} ry={9} fill="#17301A" opacity="0.28" />
+            </g>
           </g>
 
           {/* 뒷줄 잔디 — 나무 그림보다 먼저 그려서 줄기·가지에 자연스럽게 가려짐 */}

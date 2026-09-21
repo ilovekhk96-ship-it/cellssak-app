@@ -282,13 +282,15 @@ export default function TreeSceneV4({
           }}
         >
           <defs>
-            <filter id={shadowBlurId} x="-60%" y="-150%" width="220%" height="400%">
+            <filter id={shadowBlurId} x="-60%" y="-150%" width="220%" height="400%" colorInterpolationFilters="sRGB">
               <feGaussianBlur stdDeviation="3.5" />
             </filter>
           </defs>
-          <g transform={`rotate(10 ${GROUND_ANCHOR.x} ${GROUND_ANCHOR.y})`} filter={`url(#${shadowBlurId})`}>
-            <ellipse cx={GROUND_ANCHOR.x + 60} cy={GROUND_ANCHOR.y + 2} rx={100} ry={11} fill="#1F3D22" opacity="0.17" />
-            <ellipse cx={GROUND_ANCHOR.x + 18} cy={GROUND_ANCHOR.y + 1} rx={46} ry={9} fill="#17301A" opacity="0.28" />
+          <g transform={`rotate(10 ${GROUND_ANCHOR.x} ${GROUND_ANCHOR.y})`}>
+            <g filter={`url(#${shadowBlurId})`}>
+              <ellipse cx={GROUND_ANCHOR.x + 60} cy={GROUND_ANCHOR.y + 2} rx={100} ry={11} fill="#1F3D22" opacity="0.17" />
+              <ellipse cx={GROUND_ANCHOR.x + 18} cy={GROUND_ANCHOR.y + 1} rx={46} ry={9} fill="#17301A" opacity="0.28" />
+            </g>
           </g>
 
           <GrassRow blades={GRASS_BACK} height={44} keyPrefix="gb" />
