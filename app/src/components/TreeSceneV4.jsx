@@ -32,8 +32,8 @@ function makeGrassBlades(count, seed) {
     delay: -(((i * 41 + seed) % 320) / 100),
   }));
 }
-const GRASS_FRONT = makeGrassBlades(34, 0);
-const GRASS_BACK = makeGrassBlades(24, 5);
+const GRASS_FRONT = makeGrassBlades(12, 0);
+const GRASS_BACK = makeGrassBlades(8, 5);
 
 const GRASS_TUFT_IMAGES = ['/images/v4-minecraft/grass-voxel-a.png', '/images/v4-minecraft/grass-voxel-b.png'];
 

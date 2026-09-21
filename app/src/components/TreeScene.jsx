@@ -68,9 +68,9 @@ function makeGrassBlades(count, seed) {
 }
 // 앞줄: 나무보다 나중에 그려서 밑동을 살짝 덮음 — 키를 낮게 둬서 나무를 가리지 않음.
 // 너무 빽빽해서 그림자까지 덮어버리길래 절반 수준으로 줄임
-const GRASS_FRONT = makeGrassBlades(34, 0);
+const GRASS_FRONT = makeGrassBlades(12, 0);
 // 뒷줄: 나무보다 먼저 그려서 줄기·가지에 자연스럽게 가려지며 깊이감을 줌
-const GRASS_BACK = makeGrassBlades(24, 5);
+const GRASS_BACK = makeGrassBlades(8, 5);
 
 function GrassRow({ blades, height, keyPrefix }) {
   return blades.map((g, i) => (

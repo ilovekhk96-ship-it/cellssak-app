@@ -316,10 +316,12 @@ export default function TreeSceneV5({
                 {deco.emoji}
               </text>
             ))}
+          </g>
 
-            <GrassRow blades={GRASS_BACK} height={30} keyPrefix="gb" />
-            <GrassRow blades={GRASS_FRONT} height={26} keyPrefix="gf" />
+          <GrassRow blades={GRASS_BACK} height={30} keyPrefix="gb" />
+          <GrassRow blades={GRASS_FRONT} height={26} keyPrefix="gf" />
 
+          <g transform={treeTransform}>
             {treeLabel && (
             <text
               x={GROUND_ANCHOR.x}

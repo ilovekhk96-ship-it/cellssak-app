@@ -42,8 +42,8 @@ function makeGrassBlades(count, seed) {
     delay: -(((i * 41 + seed) % 320) / 100),
   }));
 }
-const GRASS_FRONT = makeGrassBlades(34, 0);
-const GRASS_BACK = makeGrassBlades(24, 5);
+const GRASS_FRONT = makeGrassBlades(12, 0);
+const GRASS_BACK = makeGrassBlades(8, 5);
 
 function GrassRow({ blades, height, keyPrefix }) {
   return blades.map((g, i) => (
