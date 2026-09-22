@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Bell } from 'lucide-react';
-import { REMINDER_VERSE, GOLD_LEAF_VERSE } from '../../data/constants';
+import { REMINDER_VERSE, GOLD_LEAF_VERSE, todayStr } from '../../data/constants';
 import { listenCellActivity } from '../../lib/prayerData';
 
 const LAST_SEEN_KEY = 'cellssak:lastNotificationSeenAt';
+const LAST_SEEN_DATE_KEY = 'cellssak:lastNotificationSeenDate';
+const LAST_SEEN_GOLD_SCORE_KEY = 'cellssak:lastNotificationSeenGoldScore';
 
 function readLastSeen() {
   try {
@@ -13,10 +15,28 @@ function readLastSeen() {
   }
 }
 
+function readLastSeenDate() {
+  try {
+    return localStorage.getItem(LAST_SEEN_DATE_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+function readLastSeenGoldScore() {
+  try {
+    return Number(localStorage.getItem(LAST_SEEN_GOLD_SCORE_KEY)) || 0;
+  } catch {
+    return 0;
+  }
+}
+
 export default function NotificationBell({ activeCell, myUid, prayedToday, score }) {
   const [open, setOpen] = useState(false);
   const [cellActivity, setCellActivity] = useState([]);
   const [lastSeenAt, setLastSeenAt] = useState(readLastSeen);
+  const [lastSeenDate, setLastSeenDate] = useState(readLastSeenDate);
+  const [lastSeenGoldScore, setLastSeenGoldScore] = useState(readLastSeenGoldScore);
 
   useEffect(() => {
     if (!activeCell) {
@@ -36,14 +56,26 @@ export default function NotificationBell({ activeCell, myUid, prayedToday, score
   const showReminder = !prayedToday;
   const showGoldLeaf = score > 0 && score % 7 === 0;
 
-  const hasUnread = showReminder || showGoldLeaf || fruitNotifications.some((a) => a.createdAt > lastSeenAt);
+  // 기도 리마인더/황금 나뭇잎은 "아직 기도 안 함"/"7의 배수 점수"처럼 상태 그 자체라, 이걸로
+  // 바로 안 읽음 표시를 하면 한 번 열어봐도 그 상태가 안 바뀌는 한(기도 안 하거나 점수가 그대로면)
+  // 계속 빨갛게 남아있었음 — 오늘 한 번 열어봤는지(리마인더), 이 점수를 이미 봤는지(황금 잎)
+  // 따로 기억해서, 확인하고 나면 그 상태가 실제로 바뀌기 전까진 다시 안 뜨게 함
+  const today = todayStr();
+  const reminderUnread = showReminder && lastSeenDate !== today;
+  const goldLeafUnread = showGoldLeaf && score > lastSeenGoldScore;
+  const hasUnread = reminderUnread || goldLeafUnread || fruitNotifications.some((a) => a.createdAt > lastSeenAt);
 
   const handleOpen = () => {
     setOpen(true);
     const now = Date.now();
+    const today = todayStr();
     setLastSeenAt(now);
+    setLastSeenDate(today);
+    if (showGoldLeaf) setLastSeenGoldScore(score);
     try {
       localStorage.setItem(LAST_SEEN_KEY, String(now));
+      localStorage.setItem(LAST_SEEN_DATE_KEY, today);
+      if (showGoldLeaf) localStorage.setItem(LAST_SEEN_GOLD_SCORE_KEY, String(score));
     } catch {
       // 저장 실패해도 이번 세션 안에서는 정상 동작하니 무시
     }
