@@ -89,6 +89,9 @@ export default function TreeSceneV4({
     })
     .filter(Boolean);
 
+  // 열매는 같은 그룹(behind/front) 안에서 "생긴 시점" 기준으로만 앞이고, 그 이후에
+  // 자란 잎에는 자연스럽게 덮일 수 있음(몇 번째 잎일 때 맺혔는지 기록은 없어서, 열매
+  // k번째는 지금까지의 잎 개수 사이에 고르게 있었을 거라고 추정)
   const { itemsBehind, itemsFront } = useMemo(() => {
     const all = leafPaths.map((l, i) => ({ type: 'leaf', order: i, leaf: l, i }));
     visibleFruits.forEach((f, k) => {

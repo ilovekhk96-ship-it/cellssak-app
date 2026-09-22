@@ -100,6 +100,9 @@ export default function TreeSceneV3({
   // 중간 굵기 가지에 자란 잎/열매는 나무 사진 "뒤"에 그려서 가지 옆으로 살짝 보이게 하고,
   // 얇은 잔가지에 자란 것만 "앞"에 그림 — 굵은 가지 위에 스티커처럼 얹혀 보이던 문제를
   // 줄이면서 잎 앵커 수를 훨씬 늘려서(잔가지만 쓸 때보다) 더 풍성해 보이게 함
+  // 열매는 같은 그룹(behind/front) 안에서 "생긴 시점" 기준으로만 앞이고, 그 이후에
+  // 자란 잎에는 자연스럽게 덮일 수 있음(몇 번째 잎일 때 맺혔는지 기록은 없어서, 열매
+  // k번째는 지금까지의 잎 개수 사이에 고르게 있었을 거라고 추정)
   const { itemsBehind, itemsFront } = useMemo(() => {
     const all = leafPaths.map((l, i) => ({ type: 'leaf', order: i, leaf: l, i }));
     visibleFruits.forEach((f, k) => {

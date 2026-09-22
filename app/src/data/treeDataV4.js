@@ -8888,4 +8888,19 @@ export function getLeafV4(index) {
   };
 }
 
-export const FRUIT_SPOTS_V4 = LEAF_ANCHORS_V4.filter((_, i) => i % 5 === 0).map((a) => ({ x: a.x, y: a.y, behind: a.behind }));
+// 그냥 5개마다 하나씩 뽑으면(셔플된 순서라도) 앵커가 가까이 몰려있는 자리끼리 뽑힐 수 있어서,
+// 포도송이 이미지가 넓다 보니 여러 개가 겹쳐 뭉친 덩어리처럼 보였음 — 이미 고른 자리들과
+// 일정 거리 이상 떨어진 자리만 순서대로 골라서 포도송이끼리 서로 안 겹치게 함
+function minDistanceFilter(anchors, minDist, maxCount) {
+  const picked = [];
+  for (const a of anchors) {
+    if (picked.every((p) => Math.hypot(p.x - a.x, p.y - a.y) >= minDist)) {
+      picked.push(a);
+      if (picked.length >= maxCount) break;
+    }
+  }
+  return picked;
+}
+export const FRUIT_SPOTS_V4 = minDistanceFilter(LEAF_ANCHORS_V4, 14, Math.floor(LEAF_ANCHORS_V4.length / 5)).map((a) => ({
+  x: a.x, y: a.y, behind: a.behind,
+}));

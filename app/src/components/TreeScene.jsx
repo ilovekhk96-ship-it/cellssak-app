@@ -138,7 +138,8 @@ export default function TreeScene({
 
   // 잎이랑 열매를 "자란 순서" 하나로 합쳐서, 열매가 맺힌 뒤에 자란 잎은 열매보다 나중에
   // (그림상 위에) 그려지게 함 — 몇 번째 잎일 때 이 열매가 맺혔는지 정확한 기록은 없어서,
-  // 열매 k번째는 지금까지의 잎 개수(score) 사이에 고르게 있었을 거라고 추정해서 순서를 매김
+  // 열매 k번째는 지금까지의 잎 개수(score) 사이에 고르게 있었을 거라고 추정해서 순서를 매김.
+  // 열매는 "생긴 시점" 기준으로만 맨 앞이고, 그 이후에 자란 잎에는 자연스럽게 덮일 수 있음
   const growthItems = useMemo(() => {
     const items = leafPaths.map((l, i) => ({ type: 'leaf', order: i, leaf: l, i }));
     visibleFruits.forEach((f, k) => {
