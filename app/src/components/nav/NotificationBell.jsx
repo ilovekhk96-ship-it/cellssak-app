@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
 import { REMINDER_VERSE, GOLD_LEAF_VERSE, todayStr } from '../../data/constants';
 import { listenCellActivity } from '../../lib/prayerData';
 
 const LAST_SEEN_KEY = 'cellssak:lastNotificationSeenAt';
 const LAST_SEEN_DATE_KEY = 'cellssak:lastNotificationSeenDate';
 const LAST_SEEN_GOLD_SCORE_KEY = 'cellssak:lastNotificationSeenGoldScore';
+const DISMISSED_FRUIT_IDS_KEY = 'cellssak:dismissedFruitNotificationIds';
 
 function readLastSeen() {
   try {
@@ -31,12 +32,40 @@ function readLastSeenGoldScore() {
   }
 }
 
+function readDismissedFruitIds() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(DISMISSED_FRUIT_IDS_KEY) || '[]');
+    return new Set(Array.isArray(raw) ? raw : []);
+  } catch {
+    return new Set();
+  }
+}
+
+// 알림이 온 시각을 "오늘 9:30" / "어제 9:30" / "9월 3일"처럼 사람이 읽기 편한 형태로 —
+// 한국 시간(KST) 기준 날짜로 오늘/어제를 가른다
+function formatNotifyTime(ts) {
+  const d = new Date(ts);
+  const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+  const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const dateStr = (dt) => `${dt.getUTCFullYear()}-${dt.getUTCMonth()}-${dt.getUTCDate()}`;
+  const hh = String(kst.getUTCHours()).padStart(2, '0');
+  const mm = String(kst.getUTCMinutes()).padStart(2, '0');
+  const oneDay = 24 * 60 * 60 * 1000;
+  if (dateStr(kst) === dateStr(now)) return `오늘 ${hh}:${mm}`;
+  const yesterday = new Date(now.getTime() - oneDay);
+  if (dateStr(kst) === dateStr(yesterday)) return `어제 ${hh}:${mm}`;
+  return `${kst.getUTCMonth() + 1}월 ${kst.getUTCDate()}일`;
+}
+
 export default function NotificationBell({ activeCell, myUid, prayedToday, score }) {
   const [open, setOpen] = useState(false);
   const [cellActivity, setCellActivity] = useState([]);
   const [lastSeenAt, setLastSeenAt] = useState(readLastSeen);
   const [lastSeenDate, setLastSeenDate] = useState(readLastSeenDate);
   const [lastSeenGoldScore, setLastSeenGoldScore] = useState(readLastSeenGoldScore);
+  const [dismissedFruitIds, setDismissedFruitIds] = useState(readDismissedFruitIds);
+  const [reminderDismissed, setReminderDismissed] = useState(false);
+  const [goldLeafDismissed, setGoldLeafDismissed] = useState(false);
 
   useEffect(() => {
     if (!activeCell) {
@@ -49,12 +78,12 @@ export default function NotificationBell({ activeCell, myUid, prayedToday, score
 
   // 다른 셀원이 열매로 바꾼 것만 — 내가 한 건 이미 그 자리에서 토스트로 봤으니 또 안 보여줌
   const fruitNotifications = useMemo(
-    () => cellActivity.filter((a) => a.type === 'fruit' && a.actorUid !== myUid),
-    [cellActivity, myUid]
+    () => cellActivity.filter((a) => a.type === 'fruit' && a.actorUid !== myUid && !dismissedFruitIds.has(a.id)),
+    [cellActivity, myUid, dismissedFruitIds]
   );
 
-  const showReminder = !prayedToday;
-  const showGoldLeaf = score > 0 && score % 7 === 0;
+  const showReminder = !prayedToday && !reminderDismissed;
+  const showGoldLeaf = score > 0 && score % 7 === 0 && !goldLeafDismissed;
 
   // 기도 리마인더/황금 나뭇잎은 "아직 기도 안 함"/"7의 배수 점수"처럼 상태 그 자체라, 이걸로
   // 바로 안 읽음 표시를 하면 한 번 열어봐도 그 상태가 안 바뀌는 한(기도 안 하거나 점수가 그대로면)
@@ -80,6 +109,26 @@ export default function NotificationBell({ activeCell, myUid, prayedToday, score
       // 저장 실패해도 이번 세션 안에서는 정상 동작하니 무시
     }
   };
+
+  const persistDismissedFruitIds = (nextSet) => {
+    try {
+      localStorage.setItem(DISMISSED_FRUIT_IDS_KEY, JSON.stringify([...nextSet]));
+    } catch {
+      // 저장 실패해도 이번 세션 안에서는 정상 동작하니 무시
+    }
+  };
+
+  const dismissFruit = (id) => {
+    setDismissedFruitIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      persistDismissedFruitIds(next);
+      return next;
+    });
+  };
+
+  const dismissReminder = () => setReminderDismissed(true);
+  const dismissGoldLeaf = () => setGoldLeafDismissed(true);
 
   const isEmpty = !showReminder && !showGoldLeaf && fruitNotifications.length === 0;
 
@@ -115,11 +164,21 @@ export default function NotificationBell({ activeCell, myUid, prayedToday, score
               </p>
             )}
 
-            {showGoldLeaf && <NotificationItem emoji="🌟" title="황금 나뭇잎이 자랐어요!" verse={GOLD_LEAF_VERSE} />}
-            {showReminder && <NotificationItem emoji="🙏" title="기도할 시간이에요" verse={REMINDER_VERSE} />}
+            {showGoldLeaf && (
+              <NotificationItem emoji="🌟" title="황금 나뭇잎이 자랐어요!" verse={GOLD_LEAF_VERSE} onDismiss={dismissGoldLeaf} />
+            )}
+            {showReminder && (
+              <NotificationItem emoji="🙏" title="기도할 시간이에요" verse={REMINDER_VERSE} onDismiss={dismissReminder} />
+            )}
 
             {fruitNotifications.map((a) => (
-              <NotificationItem key={a.id} emoji="🎉" title={`${a.prayerName}님의 기도가 믿음의 열매를 맺었어요!`} />
+              <NotificationItem
+                key={a.id}
+                emoji="🎉"
+                title={`${a.prayerName}님의 기도가 믿음의 열매를 맺었어요!`}
+                time={a.createdAt ? formatNotifyTime(a.createdAt) : null}
+                onDismiss={() => dismissFruit(a.id)}
+              />
             ))}
           </div>
         </div>
@@ -128,15 +187,28 @@ export default function NotificationBell({ activeCell, myUid, prayedToday, score
   );
 }
 
-function NotificationItem({ emoji, title, verse }) {
+function NotificationItem({ emoji, title, verse, time, onDismiss }) {
   return (
-    <div style={{ background: '#F5F0E8' }} className="rounded-2xl px-3.5 py-3">
-      <p className="text-sm font-medium flex items-center gap-1.5">
+    <div style={{ background: '#F5F0E8' }} className="relative rounded-2xl px-3.5 py-3">
+      <button
+        onClick={onDismiss}
+        aria-label="알림 지우기"
+        style={{ position: 'absolute', top: '8px', right: '8px', color: '#B7A9AC' }}
+        className="flex items-center justify-center"
+      >
+        <X size={13} />
+      </button>
+      <p className="text-sm font-medium flex items-center gap-1.5" style={{ paddingRight: '18px' }}>
         <span>{emoji}</span> {title}
       </p>
       {verse && (
         <p style={{ color: '#9C8286' }} className="text-xs mt-1 italic leading-relaxed">
           &ldquo;{verse.text}&rdquo; — {verse.ref}
+        </p>
+      )}
+      {time && (
+        <p style={{ color: '#B7A9AC' }} className="text-xs mt-1">
+          {time}
         </p>
       )}
     </div>
