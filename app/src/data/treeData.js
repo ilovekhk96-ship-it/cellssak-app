@@ -960,9 +960,11 @@ export function getLeaf(index) {
     radius = 5 + Math.min(ring * 1.1, 18) + rand() * 3;
   }
   // 잎의 뾰족한 끝(사진 위쪽)이 캐노피 중심에서 바깥쪽(가지자리 방향)을 향하고 줄기(사진
-  // 아래쪽)는 중심 쪽을 향하게 함 — 흔들림 폭은 자연스러운 정도로만 작게(예전엔 ±50도라
-  // 가장자리 잎도 방향이 거의 랜덤해 보였음)
-  const rot = anchor.angle + 90 + (rand() - 0.5) * 24;
+  // 아래쪽)는 중심 쪽을 향하게 함 — 대부분은 이 "바깥쪽" 기준에서 작게만 흔들리되,
+  // 일부(대략 5개 중 1개)는 180도 뒤집어서 아래로 처진(드루핑) 잎도 섞이게 함 — 실제
+  // 나무도 잎이 전부 가지 바깥쪽만 향하지 않고 중력에 눌려 안쪽/아래로 처진 잎이 섞여 있음
+  const droop = rand() < 0.22 ? 180 : 0;
+  const rot = anchor.angle + 90 + (rand() - 0.5) * 24 + droop;
   return {
     x: anchor.x + Math.cos(jitterAngle) * radius,
     y: anchor.y + Math.sin(jitterAngle) * radius * 0.85,

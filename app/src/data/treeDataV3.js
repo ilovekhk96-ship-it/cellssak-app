@@ -1474,11 +1474,20 @@ export function getLeafV3(index) {
   // 방향(stemAngle)이 달라서, 목표 방향에서 stemAngle만큼 빼줘야 사진마다 제각각이던
   // 방향이 전부 같은 기준으로 맞춰짐. 순수 랜덤이면 꼭지가 붙어있어도 잎이 엉뚱한
   // 방향(가지 쪽으로 되돌아 향하는 등)을 볼 수 있어서 부자연스러워 보임
-  const rot = anchor.angle + 90 - variant.stemAngle + (rand() - 0.5) * 50;
+  // 대부분은 가지 바깥쪽을 향하되, 일부(대략 5개 중 1개)는 180도 뒤집어서 아래로 처진
+  // (드루핑) 잎도 섞이게 함 — 실제 나무도 잎이 전부 바깥쪽만 향하지 않고 중력에 눌려
+  // 안쪽/아래로 처진 잎이 섞여 있음
+  const droop = rand() < 0.22 ? 180 : 0;
+  const rot = anchor.angle + 90 - variant.stemAngle + (rand() - 0.5) * 50 + droop;
+  // 사진 속 잎이 전부 비슷한 방향(손잡이 방향)으로 휘어 있는 경우, 회전만으로는 그 휜
+  // 방향 자체가 안 바뀌어서 나무 전체가 한쪽으로 쓸린 것처럼 보일 수 있음 — 절반을
+  // 좌우로 뒤집어서 그 휜 방향도 섞이게 함
+  const flip = rand() < 0.5;
   return {
     x: anchor.x + Math.cos(jitterAngle) * radius,
     y: anchor.y + Math.sin(jitterAngle) * radius * 0.85,
     rot,
+    flip,
     scale: 0.55 + rand() * 0.3,
     variant,
     behind: anchor.behind,

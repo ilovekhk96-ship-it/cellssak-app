@@ -79,6 +79,7 @@ export default function TreeSceneV3({
         x: leaf.x,
         y: leaf.y,
         rot: leaf.rot,
+        flip: leaf.flip,
         scale: leaf.scale,
         variant: leaf.variant,
         isGolden,
@@ -166,7 +167,7 @@ export default function TreeSceneV3({
       const ax = l.variant.anchorX ?? 0.5;
       const ay = l.variant.anchorY ?? 0.5;
       return (
-        <g key={`l${i}`} transform={`translate(${l.x} ${l.y}) rotate(${l.rot})`}>
+        <g key={`l${i}`} transform={`translate(${l.x} ${l.y}) rotate(${l.rot}) scale(${l.flip ? -1 : 1},1)`}>
           <g style={l.isGolden ? { filter: GOLD_LEAF_FILTER } : undefined}>
             <image href={l.variant.src} x={-w * ax} y={-h * ay} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
           </g>

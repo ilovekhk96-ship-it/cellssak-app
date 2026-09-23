@@ -1,17 +1,17 @@
 import { useId, useMemo, useRef, useState } from 'react';
 import { Sprout, Sparkles, Calendar } from 'lucide-react';
 import { STATUS } from '../data/constants';
-import { TREE_V5_IMAGE, getLeafV5, FRUIT_SPOTS_V5 } from '../data/treeDataV5';
+import { TREE_V6_IMAGE, getLeafV6, FRUIT_SPOTS_V6 } from '../data/treeDataV6';
 import { DECORATIONS, DECORATION_SLOTS } from '../data/decorations';
 import Cloud from './Cloud';
 import ThoughtBubble from './ThoughtBubble';
 import SceneIcon from './SceneIcon';
 import HeartBadge from './HeartBadge';
 
-// 버전5 실험용 TreeScene — 픽셀아트(포켓몬 스타일). 버전3(TreeSceneV3.jsx)와 완전히 같은
-// 구조(가지 앵커 스캔, 잎마다 줄기 각도 감지해서 가지 방향으로 회전, 줌/그림자 등)를
-// 그대로 쓰고 이미지만 픽셀아트 스타일로 교체함. v2/v3/v4와 완전히 분리되어 있어 이
-// 파일을 고쳐도 다른 버전에는 영향 없음.
+// 버전6 실험용 TreeScene — 수채화풍. 버전5(TreeSceneV5.jsx)와 완전히 같은 구조(가지 앵커
+// 스캔, 잎마다 줄기 각도 감지해서 가지 방향으로 회전, 줌/그림자 등)를 그대로 쓰고
+// 이미지만 수채화 스타일로 교체함. v2~v5와 완전히 분리되어 있어 이 파일을 고쳐도 다른
+// 버전에는 영향 없음.
 const GROUND_ANCHOR = { x: 120, y: 232 };
 const LABEL_Y = GROUND_ANCHOR.y + 22;
 
@@ -23,17 +23,13 @@ const MIN_USER_ZOOM = 0.6;
 const MAX_USER_ZOOM = 4;
 
 const GOLD_LEAF_FILTER = 'sepia(1) hue-rotate(16deg) saturate(9) brightness(1.4)';
-const LEAF_TONE_FILTER = 'saturate(0.7) brightness(0.87) hue-rotate(-8deg)';
 
-const GRAPE_VARIANTS = [
-  { src: '/images/v5-pixel/grape-a-pixel.png', ax: 0.4983, ay: 0.0138, w: 16, h: 19 },
-  { src: '/images/v5-pixel/grape-b-pixel.png', ax: 0.5596, ay: 0.0108, w: 16, h: 17 },
-];
+const GRAPE_IMAGE = { src: '/images/v6-watercolor/grape-watercolor.png', ax: 0.503, ay: 0.004, w: 13, h: 15.7 };
 
-const CLOUD_IMAGES_V5 = [
-  '/images/v5-pixel/clouds/cloud-p-01.png',
-  '/images/v5-pixel/clouds/cloud-p-04.png',
-  '/images/v5-pixel/clouds/cloud-p-07.png',
+const CLOUD_IMAGES_V6 = [
+  '/images/v6-watercolor/clouds/cloud-w-01.png',
+  '/images/v6-watercolor/clouds/cloud-w-02.png',
+  '/images/v6-watercolor/clouds/cloud-w-03.png',
 ];
 
 function makeGrassBlades(count, seed) {
@@ -52,13 +48,13 @@ function GrassRow({ blades, height, keyPrefix }) {
   return blades.map((g, i) => (
     <g key={`${keyPrefix}${i}`} transform={`translate(${g.x} ${GROUND_ANCHOR.y + 4 + g.y}) scale(${g.flip ? -1 : 1},1)`}>
       <g className="sway-grass" style={{ animationDelay: `${g.delay}s` }}>
-        <image href="/images/v5-pixel/grass-pixel.png" x={-g.w / 2} y={-height} width={g.w} height={height} preserveAspectRatio="xMidYMax meet" />
+        <image href="/images/v6-watercolor/grass-watercolor.png" x={-g.w / 2} y={-height} width={g.w} height={height} preserveAspectRatio="xMidYMax meet" />
       </g>
     </g>
   ));
 }
 
-export default function TreeSceneV5({
+export default function TreeSceneV6({
   score,
   daysCount,
   todayActiveCount,
@@ -71,12 +67,12 @@ export default function TreeSceneV5({
   goldenIndices,
   equippedDecorations,
 }) {
-  const shadowBlurId = `tree-shadow-blur-v5-${useId()}`;
+  const shadowBlurId = `tree-shadow-blur-v6-${useId()}`;
 
   const leafPaths = useMemo(() => {
     const arr = [];
     for (let i = 0; i < score; i++) {
-      const leaf = getLeafV5(i);
+      const leaf = getLeafV6(i);
       const isGolden = goldenIndices && goldenIndices.has(i);
       arr.push({
         x: leaf.x,
@@ -91,7 +87,7 @@ export default function TreeSceneV5({
     }
     return arr;
   }, [score, goldenIndices]);
-  const visibleFruits = FRUIT_SPOTS_V5.slice(0, fruitCount);
+  const visibleFruits = FRUIT_SPOTS_V6.slice(0, fruitCount);
 
   const decorationItems = (equippedDecorations || [])
     .map((id) => {
@@ -131,10 +127,10 @@ export default function TreeSceneV5({
       maxX = Math.max(maxX, x + pad);
       maxY = Math.max(maxY, y + pad);
     };
-    consider(TREE_V5_IMAGE.x, TREE_V5_IMAGE.y);
-    consider(TREE_V5_IMAGE.x + TREE_V5_IMAGE.width, TREE_V5_IMAGE.y + TREE_V5_IMAGE.height);
-    leafPaths.forEach((l) => consider(l.x, l.y, 17));
-    visibleFruits.forEach((f) => consider(f.x, f.y + 9, 9));
+    consider(TREE_V6_IMAGE.x, TREE_V6_IMAGE.y);
+    consider(TREE_V6_IMAGE.x + TREE_V6_IMAGE.width, TREE_V6_IMAGE.y + TREE_V6_IMAGE.height);
+    leafPaths.forEach((l) => consider(l.x, l.y, 9));
+    visibleFruits.forEach((f) => consider(f.x, f.y + 8, 8));
     consider(-14, GROUND_ANCHOR.y, 0);
     consider(250, GROUND_ANCHOR.y, 0);
 
@@ -162,13 +158,13 @@ export default function TreeSceneV5({
     if (item.type === 'leaf') {
       const l = item.leaf;
       const i = item.i;
-      const w = 20 * l.scale;
-      const h = 20 * l.scale;
+      const w = 10 * l.scale;
+      const h = 10 * l.scale;
       const ax = l.variant.anchorX ?? 0.5;
       const ay = l.variant.anchorY ?? 0.5;
       return (
         <g key={`l${i}`} transform={`translate(${l.x} ${l.y}) rotate(${l.rot}) scale(${l.flip ? -1 : 1},1)`}>
-          <g style={{ filter: l.isGolden ? GOLD_LEAF_FILTER : LEAF_TONE_FILTER }}>
+          <g style={l.isGolden ? { filter: GOLD_LEAF_FILTER } : undefined}>
             <image href={l.variant.src} x={-w * ax} y={-h * ay} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
           </g>
         </g>
@@ -176,15 +172,14 @@ export default function TreeSceneV5({
     }
     const f = item.fruit;
     const k = item.k;
-    const g = GRAPE_VARIANTS[k % GRAPE_VARIANTS.length];
     return (
       <image
         key={`f${k}`}
-        href={g.src}
-        x={f.x - g.w * g.ax}
+        href={GRAPE_IMAGE.src}
+        x={f.x - GRAPE_IMAGE.w * GRAPE_IMAGE.ax}
         y={f.y}
-        width={g.w}
-        height={g.h}
+        width={GRAPE_IMAGE.w}
+        height={GRAPE_IMAGE.h}
         preserveAspectRatio="xMidYMid meet"
       />
     );
@@ -250,13 +245,13 @@ export default function TreeSceneV5({
       className="flex flex-col"
     >
       <div style={{ top: '-8%', width: '56%', zIndex: 0, animationDuration: '340s' }} className="drift-cloud">
-        <Cloud src={CLOUD_IMAGES_V5[0]} />
+        <Cloud src={CLOUD_IMAGES_V6[0]} />
       </div>
       <div style={{ top: '17%', width: '44%', zIndex: 0, animationDuration: '400s', animationDelay: '-220s' }} className="drift-cloud">
-        <Cloud src={CLOUD_IMAGES_V5[1]} flip />
+        <Cloud src={CLOUD_IMAGES_V6[1]} flip />
       </div>
       <div style={{ top: '38%', width: '26%', zIndex: 0, animationDuration: '370s', animationDelay: '-300s' }} className="drift-cloud">
-        <Cloud src={CLOUD_IMAGES_V5[2]} />
+        <Cloud src={CLOUD_IMAGES_V6[2]} />
       </div>
 
       <ThoughtBubble />
@@ -297,11 +292,11 @@ export default function TreeSceneV5({
             {itemsBehind.map(renderGrowthItem)}
 
             <image
-              href={TREE_V5_IMAGE.src}
-              x={TREE_V5_IMAGE.x}
-              y={TREE_V5_IMAGE.y}
-              width={TREE_V5_IMAGE.width}
-              height={TREE_V5_IMAGE.height}
+              href={TREE_V6_IMAGE.src}
+              x={TREE_V6_IMAGE.x}
+              y={TREE_V6_IMAGE.y}
+              width={TREE_V6_IMAGE.width}
+              height={TREE_V6_IMAGE.height}
               preserveAspectRatio="xMidYMax meet"
             />
 

@@ -8339,11 +8339,18 @@ export function getLeafV5(index) {
   }
   const variant = LEAF_IMAGES_V5[index % LEAF_IMAGES_V5.length];
   const jitterRot = (rand() - 0.5) * 50;
-  const rot = anchor.angle + 90 - (variant.stemAngle * 180) / Math.PI + jitterRot;
+  // 대부분은 가지 바깥쪽을 향하되, 일부(대략 5개 중 1개)는 180도 뒤집어서 아래로 처진
+  // (드루핑) 잎도 섞이게 함 — 실제 나무도 잎이 전부 바깥쪽만 향하지 않고 중력에 눌려
+  // 안쪽/아래로 처진 잎이 섞여 있음
+  const droop = rand() < 0.22 ? 180 : 0;
+  const rot = anchor.angle + 90 - (variant.stemAngle * 180) / Math.PI + jitterRot + droop;
+  // 절반은 좌우로 뒤집어서, 잎 스프라이트 자체에 한쪽으로 쏠린 결이 있어도 섞이게 함
+  const flip = rand() < 0.5;
   return {
     x: anchor.x + Math.cos(jitterAngle) * radius,
     y: anchor.y + Math.sin(jitterAngle) * radius * 0.85,
     rot,
+    flip,
     scale: 0.55 + rand() * 0.3,
     variant,
     behind: anchor.behind,
