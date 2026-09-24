@@ -33,6 +33,9 @@ import { listenEquippedDecorations, setEquippedDecorations } from '../lib/decora
 import { DECORATIONS, findSlot } from '../data/decorations';
 
 const PAGE_BG = "url('/images/bg-field.jpg') center 72% / cover no-repeat";
+// 버전1만 사진이 아니라 그라데이션 — 나무·구름·잔디가 전부 도형이라 배경만 사진이면 겉돈다.
+// 52% 지점에서 하늘색이 잔디색으로 딱 끊기게 해서 지평선을 만든다
+const PAGE_BG_V1 = 'linear-gradient(to bottom, #CFEFFB 0%, #E3F7EC 52%, #C3E9B9 52%, #A8DE9D 100%)';
 const PAGE_BG_V4 = "url('/images/v4-minecraft/bg-field-voxel.png') center 72% / cover no-repeat";
 const PAGE_BG_V5 = "url('/images/v5-pixel/bg-field-pixel.png') center 72% / cover no-repeat";
 const PAGE_BG_V6 = "url('/images/v6-watercolor/bg-field-watercolor.png') center 72% / cover no-repeat";
@@ -288,7 +291,7 @@ export default function PersonalHome({ user, activeCell, pendingRequest, onOpenC
     <div
       style={{
         ...vars,
-        background: showTreeV4 ? PAGE_BG_V4 : showTreeV5 ? PAGE_BG_V5 : showTreeV6 ? PAGE_BG_V6 : PAGE_BG,
+        background: showTreeV1 ? PAGE_BG_V1 : showTreeV4 ? PAGE_BG_V4 : showTreeV5 ? PAGE_BG_V5 : showTreeV6 ? PAGE_BG_V6 : PAGE_BG,
         fontFamily: 'var(--font-body)',
         color: 'var(--ink)',
         overflowX: 'hidden',
