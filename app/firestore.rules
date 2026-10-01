@@ -132,6 +132,35 @@ service cloud.firestore {
         match /activity/{activityId} {
           allow read, create: if isMember(churchId, cellId) || isSuperAdmin();
         }
+
+        // 함께 기도 약속 — 만들고 지우는 건 셀장만. 다만 진행 중에 바뀌는 두 가지,
+        // 현재 장(인도자가 넘김)과 상태(시작/종료)는 셀원도 쓸 수 있게 열어둔다.
+        // 'self'(각자 속도) 모드이거나 셀장이 자리를 비웠을 때도 진행이 멈추지 않아야 하기 때문.
+        // 그 두 필드 말고 제목·시각·말씀 본문을 셀원이 고치는 건 막는다
+        match /groupPrayers/{gpId} {
+          allow read: if isMember(churchId, cellId) || isSuperAdmin();
+          allow create, delete: if isLeader(churchId, cellId) || isSuperAdmin();
+          allow update: if isLeader(churchId, cellId) || isSuperAdmin() ||
+            (isMember(churchId, cellId) &&
+             request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['currentIndex', 'status']));
+
+          // 지금 함께 있는 사람 — 자기 자신만 쓰고 지울 수 있고, 목록은 셀원 누구나 본다
+          match /participants/{uid} {
+            allow read: if isMember(churchId, cellId) || isSuperAdmin();
+            allow write: if isSignedIn() && request.auth.uid == uid && isMember(churchId, cellId);
+          }
+
+          // 채팅 — 셀원이면 읽고 쓸 수 있고, 보낸 사람이 자기여야 한다. 수정은 막고
+          // 지우는 건 본인이나 셀장만(기도 중에 오간 말을 남이 고치면 안 됨)
+          match /messages/{msgId} {
+            allow read: if isMember(churchId, cellId) || isSuperAdmin();
+            allow create: if isMember(churchId, cellId) && request.resource.data.uid == request.auth.uid;
+            allow update: if false;
+            allow delete: if isSuperAdmin() || isLeader(churchId, cellId) ||
+              (isSignedIn() && resource.data.uid == request.auth.uid);
+          }
+        }
       }
     }
   }
