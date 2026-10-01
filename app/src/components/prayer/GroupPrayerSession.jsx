@@ -5,6 +5,7 @@ import { savePrayerSession } from '../../lib/prayerSessions';
 import { usePrayerTimer, formatHMS } from '../../hooks/usePrayerTimer';
 import { usePrayerMusic } from '../../hooks/usePrayerMusic';
 import MusicToggle from './MusicToggle';
+import GroupPrayerChat from './GroupPrayerChat';
 import {
   listenGroupPrayer,
   listenParticipants,
@@ -137,6 +138,7 @@ export default function GroupPrayerSession({ user, churchId, cellId, groupPrayer
             currentTrack={music.currentTrack}
             nextTrack={music.nextTrack}
           />
+          <GroupPrayerChat churchId={churchId} cellId={cellId} gpId={gpId} user={user} />
           <button onClick={handleEnd} disabled={ending} aria-label="나가기" style={{ color: '#9C8286' }}>
             <X size={20} />
           </button>

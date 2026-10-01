@@ -8,6 +8,7 @@ import {
   toMillis,
 } from '../../lib/groupPrayer';
 import GroupPrayerSession from './GroupPrayerSession';
+import PassagePicker from './PassagePicker';
 
 // 함께 기도 약속 목록 — 셀 메뉴의 한 탭. 셀장은 여기서 약속을 만들고, 셀원은 다가오는
 // 약속을 본다. 실제로 들어가서 함께 기도하는 화면은 다음 단계(1-B)에서 붙인다.
@@ -199,16 +200,10 @@ export default function GroupPrayerPanel({ churchId, cellId, user, isLeader }) {
           <div className="flex flex-col gap-2 text-xs" style={{ color: '#9C8286' }}>
             함께 읽을 말씀
             {passages.map((p, i) => (
-              <div key={i} className="flex flex-col gap-1">
-                <div className="flex gap-1.5 items-center">
-                  <input
-                    value={p.ref}
-                    onChange={(e) => setPassages(passages.map((x, k) => (k === i ? { ...x, ref: e.target.value } : x)))}
-                    placeholder="시편 23:1-3"
-                    style={{ background: '#F5F0E8', color: '#4A3B3F' }}
-                    className="flex-1 rounded-xl px-3 py-2 text-sm"
-                  />
-                  {passages.length > 1 && (
+              <div key={i} style={{ background: '#F9F5EF' }} className="rounded-xl p-2.5 flex flex-col gap-1.5">
+                {passages.length > 1 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px]">{i + 1}번째 말씀</span>
                     <button
                       onClick={() => setPassages(passages.filter((_, k) => k !== i))}
                       aria-label="이 말씀 지우기"
@@ -216,15 +211,11 @@ export default function GroupPrayerPanel({ churchId, cellId, user, isLeader }) {
                     >
                       <Trash2 size={14} />
                     </button>
-                  )}
-                </div>
-                <textarea
-                  value={p.text}
-                  onChange={(e) => setPassages(passages.map((x, k) => (k === i ? { ...x, text: e.target.value } : x)))}
-                  placeholder="본문을 붙여넣어 주세요"
-                  rows={3}
-                  style={{ background: '#F5F0E8', color: '#4A3B3F' }}
-                  className="rounded-xl px-3 py-2 text-sm resize-none"
+                  </div>
+                )}
+                <PassagePicker
+                  value={p}
+                  onChange={(next) => setPassages(passages.map((x, k) => (k === i ? next : x)))}
                 />
               </div>
             ))}
