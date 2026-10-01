@@ -288,7 +288,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
                 </span>
               )}
             </div>
-            <CellMenu churchId={churchId} cellId={cellId} cellName={cellName} myUid={user.uid} isLeader={isLeader} />
+            <CellMenu churchId={churchId} cellId={cellId} cellName={cellName} myUid={user.uid} user={user} isLeader={isLeader} />
           </div>
         </div>
 

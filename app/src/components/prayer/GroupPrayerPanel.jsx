@@ -7,6 +7,7 @@ import {
   groupPrayerPhase,
   toMillis,
 } from '../../lib/groupPrayer';
+import GroupPrayerSession from './GroupPrayerSession';
 
 // 함께 기도 약속 목록 — 셀 메뉴의 한 탭. 셀장은 여기서 약속을 만들고, 셀원은 다가오는
 // 약속을 본다. 실제로 들어가서 함께 기도하는 화면은 다음 단계(1-B)에서 붙인다.
@@ -41,8 +42,10 @@ function defaultWhen() {
   return toLocalInputValue(d);
 }
 
-export default function GroupPrayerPanel({ churchId, cellId, myUid, isLeader }) {
+export default function GroupPrayerPanel({ churchId, cellId, user, isLeader }) {
   const [items, setItems] = useState([]);
+  // 함께 기도 화면은 셀 메뉴 모달 위에 전체화면으로 덮는다
+  const [joined, setJoined] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [creating, setCreating] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -107,7 +110,7 @@ export default function GroupPrayerPanel({ churchId, cellId, myUid, isLeader }) 
         scheduledAt: new Date(when).getTime(),
         passages: cleanPassages,
         mode,
-        leaderUid: myUid,
+        leaderUid: user.uid,
       });
       resetForm();
       setCreating(false);
@@ -293,12 +296,22 @@ export default function GroupPrayerPanel({ churchId, cellId, myUid, isLeader }) 
               >
                 {MODES.find((m) => m.id === gp.mode)?.label || '각자 속도'}
               </span>
-              {phase === 'open' && (
-                <span style={{ background: '#6FA66B', color: '#FFF8F0' }} className="text-[11px] rounded-full px-2 py-0.5">
-                  지금 열려 있어요
+              {phase !== 'open' && (
+                <span style={{ color: '#9C8286' }} className="text-[11px]">
+                  시작 10분 전부터 들어갈 수 있어요
                 </span>
               )}
             </div>
+
+            {phase === 'open' && (
+              <button
+                onClick={() => setJoined(gp)}
+                style={{ background: '#6FA66B', color: '#FFF8F0' }}
+                className="mt-1.5 rounded-xl py-2 text-sm font-medium"
+              >
+                함께 기도하러 들어가기
+              </button>
+            )}
           </div>
         );
       })}
@@ -320,6 +333,17 @@ export default function GroupPrayerPanel({ churchId, cellId, myUid, isLeader }) 
             </div>
           ))}
         </>
+      )}
+
+      {joined && (
+        <GroupPrayerSession
+          user={user}
+          churchId={churchId}
+          cellId={cellId}
+          groupPrayer={joined}
+          isLeader={isLeader}
+          onClose={() => setJoined(null)}
+        />
       )}
     </div>
   );

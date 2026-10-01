@@ -5,7 +5,7 @@ import MemberList from '../members/MemberList';
 import AdminApprovals from '../admin/AdminApprovals';
 import GroupPrayerPanel from '../prayer/GroupPrayerPanel';
 
-export default function CellMenu({ churchId, cellId, cellName, myUid, isLeader }) {
+export default function CellMenu({ churchId, cellId, cellName, myUid, user, isLeader }) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState('members'); // 'members' | 'together' | 'admin'
   const [editingName, setEditingName] = useState(false);
@@ -129,7 +129,7 @@ export default function CellMenu({ churchId, cellId, cellName, myUid, isLeader }
               {tab === 'members' ? (
                 <MemberList churchId={churchId} cellId={cellId} myUid={myUid} myRole={isLeader ? 'leader' : 'member'} />
               ) : tab === 'together' ? (
-                <GroupPrayerPanel churchId={churchId} cellId={cellId} myUid={myUid} isLeader={isLeader} />
+                <GroupPrayerPanel churchId={churchId} cellId={cellId} user={user} isLeader={isLeader} />
               ) : (
                 <AdminApprovals churchId={churchId} cellId={cellId} />
               )}
