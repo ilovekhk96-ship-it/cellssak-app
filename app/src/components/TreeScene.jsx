@@ -1,5 +1,5 @@
 import { useId, useMemo, useRef, useState } from 'react';
-import { Sprout, Sparkles, Calendar } from 'lucide-react';
+import { Sprout, Sparkles, Calendar, HeartHandshake } from 'lucide-react';
 import { STATUS } from '../data/constants';
 import { TRUNK, BRANCHES, FRUIT_SPOTS, getLeaf } from '../data/treeData';
 import { DECORATIONS, DECORATION_SLOTS } from '../data/decorations';
@@ -90,6 +90,7 @@ export default function TreeScene({
   fruitCount,
   onOpenList,
   onOpenHeatmap,
+  onOpenGroupPrayer,
   showActions = true,
   treeLabel,
   goldenIndices,
@@ -465,6 +466,10 @@ export default function TreeScene({
           <SceneIcon icon={Sparkles} label="믿음열매" count={fruitCount} bg="#FFFDF9" fg={STATUS.fruit.color} onClick={() => onOpenList('fruit')} />
           {onOpenHeatmap && (
             <SceneIcon icon={Calendar} label="기도잔디" bg="#FFFDF9" fg="#4A9FD8" onClick={onOpenHeatmap} />
+          )}
+          {/* 함께 기도 — 모임설정 안에 있던 걸 꺼냄. 설정이 아니라 매번 쓰는 기능이라 */}
+          {onOpenGroupPrayer && (
+            <SceneIcon icon={HeartHandshake} label="함께기도" bg="#FFFDF9" fg="#6FA66B" onClick={onOpenGroupPrayer} />
           )}
           <div style={{ marginTop: '6px' }}>
             <HeartBadge count={todayActiveCount} />

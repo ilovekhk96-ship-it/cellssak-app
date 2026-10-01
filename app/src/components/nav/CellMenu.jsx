@@ -3,11 +3,10 @@ import { Users, Pencil, Check } from 'lucide-react';
 import { renameCell, listenPendingRequests } from '../../lib/church';
 import MemberList from '../members/MemberList';
 import AdminApprovals from '../admin/AdminApprovals';
-import GroupPrayerPanel from '../prayer/GroupPrayerPanel';
 
 export default function CellMenu({ churchId, cellId, cellName, myUid, user, isLeader }) {
   const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState('members'); // 'members' | 'together' | 'admin'
+  const [tab, setTab] = useState('members'); // 'members' | 'admin'
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const [saving, setSaving] = useState(false);
@@ -110,9 +109,6 @@ export default function CellMenu({ churchId, cellId, cellName, myUid, user, isLe
               <button onClick={() => setTab('members')} style={tabBtnStyle('members')} className="px-4 py-2 rounded-t-2xl text-sm font-medium">
                 셀원
               </button>
-              <button onClick={() => setTab('together')} style={tabBtnStyle('together')} className="px-4 py-2 rounded-t-2xl text-sm font-medium">
-                함께 기도
-              </button>
               {isLeader && (
                 <button onClick={() => setTab('admin')} style={tabBtnStyle('admin')} className="px-4 py-2 rounded-t-2xl text-sm font-medium flex items-center gap-1">
                   가입승인
@@ -128,8 +124,6 @@ export default function CellMenu({ churchId, cellId, cellName, myUid, user, isLe
             <div style={{ background: '#F5F0E8' }} className="mx-5 mb-5 rounded-2xl rounded-tl-none flex-1 overflow-y-auto p-4">
               {tab === 'members' ? (
                 <MemberList churchId={churchId} cellId={cellId} myUid={myUid} myRole={isLeader ? 'leader' : 'member'} />
-              ) : tab === 'together' ? (
-                <GroupPrayerPanel churchId={churchId} cellId={cellId} user={user} isLeader={isLeader} />
               ) : (
                 <AdminApprovals churchId={churchId} cellId={cellId} />
               )}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Crown } from 'lucide-react';
+import { Crown, X } from 'lucide-react';
 import { STATUS, VERSES, FULL_INDEX, getIndexLabel, todayStr } from './data/constants';
 import { listenCell, clearActiveCell } from './lib/church';
 import {
@@ -15,6 +15,7 @@ import {
 import { copyEntryToPersonal, logPersonalPrayerForToday } from './lib/personalPrayer';
 import { myWeeklyGoldenIndicesInCell } from './lib/growth';
 import TreeScene from './components/TreeScene';
+import GroupPrayerPanel from './components/prayer/GroupPrayerPanel';
 import ListModal from './components/ListModal';
 import EntrySheet from './components/EntrySheet';
 import AddEntrySheet from './components/entry/AddEntrySheet';
@@ -36,6 +37,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
   const [sheet, setSheet] = useState(null); // null | { editId, status }
   const [form, setForm] = useState({ prayerName: '', targetName: '', relationship: '', note: '' });
   const [heatmapOpen, setHeatmapOpen] = useState(false);
+  const [groupPrayerOpen, setGroupPrayerOpen] = useState(false);
 
   const listRef = useRef(null);
   const groupRefs = useRef({});
@@ -307,6 +309,7 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
             fruitCount={fruitCount}
             onOpenList={(k) => setOpenList(k)}
             onOpenHeatmap={() => setHeatmapOpen(true)}
+            onOpenGroupPrayer={() => setGroupPrayerOpen(true)}
             treeLabel={cellName ? `${cellName}의 기도나무` : ''}
             goldenIndices={goldenIndices}
           />
@@ -357,6 +360,26 @@ export default function App({ user, onSignOut, churchId, cellId, isLeader, onBac
             onClose={() => setAddOpen(false)}
             onAdded={() => setToast('기도씨앗을 심었어요 🌱')}
           />
+        )}
+
+        {groupPrayerOpen && (
+          <div className="fixed inset-0 flex items-center justify-center z-30 px-6" style={{ maxWidth: '384px', margin: '0 auto' }}>
+            <div style={{ background: '#00000040' }} className="absolute inset-0" onClick={() => setGroupPrayerOpen(false)} />
+            <div
+              style={{ background: '#FFFDF9', color: '#4A3B3F', maxHeight: '75vh' }}
+              className="relative w-full rounded-3xl shadow-xl flex flex-col overflow-hidden"
+            >
+              <div className="px-5 pt-5 pb-3 flex items-center justify-between shrink-0">
+                <span style={{ fontFamily: "'Cafe24Dongdong', 'Gowun Dodum', sans-serif", fontSize: '1.2rem' }}>함께 기도</span>
+                <button onClick={() => setGroupPrayerOpen(false)} aria-label="닫기" style={{ color: '#9C8286' }}>
+                  <X size={18} />
+                </button>
+              </div>
+              <div style={{ background: '#F5F0E8' }} className="mx-5 mb-5 rounded-2xl flex-1 overflow-y-auto p-4">
+                <GroupPrayerPanel churchId={churchId} cellId={cellId} user={user} isLeader={isLeader} />
+              </div>
+            </div>
+          </div>
         )}
 
         {heatmapOpen && (
